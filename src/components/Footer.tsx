@@ -9,16 +9,14 @@ export default function Footer() {
 
   const footerLinks = {
     services: [
-      { name: 'Solidity Audits', href: '#services' },
-      { name: 'Move Security', href: '#services' },
-      { name: 'Solana Programs', href: '#services' },
-      { name: 'Security Research', href: '#services' }
+      { name: 'Solidity Audits', href: '/services' },
+      { name: 'Move Security', href: '/services' },
+      { name: 'Solana Programs', href: '/services' }
     ],
     company: [
-      { name: 'About Us', href: '#about' },
-      { name: 'Our Team', href: '#about' },
-      { name: 'Portfolio', href: '#portfolio' },
-      { name: 'Blog', href: '#blog' }
+      { name: 'About Us', href: '/about' },
+      { name: 'Portfolio', href: '/portfolio' },
+      { name: 'Blog', href: '/blog' }
     ],
     resources: [
       { name: 'Security Best Practices', href: '#' },
@@ -27,10 +25,8 @@ export default function Footer() {
       { name: 'Research Papers', href: '#' }
     ],
     contact: [
-      { name: 'Get in Touch', href: '#contact' },
-      { name: 'Request Audit', href: '#contact' },
-      { name: 'Emergency Security', href: '#contact' },
-      { name: 'Partnership', href: '#contact' }
+      { name: 'Get in Touch', href: '/contact' },
+      { name: 'Audit Request', href: '/contact' }
     ]
   }
 
