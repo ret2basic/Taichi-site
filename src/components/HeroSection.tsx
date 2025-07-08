@@ -38,14 +38,18 @@ export default function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <a
-              href="#contact"
+              href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 flex items-center group shadow-lg hover:shadow-xl"
             >
               Request Audit
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </a>
             <a
-              href="#portfolio"
+              href="https://github.com/TaiChiAuditGroup/Portfolio"
+              target="_blank"
+              rel="noopener noreferrer"
               className="border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-600 hover:text-white transition-all duration-200 flex items-center"
             >
               View Portfolio

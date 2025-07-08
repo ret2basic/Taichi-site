@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { Shield, ArrowUp, Twitter, Github, Linkedin, Mail } from 'lucide-react'
+import { Shield, ArrowUp, Twitter, Github, Linkedin, Mail, MessageCircle } from 'lucide-react'
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -8,14 +8,9 @@ export default function Footer() {
   }
 
   const footerLinks = {
-    services: [
-      { name: 'Solidity Audits', href: '/services' },
-      { name: 'Move Security', href: '/services' },
-      { name: 'Solana Programs', href: '/services' }
-    ],
     company: [
       { name: 'About Us', href: '/about' },
-      { name: 'Portfolio', href: '/portfolio' },
+      { name: 'Portfolio', href: 'https://github.com/TaiChiAuditGroup/Portfolio' },
       { name: 'Blog', href: '/blog' }
     ],
     resources: [
@@ -25,16 +20,16 @@ export default function Footer() {
       { name: 'Research Papers', href: '#' }
     ],
     contact: [
-      { name: 'Get in Touch', href: '/contact' },
-      { name: 'Audit Request', href: '/contact' }
+      { name: 'Get in Touch', href: '#contact' },
+      { name: 'Email Us', href: 'mailto:taichiweb3sec@gmail.com' }
     ]
   }
 
   const socialLinks = [
-    { icon: Twitter, href: '#', name: 'Twitter' },
-    { icon: Github, href: '#', name: 'GitHub' },
-    { icon: Linkedin, href: '#', name: 'LinkedIn' },
-    { icon: Mail, href: '#', name: 'Email' }
+    { icon: Twitter, href: 'https://x.com/TaiChiWeb3Sec', name: 'Twitter' },
+    { icon: Github, href: 'https://github.com/TaiChiAuditGroup', name: 'GitHub' },
+    { icon: MessageCircle, href: 'https://t.me/+egUmC7vd9TI4MGM9', name: 'Telegram' },
+    { icon: Mail, href: 'mailto:taichiweb3sec@gmail.com', name: 'Email' }
   ]
 
   return (
@@ -42,7 +37,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer */}
         <div className="py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center mb-4">
@@ -58,6 +53,8 @@ export default function Footer() {
                   <a
                     key={index}
                     href={social.href}
+                    target={social.href.startsWith('http') ? '_blank' : '_self'}
+                    rel={social.href.startsWith('http') ? 'noopener noreferrer' : ''}
                     className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
                     aria-label={social.name}
                   >
@@ -65,23 +62,6 @@ export default function Footer() {
                   </a>
                 ))}
               </div>
-            </div>
-
-            {/* Services */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Services</h3>
-              <ul className="space-y-2">
-                {footerLinks.services.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href={link.href}
-                      className="text-gray-300 hover:text-primary-400 transition-colors duration-200"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
             </div>
 
             {/* Company */}
@@ -92,6 +72,8 @@ export default function Footer() {
                   <li key={index}>
                     <a
                       href={link.href}
+                      target={link.href.startsWith('http') ? '_blank' : '_self'}
+                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : ''}
                       className="text-gray-300 hover:text-primary-400 transition-colors duration-200"
                     >
                       {link.name}
@@ -126,6 +108,8 @@ export default function Footer() {
                   <li key={index}>
                     <a
                       href={link.href}
+                      target={link.href.startsWith('mailto') ? '_self' : '_blank'}
+                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : ''}
                       className="text-gray-300 hover:text-primary-400 transition-colors duration-200"
                     >
                       {link.name}

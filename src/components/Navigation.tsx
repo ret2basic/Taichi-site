@@ -17,11 +17,10 @@ export default function Navigation() {
 
   const menuItems = [
     { name: 'Home', href: '/' },
-    { name: 'Services', href: '/services' },
-    { name: 'Portfolio', href: '/portfolio' },
-    { name: 'About', href: '/about' },
+    { name: 'Portfolio', href: 'https://github.com/TaiChiAuditGroup/Portfolio' },
     { name: 'Blog', href: '/blog' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '#contact' },
   ]
 
   return (
@@ -47,13 +46,17 @@ export default function Navigation() {
                 <a
                   key={item.name}
                   href={item.href}
+                  target={item.href.startsWith('http') ? '_blank' : '_self'}
+                  rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
                   className="text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
                 >
                   {item.name}
                 </a>
               ))}
               <a
-                href="#contact"
+                href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-primary-700 transition-colors duration-200 flex items-center"
               >
                 Request Audit
@@ -86,6 +89,8 @@ export default function Navigation() {
               <a
                 key={item.name}
                 href={item.href}
+                target={item.href.startsWith('http') ? '_blank' : '_self'}
+                rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
                 className="text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 block px-3 py-2 text-base font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -93,7 +98,9 @@ export default function Navigation() {
               </a>
             ))}
             <a
-              href="#contact"
+              href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-primary-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-primary-700 transition-colors duration-200 flex items-center"
               onClick={() => setIsMenuOpen(false)}
             >
