@@ -199,7 +199,6 @@ pm2 start npm --name "taichi-audit" -- start
 - Blog CMS integration (Contentful, Strapi)
 - User authentication for admin
 - Portfolio case studies with details
-- Newsletter signup functionality
 - Multi-language support
 
 ### Support

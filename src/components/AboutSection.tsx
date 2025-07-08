@@ -1,49 +1,49 @@
 'use client'
 import React from 'react'
-import { Users, BookOpen, Target, Zap, Shield, Code, Award, Globe } from 'lucide-react'
+import { Users, BookOpen, Target, Zap, Shield, Code, Award, Globe, Brain, Eye, Trophy } from 'lucide-react'
 
 export default function AboutSection() {
   const teamMembers = [
     {
-      name: 'Security Researcher',
-      role: 'Lead Auditor',
-      expertise: 'Solidity, DeFi Protocols',
-      description: 'Former security researcher at leading DeFi protocols with 5+ years of experience'
+      name: 'Competition Champions',
+      role: 'Lead Security Researchers',
+      expertise: 'Multi-chain Security, Competition Winners',
+      description: '60+ audit competitions with 12 first-place wins across major platforms including ZKsync Era and Maia DAO'
     },
     {
-      name: 'Move Expert',
-      role: 'Move Specialist',
-      expertise: 'Aptos, Sui, Move Language',
-      description: 'Core contributor to Move ecosystem security tools and best practices'
+      name: 'DeFiHackLabs Veterans',
+      role: 'Hack Analysis Specialists',
+      expertise: 'Real-world Attack Vectors, Incident Response',
+      description: 'Core contributors from DeFiHackLabs community with deep knowledge of past DeFi exploits and prevention strategies'
     },
     {
-      name: 'Solana Developer',
-      role: 'Solana Auditor',
-      expertise: 'Rust, Solana Programs',
-      description: 'Former Solana Labs engineer with deep knowledge of Solana runtime security'
+      name: 'AI Security Engineers',
+      role: 'LLM4Sec Integration Team',
+      expertise: 'AI-Enhanced Auditing, Tool Development',
+      description: 'Specialists in integrating AI tools from llm4sec.net to enhance traditional audit methodologies'
     }
   ]
 
   const values = [
     {
-      icon: Shield,
-      title: 'Security First',
-      description: 'Every audit is conducted with the highest security standards and thoroughness'
-    },
-    {
-      icon: BookOpen,
-      title: 'Continuous Learning',
-      description: 'We stay at the forefront of security research and emerging threats'
-    },
-    {
       icon: Users,
-      title: 'Community Driven',
-      description: 'Rooted in the DeFiHackLabs community, we contribute back to the ecosystem'
+      title: 'Team-First Approach',
+      description: 'More eyes = more coverage. Every audit requires ≥2 auditors for comprehensive security analysis'
     },
     {
-      icon: Target,
-      title: 'Precision Focus',
-      description: 'Specialized expertise in DeFi protocols and multi-chain security'
+      icon: Eye,
+      title: 'Continuous Monitoring',
+      description: 'Real-time analysis of DeFi hacks from our DeFiHackLabs background to prevent future incidents'
+    },
+    {
+      icon: Brain,
+      title: 'AI-Enhanced Security',
+      description: 'Strategic use of AI tools from llm4sec.net to catch obvious bugs while relying on human expertise'
+    },
+    {
+      icon: Trophy,
+      title: 'Proven Excellence',
+      description: 'Track record of 60+ competitions, 135+ findings, and 12 first-place wins'
     }
   ]
 
@@ -56,7 +56,7 @@ export default function AboutSection() {
             About <span className="gradient-text">Taichi Audit</span>
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Born from the DeFiHackLabs community, we represent the next generation of security researchers dedicated to protecting the DeFi ecosystem
+            Born from the DeFiHackLabs community, we represent the next generation of security researchers with a proven track record in competitive auditing
           </p>
         </div>
 
@@ -67,37 +67,52 @@ export default function AboutSection() {
             <div className="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-8">
               <div className="flex items-center mb-6">
                 <div className="bg-primary-100 dark:bg-primary-900 p-3 rounded-xl mr-4">
-                  <BookOpen className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                  <Eye className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Our Origin</h3>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">DeFiHackLabs Heritage</h3>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                Taichi Audit Group emerged from the renowned DeFiHackLabs community, a collective of security researchers and ethical hackers dedicated to improving DeFi security. Our team brings together years of experience in identifying and preventing security vulnerabilities in decentralized finance protocols.
+                Taichi Audit Group emerged from the renowned DeFiHackLabs community, where our team members continuously monitor and analyze real-world DeFi hacks. This unique background gives us unparalleled insights into attack vectors and vulnerabilities that have actually been exploited in production.
               </p>
               <p className="text-gray-700 dark:text-gray-300">
-                We've witnessed firsthand the evolution of DeFi security challenges and have developed specialized expertise in the most critical areas of smart contract security across multiple blockchain ecosystems.
+                <strong>Our goal is simple:</strong> Keep our client's protocol names out of the DeFiHackLabs GitHub repository by preventing vulnerabilities before they can be exploited.
               </p>
             </div>
 
             <div className="bg-gradient-to-r from-secondary-50 to-primary-50 dark:from-slate-700 dark:to-slate-800 rounded-2xl p-8">
               <div className="flex items-center mb-6">
                 <div className="bg-secondary-100 dark:bg-secondary-900 p-3 rounded-xl mr-4">
-                  <Target className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
+                  <Users className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Our Mission</h3>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Team Audit Philosophy</h3>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                Our mission is to secure the DeFi ecosystem by providing comprehensive security audits that protect both protocols and users. We believe in the transformative power of decentralized finance and are committed to making it safer for everyone.
+                We believe in the principle that <strong>"more eyes = more coverage"</strong>. Every audit we conduct involves at least 2 auditors, with team size scaling based on the codebase's nSLOC and design complexity.
               </p>
               <p className="text-gray-700 dark:text-gray-300">
-                Through rigorous testing, innovative audit methodologies, and continuous security research, we help build a more secure and trustworthy DeFi landscape.
+                This team-based approach ensures comprehensive coverage and significantly reduces the chance of missing critical vulnerabilities that single auditors might overlook.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-8">
+              <div className="flex items-center mb-6">
+                <div className="bg-primary-100 dark:bg-primary-900 p-3 rounded-xl mr-4">
+                  <Brain className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">AI-Enhanced Security</h3>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                We don't rely solely on AI tools, but we use them strategically to ensure we don't miss obvious bugs in client codebases. Our AI tools, primarily sourced from <a href="https://llm4sec.net/" target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">llm4sec.net</a>, serve as an additional layer of security analysis.
+              </p>
+              <p className="text-gray-700 dark:text-gray-300">
+                Each audit we perform provides more data to improve our AI tools, creating a continuous feedback loop that enhances our security capabilities.
               </p>
             </div>
           </div>
 
           {/* Right Column - Values */}
           <div className="space-y-6">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Our Values</h3>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Core Principles</h3>
             {values.map((value, index) => (
               <div key={index} className="flex items-start space-x-4 p-6 bg-gray-50 dark:bg-slate-800 rounded-2xl">
                 <div className="bg-primary-100 dark:bg-primary-900 p-3 rounded-xl flex-shrink-0">
@@ -116,6 +131,66 @@ export default function AboutSection() {
           </div>
         </div>
 
+        {/* Core Methodologies - Detailed */}
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-12 shadow-xl mb-20">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Our <span className="gradient-text">Security Methodology</span>
+            </h3>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Three core principles that set us apart in the DeFi security landscape
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                icon: Users,
+                title: 'Team Audit Approach',
+                description: 'We believe in "more eyes = more coverage". Each audit is conducted by ≥2 auditors based on codebase nSLOC and design difficulty, ensuring comprehensive security coverage.',
+                highlight: 'Multi-auditor coverage'
+              },
+              {
+                icon: Target,
+                title: 'Past Hack Analysis',
+                description: 'Our team members from DeFiHackLabs community continuously monitor real-world hacks and their root causes. Our goal: keeping client names out of DeFiHackLabs github repo.',
+                highlight: 'DeFiHackLabs expertise'
+              },
+              {
+                icon: Brain,
+                title: 'AI-Backed Security',
+                description: 'We don\'t rely solely on AI tools, but use them strategically to ensure we don\'t miss obvious bugs. Our AI tools from llm4sec.net improve with each audit we perform.',
+                highlight: 'llm4sec.net integration'
+              },
+              {
+                icon: Shield,
+                title: 'Multi-Chain Expertise',
+                description: 'Deep security knowledge across Solidity (Ethereum/EVM), Move (Aptos/Sui), Solana (Rust), and emerging blockchain ecosystems with proven track record.',
+                highlight: 'Cross-chain security'
+              }
+            ].map((methodology, index) => (
+              <div key={index} className="bg-gray-50 dark:bg-slate-900 rounded-2xl p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-start space-x-4">
+                  <div className="bg-primary-100 dark:bg-primary-900 p-3 rounded-xl flex-shrink-0">
+                    <methodology.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      {methodology.title}
+                    </h4>
+                    <div className="text-sm text-primary-600 dark:text-primary-400 font-medium mb-3">
+                      {methodology.highlight}
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                      {methodology.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Team Section */}
         <div className="bg-gray-50 dark:bg-slate-800 rounded-3xl p-8 md:p-12">
           <div className="text-center mb-12">
@@ -123,7 +198,7 @@ export default function AboutSection() {
               Expert <span className="gradient-text">Security Team</span>
             </h3>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Our diverse team of security experts brings specialized knowledge across multiple blockchain ecosystems
+              Our team combines competition excellence with real-world security expertise across multiple blockchain ecosystems
             </p>
           </div>
 
@@ -131,7 +206,7 @@ export default function AboutSection() {
             {teamMembers.map((member, index) => (
               <div key={index} className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg">
                 <div className="w-16 h-16 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mb-4">
-                  <Users className="w-8 h-8 text-white" />
+                  <Trophy className="w-8 h-8 text-white" />
                 </div>
                 <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   {member.name}
@@ -157,16 +232,16 @@ export default function AboutSection() {
               Technology <span className="gradient-text">Expertise</span>
             </h3>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Specialized knowledge across the most important blockchain ecosystems and security tools
+              Proven expertise across the most important blockchain ecosystems with competition wins to validate our skills
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: 'Solidity', desc: 'Ethereum & EVM' },
-              { name: 'Move', desc: 'Aptos & Sui' },
-              { name: 'Rust', desc: 'Solana Programs' },
-              { name: 'Cairo', desc: 'StarkNet' }
+              { name: 'Solidity', desc: 'Ethereum & EVM Chains', wins: 'ZKsync Era, Arbitrum BoLD' },
+              { name: 'Move', desc: 'Aptos & Sui', wins: 'Competitive Analysis' },
+              { name: 'Rust', desc: 'Solana Programs', wins: 'Cross-chain Security' },
+              { name: 'Cairo', desc: 'StarkNet', wins: 'L2 Scaling Solutions' }
             ].map((tech, index) => (
               <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-slate-700">
                 <div className="bg-primary-100 dark:bg-primary-900 p-4 rounded-2xl inline-flex mb-4">
@@ -175,11 +250,45 @@ export default function AboutSection() {
                 <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   {tech.name}
                 </h4>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 dark:text-gray-300 mb-2">
                   {tech.desc}
+                </p>
+                <p className="text-xs text-primary-600 dark:text-primary-400 font-medium">
+                  {tech.wins}
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Competition Track Record */}
+        <div className="mt-16 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-3xl p-8 md:p-12 text-white">
+          <div className="text-center mb-8">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">
+              Competition Track Record
+            </h3>
+            <p className="text-xl opacity-90">
+              Our success in competitive auditing validates our security expertise
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl font-bold mb-2">60+</div>
+              <div className="text-sm opacity-90">Total Competitions</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold mb-2">12 times</div>
+              <div className="text-sm opacity-90">Audit Contests Top 3</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold mb-2">135+</div>
+              <div className="text-sm opacity-90">Findings Reported</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold mb-2">#7</div>
+              <div className="text-sm opacity-90">Remedy CTF 2025</div>
+            </div>
           </div>
         </div>
       </div>

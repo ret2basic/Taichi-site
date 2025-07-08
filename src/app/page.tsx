@@ -2,7 +2,7 @@ import React from 'react'
 import Navigation from '@/components/Navigation'
 import HeroSection from '@/components/HeroSection'
 import StatsSection from '@/components/StatsSection'
-import AboutSection from '@/components/AboutSection'
+import WhyChooseUsSection from '@/components/WhyChooseUsSection'
 import ContactSection from '@/components/ContactSection'
 import Footer from '@/components/Footer'
 
@@ -15,7 +15,7 @@ export default function HomePage() {
       <Navigation />
       <HeroSection />
       <StatsSection />
-      <AboutSection />
+      <WhyChooseUsSection />
       <ContactSection />
       <Footer />
     </main>

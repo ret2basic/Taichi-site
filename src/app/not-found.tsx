@@ -59,7 +59,7 @@ export default function NotFound() {
               </Link>
               <Link href="/#contact" className="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                 <ArrowLeft className="h-5 w-5 text-primary-600 mr-2" />
-                <span className="text-gray-700 dark:text-gray-300">Contact</span>
+                Contact
               </Link>
             </div>
           </div>

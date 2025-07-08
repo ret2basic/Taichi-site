@@ -34,8 +34,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Monaco', 'Consolas', 'monospace'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Monaco', 'Consolas', 'monospace'],
       },
       animation: {
         'gradient-x': 'gradient-x 15s ease infinite',

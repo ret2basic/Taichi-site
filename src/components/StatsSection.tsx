@@ -1,67 +1,63 @@
 'use client'
 import React from 'react'
-import { TrendingUp, Shield, Users, Award, DollarSign, FileText, Clock, Star } from 'lucide-react'
+import { TrendingUp, Shield, Users, Award, DollarSign, FileText, Clock, Star, Trophy, Brain, Target, Eye, Zap } from 'lucide-react'
 
 export default function StatsSection() {
   const stats = [
     {
-      icon: Shield,
-      number: '50+',
-      label: 'Audits Completed',
-      description: 'Comprehensive security reviews across multiple blockchain ecosystems'
+      icon: Trophy,
+      number: '60+',
+      label: 'Audit Competitions',
+      description: 'Participated across Code4rena, CodeHawks, Secure3, and Cantina platforms'
+    },
+    {
+      icon: Star,
+      number: '12',
+      label: 'Contest Top 3',
+      description: 'ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, and Zeeknetwork'
     },
     {
       icon: TrendingUp,
-      number: '100+',
-      label: 'Critical Vulnerabilities',
-      description: 'High-severity security issues identified and resolved'
-    },
-    {
-      icon: DollarSign,
-      number: '$50M+',
-      label: 'Value Secured',
-      description: 'Total value locked in audited protocols'
+      number: '135+',
+      label: 'Total Findings',
+      description: '60+ High severity and 75+ Medium severity vulnerabilities identified'
     },
     {
       icon: Users,
-      number: '25+',
-      label: 'Client Projects',
-      description: 'DeFi protocols and projects successfully audited'
+      number: '≥2',
+      label: 'Auditors per Project',
+      description: 'Team-based approach ensures comprehensive coverage and quality'
     },
     {
-      icon: Award,
+      icon: Brain,
       number: '100%',
-      label: 'Success Rate',
-      description: 'Zero security incidents in audited contracts post-audit'
+      label: 'AI-Enhanced',
+      description: 'Every audit backed by advanced AI tools from llm4sec.net'
     },
     {
-      icon: Clock,
-      number: '48h',
-      label: 'Response Time',
-      description: 'Average time to initial security assessment'
+      icon: Eye,
+      number: '24/7',
+      label: 'Hack Monitoring',
+      description: 'Continuous analysis of real-world DeFi hacks and vulnerabilities'
     }
   ]
 
   const achievements = [
     {
-      icon: Star,
-      title: 'DeFiHackLabs Incubated',
-      description: 'Emerging from the renowned DeFiHackLabs security research community'
+      platform: 'Audit contests',
+      description: '12 times Top 3 wins, team members constantly participate in audit contests on all platforms.'
     },
     {
-      icon: Award,
-      title: 'Multi-Chain Expertise',
-      description: 'Deep knowledge across Ethereum, Solana, Aptos, and Sui ecosystems'
+      platform: 'Web3 CTFs',
+      description: 'Remedy CTF 2025 #7, Blaz CTF 2024 4th, Secureum RACEs 4 times Top 3 wins.'
     },
     {
-      icon: Shield,
-      title: 'Zero Incidents',
-      description: 'No security breaches in protocols audited by our team'
+      platform: 'Our specialization',
+      description: 'We enjoy finding bugs in Solidity, Move, and Solana codebases. Anything DeFi is welcome.'
     },
     {
-      icon: Users,
-      title: 'Community Trusted',
-      description: 'Recognized by leading DeFi protocols and development teams'
+      platform: 'Our philosophy',
+      description: 'We believe that the best way to demonstrate security expertise is to participate in audit contests and CTFs. No public record, no skills.'
     }
   ]
 
@@ -107,54 +103,64 @@ export default function StatsSection() {
           ))}
         </div>
 
-        {/* Achievements */}
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-12 shadow-xl">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose <span className="gradient-text">Taichi Audit</span>
-            </h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Our unique position in the DeFi security landscape gives us unparalleled insights and capabilities
-            </p>
+        {/* Competition Achievements */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          <div className="bg-gradient-to-br from-primary-600 to-secondary-600 rounded-2xl p-8 text-white">
+            <h3 className="text-2xl font-bold mb-6">Competition Excellence</h3>
+            <div className="space-y-4">
+              {achievements.map((achievement, index) => (
+                <div key={index} className="bg-white/10 rounded-lg p-4">
+                  <h4 className="font-semibold mb-2">{achievement.platform}</h4>
+                  <p className="text-sm opacity-90">{achievement.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {achievements.map((achievement, index) => (
-              <div key={index} className="flex items-start space-x-4">
-                <div className="bg-primary-100 dark:bg-primary-900 p-3 rounded-xl flex-shrink-0">
-                  <achievement.icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              Featured Contest Top 3
+            </h3>
+            <div className="space-y-4">
+              {[
+                { name: 'ZKsync Era', type: 'L2 Scaling Solution' },
+                { name: 'Maia DAO', type: 'DeFi Governance' },
+                { name: 'Arbitrum BoLD', type: 'Dispute Resolution' },
+                { name: 'Arcadexyz', type: 'NFT Gaming Platform' },
+                { name: 'Zeeknetwork', type: 'Cross-chain Protocol' }
+              ].map((win, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+                  <div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{win.name}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{win.type}</div>
+                  </div>
+                  <Trophy className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
-                <div>
-                  <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {achievement.title}
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {achievement.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Call to Action */}
-        <div className="mt-16 text-center">
+        <div className="text-center">
           <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl p-8 md:p-12 text-white">
             <h3 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to Secure Your Protocol?
             </h3>
             <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Join the ranks of secured DeFi protocols. Get a comprehensive security audit from the experts.
+              Join the ranks of secured DeFi protocols. Get a comprehensive security audit from proven experts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="#contact"
+                href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-white text-primary-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center justify-center"
               >
-                Get Started Today
+                Request Audit
               </a>
               <a
-                href="#about"
+                href="/about"
                 className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-primary-600 transition-colors duration-200 inline-flex items-center justify-center"
               >
                 Learn More

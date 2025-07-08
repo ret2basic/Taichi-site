@@ -5,9 +5,9 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
-import Image from 'next/image'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import ZoomableImage from './ZoomableImage'
 
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
@@ -81,43 +81,14 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           img({ src, alt, title }: ImageProps) {
             if (!src) return null
             
-            // Handle external images
-            if (src.startsWith('http')) {
-              return (
-                <div className="my-8">
-                  <img
-                    src={src}
-                    alt={alt || ''}
-                    title={title}
-                    className="rounded-lg shadow-lg w-full"
-                  />
-                  {alt && (
-                    <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2 italic">
-                      {alt}
-                    </p>
-                  )}
-                </div>
-              )
-            }
-            
-            // Handle local images with Next.js Image
+            // Return the ZoomableImage component directly
+            // The paragraph renderer will handle wrapping appropriately
             return (
-              <div className="my-8">
-                <div className="relative w-full h-64 md:h-80 lg:h-96">
-                  <Image
-                    src={src}
-                    alt={alt || ''}
-                    fill
-                    className="object-cover rounded-lg shadow-lg"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-                  />
-                </div>
-                {alt && (
-                  <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2 italic">
-                    {alt}
-                  </p>
-                )}
-              </div>
+              <ZoomableImage
+                src={src}
+                alt={alt || ''}
+                title={title}
+              />
             )
           },
           
@@ -181,6 +152,28 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             )
           },
           
+          // Custom paragraph renderer to handle images properly
+          p({ children, ...props }) {
+            // Check if children contains an img element
+            const childrenArray = React.Children.toArray(children)
+            const hasImage = childrenArray.some((child: any) => {
+              if (typeof child === 'object' && child !== null) {
+                // Check if it's an img element or our ZoomableImage component
+                return child.type === 'img' || 
+                       (child.props && child.props.src !== undefined)
+              }
+              return false
+            })
+            
+            // If paragraph contains an image, render as div to avoid invalid HTML
+            if (hasImage) {
+              return <div className="my-4" {...props}>{children}</div>
+            }
+            
+            // Normal paragraph
+            return <p {...props}>{children}</p>
+          },
+
           // Custom link renderer
           a({ href, children, ...props }) {
             // External links

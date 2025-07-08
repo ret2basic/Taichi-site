@@ -98,12 +98,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Featured Image */}
         {post.image && (
-          <div className="relative h-64 md:h-80 lg:h-96 bg-gray-200 dark:bg-gray-800">
+          <div className="relative h-64 md:h-80 lg:h-96 bg-white dark:bg-gray-900 border-y border-gray-200 dark:border-gray-700">
             <Image
               src={post.image}
               alt={post.title}
               fill
-              className="object-cover"
+              className="object-contain"
               priority
             />
           </div>
@@ -146,12 +146,12 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                 >
                   <article className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200">
                     {relatedPost.image && (
-                      <div className="relative h-48 bg-gray-200 dark:bg-gray-700">
+                      <div className="relative h-48 bg-white dark:bg-gray-900">
                         <Image
                           src={relatedPost.image}
                           alt={relatedPost.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-200"
+                          className="object-contain group-hover:scale-105 transition-transform duration-200"
                         />
                       </div>
                     )}
@@ -188,27 +188,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           </section>
         )}
 
-        {/* Newsletter CTA */}
-        <section className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Stay Updated with Security Insights
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Get the latest DeFi security research and vulnerability analysis delivered to your inbox.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
-              />
-              <button className="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />

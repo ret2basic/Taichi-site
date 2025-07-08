@@ -49,12 +49,12 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
                 <article className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200">
                   {post.image && (
-                    <div className="relative h-48 bg-gray-200 dark:bg-gray-700">
+                    <div className="relative h-48 bg-white dark:bg-gray-900">
                       <Image
                         src={post.image}
                         alt={post.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        className="object-contain group-hover:scale-105 transition-transform duration-200"
                       />
                     </div>
                   )}
@@ -120,12 +120,12 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
                 <article className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200 h-full">
                   {post.image && (
-                    <div className="relative h-48 bg-gray-200 dark:bg-gray-700">
+                    <div className="relative h-48 bg-white dark:bg-gray-900">
                       <Image
                         src={post.image}
                         alt={post.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        className="object-contain group-hover:scale-105 transition-transform duration-200"
                       />
                     </div>
                   )}

@@ -239,14 +239,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For support and questions:
-- Email: hello@taichi-audit.com
+- Email: hello@taichiaudit.com
 - GitHub Issues: [Create an issue](https://github.com/your-repo/issues)
 
 ## 🔗 Links
 
-- [Live Website](https://taichi-audit.com)
+- [Live Website](https://taichiaudit.com)
 - [DeFiHackLabs](https://defihacklabs.com)
-- [Blog](https://taichi-audit.com/blog)
+- [Blog](https://taichiaudit.com/blog)
 
 ---
 

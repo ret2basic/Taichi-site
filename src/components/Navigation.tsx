@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { Menu, X, Shield, ExternalLink } from 'lucide-react'
+import { Menu, X, ExternalLink } from 'lucide-react'
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -20,7 +20,8 @@ export default function Navigation() {
     { name: 'Portfolio', href: 'https://github.com/TaiChiAuditGroup/Portfolio' },
     { name: 'Blog', href: '/blog' },
     { name: 'About', href: '/about' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Writeups', href: 'https://ret2basic.gitbook.io/ctfwriteup' },
+    { name: 'Contact', href: '/#contact' },
   ]
 
   return (
@@ -34,8 +35,12 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Shield className="h-8 w-8 text-primary-600 mr-2" />
-              <span className="text-xl font-bold gradient-text">Taichi Audit</span>
+              <img 
+                src="/taichi_logo.jpg" 
+                alt="Taichi Audit Group" 
+                className="h-8 w-8 mr-2 rounded-md"
+              />
+              <span className="text-xl font-bold gradient-text">Taichi Audit Group</span>
             </div>
           </div>
 

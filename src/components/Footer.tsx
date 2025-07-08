@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { Shield, ArrowUp, Twitter, Github, Linkedin, Mail, MessageCircle } from 'lucide-react'
+import { ArrowUp, Twitter, Github, Linkedin, Mail, MessageCircle } from 'lucide-react'
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -11,16 +11,17 @@ export default function Footer() {
     company: [
       { name: 'About Us', href: '/about' },
       { name: 'Portfolio', href: 'https://github.com/TaiChiAuditGroup/Portfolio' },
-      { name: 'Blog', href: '/blog' }
+      { name: 'Blog', href: '/blog' },
+      { name: 'Writeups', href: 'https://ret2basic.gitbook.io/ctfwriteup' },
     ],
     resources: [
-      { name: 'Security Best Practices', href: '#' },
-      { name: 'DeFi Security Guide', href: '#' },
-      { name: 'Vulnerability Database', href: '#' },
-      { name: 'Research Papers', href: '#' }
+      { name: 'DeFiHackLabs', href: 'https://defihacklabs.io/' },
+      { name: 'LLM4Sec', href: 'https://llm4sec.net/' },
+      { name: 'OnlyPwner', href: 'https://onlypwner.xyz/' },
+      { name: 'Secureum', href: 'https://x.com/TheSecureum' },
     ],
     contact: [
-      { name: 'Get in Touch', href: '#contact' },
+      { name: 'Get in Touch', href: '/#contact' },
       { name: 'Email Us', href: 'mailto:taichiweb3sec@gmail.com' }
     ]
   }
@@ -41,12 +42,15 @@ export default function Footer() {
             {/* Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center mb-4">
-                <Shield className="h-8 w-8 text-primary-400 mr-2" />
-                <span className="text-xl font-bold">Taichi Audit</span>
+                <img 
+                  src="/taichi_logo.jpg" 
+                  alt="Taichi Audit Group" 
+                  className="h-8 w-8 mr-2 rounded-md"
+                />
+                <span className="text-xl font-bold">Taichi Audit Group</span>
               </div>
-              <p className="text-gray-300 mb-6 max-w-md">
-                Leading DeFi security audit group incubated from DeFiHackLabs community. 
-                Specializing in Solidity, Move, and Solana smart contract security reviews.
+              <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md">
+                Leading DeFi security audit group from DeFiHackLabs community with 60+ competitions, 12 first-place wins, and team-based audit approach across Solidity, Move, and Solana ecosystems.
               </p>
               <div className="flex space-x-4">
                 {socialLinks.map((social, index) => (
@@ -117,28 +121,6 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Newsletter */}
-        <div className="border-t border-gray-800 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-lg font-semibold mb-2">Stay Updated</h3>
-              <p className="text-gray-300">
-                Subscribe to our newsletter for the latest security insights and updates.
-              </p>
-            </div>
-            <div className="flex w-full md:w-auto max-w-md">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2 rounded-l-lg bg-gray-800 text-white border border-gray-700 focus:border-primary-400 focus:outline-none"
-              />
-              <button className="bg-primary-600 hover:bg-primary-700 px-6 py-2 rounded-r-lg transition-colors duration-200">
-                Subscribe
-              </button>
             </div>
           </div>
         </div>
