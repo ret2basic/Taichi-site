@@ -32,7 +32,7 @@ export default function HeroSection() {
           
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4 max-w-4xl mx-auto leading-relaxed">
-            Leading DeFi security audit group with <span className="font-semibold text-primary-600 dark:text-primary-400">60+ competitions</span>, <span className="font-semibold text-secondary-600 dark:text-secondary-400">12 times audit contest Top 3</span>, and <span className="font-semibold text-primary-600 dark:text-primary-400">135+ findings</span> across Solidity, Move, and Solana ecosystems.
+            Leading DeFi security audit group with <span className="font-semibold text-primary-600 dark:text-primary-400">60+ competitions</span>, <span className="font-semibold text-secondary-600 dark:text-secondary-400">11 times audit contest Top 3</span>, and <span className="font-semibold text-primary-600 dark:text-primary-400">135+ findings</span> across Solidity, Move, and Solana ecosystems.
           </p>
           
           {/* Core methodology highlights */}
@@ -86,7 +86,7 @@ export default function HeroSection() {
               <div className="bg-secondary-100 p-3 rounded-full mb-4 dark:bg-secondary-900">
                 <Star className="h-8 w-8 text-secondary-600 dark:text-secondary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">12</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">11</div>
               <div className="text-gray-600 dark:text-gray-300 text-center text-sm">Contest Top 3</div>
             </div>
             

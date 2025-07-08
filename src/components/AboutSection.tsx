@@ -8,7 +8,7 @@ export default function AboutSection() {
       name: 'Competition Champions',
       role: 'Lead Security Researchers',
       expertise: 'Multi-chain Security, Competition Winners',
-      description: '60+ audit competitions with 12 first-place wins across major platforms including ZKsync Era and Maia DAO'
+      description: '60+ audit competitions with 11 Top 3 wins including 6 first places across major platforms: ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, Coinbase SpendPermission, OneWorld'
     },
     {
       name: 'DeFiHackLabs Veterans',
@@ -43,7 +43,7 @@ export default function AboutSection() {
     {
       icon: Trophy,
       title: 'Proven Excellence',
-      description: 'Track record of 60+ competitions, 135+ findings, and 12 first-place wins'
+      description: 'Track record of 60+ competitions, 135+ findings, and 11 Top 3 wins including 6 first places'
     }
   ]
 
@@ -278,7 +278,7 @@ export default function AboutSection() {
               <div className="text-sm opacity-90">Total Competitions</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">12 times</div>
+              <div className="text-3xl font-bold mb-2">11 times</div>
               <div className="text-sm opacity-90">Audit Contests Top 3</div>
             </div>
             <div>

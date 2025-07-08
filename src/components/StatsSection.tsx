@@ -12,9 +12,9 @@ export default function StatsSection() {
     },
     {
       icon: Star,
-      number: '12',
+      number: '11',
       label: 'Contest Top 3',
-      description: 'ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, and Zeeknetwork'
+      description: 'ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, Coinbase SpendPermission, and more'
     },
     {
       icon: TrendingUp,
@@ -45,11 +45,11 @@ export default function StatsSection() {
   const achievements = [
     {
       platform: 'Audit contests',
-      description: '12 times Top 3 wins, team members constantly participate in audit contests on all platforms.'
+      description: '11 times Top 3 wins including 6 first places. Recent wins: OneWorld #1, Coinbase SpendPermission #1, Arbitrum BoLD #1.'
     },
     {
       platform: 'Web3 CTFs',
-      description: 'Remedy CTF 2025 #7, Blaz CTF 2024 4th, Secureum RACEs 4 times Top 3 wins.'
+      description: 'Remedy CTF 2025 #7, Blaz CTF 2024 #4, OpenZeppelin Ethernaut CTF 2024 #9, Secureum RACEs multiple Top 3 wins.'
     },
     {
       platform: 'Our specialization',
@@ -127,7 +127,8 @@ export default function StatsSection() {
                 { name: 'Maia DAO', type: 'DeFi Governance' },
                 { name: 'Arbitrum BoLD', type: 'Dispute Resolution' },
                 { name: 'Arcadexyz', type: 'NFT Gaming Platform' },
-                { name: 'Zeeknetwork', type: 'Cross-chain Protocol' }
+                { name: 'Coinbase SpendPermission', type: 'Account Abstraction' },
+                { name: 'OneWorld', type: 'DeFi Platform' }
               ].map((win, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                   <div>

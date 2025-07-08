@@ -25,7 +25,7 @@ export default function AboutPage() {
                   <div className="text-sm opacity-90">Competitions</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">12 times</div>
+                  <div className="text-3xl font-bold mb-2">11 times</div>
                   <div className="text-sm opacity-90">Audit Contests Top 3</div>
                 </div>
                 <div className="text-center">
