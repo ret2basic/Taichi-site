@@ -8,7 +8,7 @@ export default function AboutSection() {
       name: 'Competition Champions',
       role: 'Senior Security Researchers',
       expertise: 'Multi-chain Security, Competition Winners',
-      description: '60+ audit competitions with 11 Top 3 wins including 6 first places across major platforms: ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, Coinbase SpendPermission, OneWorld'
+      description: '60+ audit competitions with 11 Top 3 wins including 6 first places across major contest platforms'
     },
     {
       name: 'DeFiHackLabs Veterans',
