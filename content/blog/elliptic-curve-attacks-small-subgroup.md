@@ -104,7 +104,27 @@ Without getting stuck into details, let's say Alice can find a point $$Q$$ with 
 
 ~~(**TODO:** I still don't know how to prove a point with a certain order actually exist on a curve and I don't have an algorithm for finding it. Will come back later if I figure out).~~
 
-(**UPDATE:** I figured out how to prove point existence and find them. **Proof of existence**: By Lagrange's theorem, if curve has order $$n = q \cdot h$$, then points can have orders dividing $$n$$, so orders dividing $$h$$ are possible. By Cauchy's theorem, for each prime $$p$$ dividing $$h$$, there exists at least one point of order $$p$$. The $$h$$-torsion subgroup structure guarantees many points of various orders dividing $$h$$. **Algorithm**: Take any random point $$P$$ on the curve and compute $$Q = q \cdot P$$ where $$q = n/h$$. This cofactor multiplication projects $$P$$ into the $$h$$-torsion subgroup, giving a point whose order divides $$h$$. Check the actual order by computing $$Q, 2Q, 3Q, \ldots$$ until reaching point at infinity. For small $$h$$, can also enumerate all curve points directly).
+(**UPDATE:** I figured out how to prove point existence and find them. 
+
+**Proof of existence - step by step logic**:
+
+**Step 1 - What we want to prove**: We need to show that points with order exactly $$h$$ (or orders dividing $$h$$) actually exist on our curve.
+
+**Step 2 - Setup**: Assume our curve has composite order $$n = q \cdot h$$ where $$q$$ is a large prime and $$h$$ is the small cofactor (like 4 or 8).
+
+**Step 3 - Lagrange's theorem tells us what's possible**: By Lagrange's theorem, any point $$P$$ on the curve must have order dividing $$n = q \cdot h$$. So possible orders are: $$\{1, 2, 4, q, 2q, 4q, h, qh\}$$ (assuming $$h = 4$$ for example). This includes orders that divide $$h$$, but doesn't guarantee they exist.
+
+**Step 4 - The h-torsion subgroup**: Consider the set of all points $$P$$ such that $$h \cdot P = O$$. This is called the **$$h$$-torsion subgroup**, denoted $$E[h]$$. Any point in this subgroup has order dividing $$h$$.
+
+**Step 5 - Why the h-torsion subgroup is non-trivial**: Here's the key insight: since our curve has order $$n = q \cdot h$$, we know that for ANY point $$P$$ on the curve, we have $$n \cdot P = (q \cdot h) \cdot P = O$$. This can be rewritten as $$h \cdot (q \cdot P) = O$$. This means $$q \cdot P$$ is always in the $$h$$-torsion subgroup $$E[h]$$!
+
+**Step 6 - Cauchy's theorem guarantees specific orders**: Since $$h$$ has prime factors (say $$h = 2^k$$), Cauchy's theorem guarantees that $$E[h]$$ contains elements of each prime order dividing $$h$$. For $$h = 8 = 2^3$$, we're guaranteed points of order 2.
+
+**Step 7 - Structure gives us more**: The $$h$$-torsion subgroup $$E[h]$$ actually has a rich structure. For most curves, $$|E[h]| = h^2$$ when $$\gcd(h, \text{char}(k)) = 1$$, giving us many points of various orders dividing $$h$$.
+
+**Algorithm**: Take any random point $$P$$ on the curve and compute $$Q = q \cdot P$$ where $$q = n/h$$. By Step 5 above, $$Q$$ is guaranteed to be in $$E[h]$$, so its order divides $$h$$. Check the actual order by computing $$Q, 2Q, 3Q, \ldots$$ until reaching point at infinity. Since $$h$$ is small (≤8), this is fast.
+
+**Why this works**: The cofactor multiplication $$Q = q \cdot P$$ is essentially "projecting" any curve point into the small $$h$$-torsion subgroup, giving us our attack point!).
 
 To prevent small subgroup attack, your code should reject any incoming point $$Q$$ such that $$h \cdot Q = O$$ from Alice. Another way to prevent this attack is to use curves with $$h = 1$$ (prime order curves), so that no small subgroups exist.
 
