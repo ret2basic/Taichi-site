@@ -6,7 +6,7 @@ export default function AboutSection() {
   const teamMembers = [
     {
       name: 'Competition Champions',
-      role: 'Lead Security Researchers',
+      role: 'Senior Security Researchers',
       expertise: 'Multi-chain Security, Competition Winners',
       description: '60+ audit competitions with 11 Top 3 wins including 6 first places across major platforms: ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, Coinbase SpendPermission, OneWorld'
     },
@@ -238,10 +238,10 @@ export default function AboutSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: 'Solidity', desc: 'Ethereum & EVM Chains', wins: 'ZKsync Era, Arbitrum BoLD' },
-              { name: 'Move', desc: 'Aptos & Sui', wins: 'Competitive Analysis' },
-              { name: 'Rust', desc: 'Solana Programs', wins: 'Cross-chain Security' },
-              { name: 'Cairo', desc: 'StarkNet', wins: 'L2 Scaling Solutions' }
+              { name: 'Solidity', desc: 'Ethereum & EVM Chains', wins: '' },
+              { name: 'Move', desc: 'Aptos & Sui', wins: '' },
+              { name: 'Rust', desc: 'Solana Programs', wins: '' },
+              { name: 'Cairo', desc: 'StarkNet', wins: '' }
             ].map((tech, index) => (
               <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-slate-700">
                 <div className="bg-primary-100 dark:bg-primary-900 p-4 rounded-2xl inline-flex mb-4">
