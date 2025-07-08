@@ -32,7 +32,7 @@ export default function HeroSection() {
           
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4 max-w-4xl mx-auto leading-relaxed">
-            Leading DeFi security audit group with <span className="font-semibold text-primary-600 dark:text-primary-400">60+ competitions</span>, <span className="font-semibold text-secondary-600 dark:text-secondary-400">11 times audit contest Top 3</span>, and <span className="font-semibold text-primary-600 dark:text-primary-400">135+ findings</span> across Solidity, Move, and Solana ecosystems.
+            Leading DeFi security audit group with <span className="font-semibold text-primary-600 dark:text-primary-400">70+ audits</span>, <span className="font-semibold text-secondary-600 dark:text-secondary-400">11 times audit contest Top 3</span>, and <span className="font-semibold text-primary-600 dark:text-primary-400">170+ findings</span> across Solidity, Move, and Solana ecosystems.
           </p>
           
           {/* Core methodology highlights */}
