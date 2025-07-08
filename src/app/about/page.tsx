@@ -29,7 +29,7 @@ export default function AboutPage() {
                   <div className="text-sm opacity-90">Audit Contests Top 3</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">135+</div>
+                  <div className="text-3xl font-bold mb-2">170+</div>
                   <div className="text-sm opacity-90">Findings</div>
                 </div>
                 <div className="text-center">

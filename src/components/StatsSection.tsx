@@ -18,7 +18,7 @@ export default function StatsSection() {
     },
     {
       icon: TrendingUp,
-      number: '135+',
+      number: '170+',
       label: 'Total Findings',
       description: '60+ High severity and 75+ Medium severity vulnerabilities identified'
     },

@@ -43,7 +43,7 @@ export default function AboutSection() {
     {
       icon: Trophy,
       title: 'Proven Excellence',
-      description: 'Track record of 60+ competitions, 135+ findings, and 11 Top 3 wins including 6 first places'
+      description: 'Track record of 60+ competitions, 170+ findings, and 11 Top 3 wins including 6 first places'
     }
   ]
 
@@ -282,7 +282,7 @@ export default function AboutSection() {
               <div className="text-sm opacity-90">Audit Contests Top 3</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">135+</div>
+              <div className="text-3xl font-bold mb-2">170+</div>
               <div className="text-sm opacity-90">Findings Reported</div>
             </div>
             <div>
