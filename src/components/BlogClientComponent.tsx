@@ -142,11 +142,11 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
                       )}
                     </div>
                     
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors flex-grow">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
                       {post.title}
                     </h3>
                     
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 flex-grow">
                       {post.excerpt}
                     </p>
                     

@@ -6,7 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import ZoomableImage from './ZoomableImage'
 
 // Import KaTeX CSS
@@ -44,13 +44,36 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             const language = match ? match[1] : ''
             
             if (!inline && language) {
+              // Clean up the code content more aggressively
+              const codeContent = String(children)
+                .split('\n')                                    // Split into lines
+                .map(line => line.replace(/\s+$/, ''))          // Remove trailing spaces from each line
+                .filter((line, index, array) => {              // Remove unnecessary blank lines
+                  // Keep the line if it's not empty
+                  if (line.trim() !== '') return true;
+                  
+                  // For empty lines, only keep if:
+                  // - It's not at the start or end
+                  // - The previous and next lines are not also empty
+                  const prevLine = array[index - 1];
+                  const nextLine = array[index + 1];
+                  
+                  return index > 0 && 
+                         index < array.length - 1 && 
+                         prevLine && prevLine.trim() !== '' && 
+                         nextLine && nextLine.trim() !== '';
+                })
+                .join('\n')
+                .replace(/^\n+/, '')                            // Remove leading newlines
+                .replace(/\n+$/, '');                           // Remove trailing newlines
+              
               return (
                 <div className="relative">
                   <div className="absolute top-2 right-2 text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
                     {language}
                   </div>
                   <SyntaxHighlighter
-                    style={oneDark}
+                    style={dracula}
                     language={language}
                     PreTag="div"
                     customStyle={{
@@ -58,10 +81,24 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                       borderRadius: '0.5rem',
                       fontSize: '0.875rem',
                       lineHeight: '1.5',
+                      border: 'none',
+                      outline: 'none',
+                      textDecoration: 'none',
+                      backgroundImage: 'none',
+                      boxShadow: 'none',
+                    }}
+                    codeTagProps={{
+                      style: {
+                        textDecoration: 'none',
+                        border: 'none',
+                        outline: 'none',
+                        backgroundImage: 'none',
+                        boxShadow: 'none',
+                      }
                     }}
                     {...props}
                   >
-                    {String(children).replace(/\n$/, '')}
+                    {codeContent}
                   </SyntaxHighlighter>
                 </div>
               )
@@ -173,7 +210,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             // Normal paragraph
             return <p {...props}>{children}</p>
           },
-
+          
           // Custom link renderer
           a({ href, children, ...props }) {
             // External links

@@ -10,8 +10,8 @@ echo "🚀 Starting Taichi Audit site update..."
 # Navigate to site directory
 cd /root/Taichi-site
 
-echo "📥 Pulling latest changes from GitHub..."
-git pull origin main
+# echo "📥 Pulling latest changes from GitHub..."
+# git pull origin main
 
 echo "📦 Installing any new dependencies..."
 npm ci --only=production
