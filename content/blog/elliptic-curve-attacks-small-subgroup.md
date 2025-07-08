@@ -119,12 +119,8 @@ Back to the actual attack. Alice then chooses a point $$Q_1$$ on the invalid cur
 Once Alice receives ciphertext, she can bruteforce the shared key. Since $$p_1$$ is fairly small, the shared key $$d_B \cdot Q_1$$ only has $$p_1$$ possible values. Alice can traverse all possible points on the invalid curve and see which point decrypts the encrypted message correctly (for example it should return some meaningful string). In this round, Alice learns a congruence relation $$d_B \equiv r_1 \pmod{p_1}$$ for some $$r_1$$. It is not possible to learn $$d_B$$ in only one round since the attack only reveals the private key modulo the order of the chosen point.
 
 To recover $$d_B$$, Alice chooses point $$Q_2$$ with order $$p_2$$, point $$Q_3$$ with order $$p_3$$, and so on, and repeats the above process. In the end, Alice gets a system of congruences:
-$$\begin{align}
-d_B &\equiv r_1 \pmod{p_1}\\
-d_B &\equiv r_2 \pmod{p_2}\\
-&\vdots\\
-d_B &\equiv r_n \pmod{p_n}
-\end{align}$$
+
+$$d_B \equiv r_1 \pmod{p_1}, \quad d_B \equiv r_2 \pmod{p_2}, \quad \ldots, \quad d_B \equiv r_n \pmod{p_n}$$
 
 Since all moduli $$p_i$$ are prime, they are coprime to each other, satisfying the criteria for [Chinese Remainder Theorem (CRT)](https://crypto.stanford.edu/pbc/notes/numbertheory/crt.html). Alice can solve for $$d_B \bmod (p_1 \cdot p_2 \cdot \ldots \cdot p_n)$$. If Alice collects enough congruences so that the product $$p_1 \cdot p_2 \cdot \ldots \cdot p_n$$ exceeds the range of possible private keys, then $$d_B$$ is uniquely determined. In other words, Alice recovers Bob's private key completely.
 
