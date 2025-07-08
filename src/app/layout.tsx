@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import React from 'react'
 import './globals.css'
+import { DarkModeProvider } from '../lib/DarkModeContext'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://taichiaudit.com'),
@@ -76,7 +77,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        {children}
+        <DarkModeProvider>
+          {children}
+        </DarkModeProvider>
       </body>
     </html>
   )

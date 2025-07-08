@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Menu, X, ExternalLink } from 'lucide-react'
+import DarkModeToggle from './DarkModeToggle'
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -67,11 +68,13 @@ export default function Navigation() {
                 Request Audit
                 <ExternalLink className="ml-2 h-4 w-4" />
               </a>
+              <DarkModeToggle />
             </div>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button and dark mode toggle */}
+          <div className="md:hidden flex items-center space-x-2">
+            <DarkModeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
