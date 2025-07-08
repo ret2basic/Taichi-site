@@ -2,12 +2,12 @@
 title: "Rust Method Chaining: The Art of Fluent Data Pipelines"
 slug: "rust-method-chaining-fluent-interfaces"
 excerpt: "Understanding Rust's elegant method chaining pattern and how it creates readable, efficient data transformation pipelines."
-author: "AI Assistant"
+author: "ret2basic.eth"
 date: "2025-07-08"
 readTime: "15 min read"
 category: "Rust"
 tags: ["Rust", "Iterators", "Functional Programming", "Design Patterns"]
-featured: true
+featured: false
 image: "/images/blog/rust-method-chaining.png"
 ---
 

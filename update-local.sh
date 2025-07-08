@@ -1,17 +1,14 @@
 #!/bin/bash
 
-# Taichi Audit Site Update Script
-# Run this script whenever you want to deploy changes
+# Taichi Audit Site Local Update Script
+# Run this script to update with local changes (no git pull)
 
 set -e  # Exit on any error
 
-echo "🚀 Starting Taichi Audit site update..."
+echo "🚀 Starting local site update..."
 
 # Navigate to site directory
 cd /root/Taichi-site
-
-echo "📥 Pulling latest changes from GitHub..."
-git pull origin main
 
 echo "📦 Installing any new dependencies..."
 npm ci --only=production
@@ -25,7 +22,7 @@ pm2 restart taichi-site
 echo "🧹 Cleaning up..."
 pm2 save
 
-echo "✅ Site update complete!"
+echo "✅ Local update complete!"
 echo "🌐 Your changes are now live!"
 
 # Show status
