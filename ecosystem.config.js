@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'taichi-audit-website',
+      name: 'taichi-site',
       script: 'npm',
       args: 'start',
       cwd: '/root/Taichi-site',
@@ -13,10 +13,10 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000
       },
-      error_file: '/var/log/pm2/taichi-audit-error.log',
-      out_file: '/var/log/pm2/taichi-audit-out.log',
-      log_file: '/var/log/pm2/taichi-audit-combined.log',
+      error_file: './logs/err.log',
+      out_file: './logs/out.log',
+      log_file: './logs/combined.log',
       time: true
     }
   ]
-}; 
+} 
