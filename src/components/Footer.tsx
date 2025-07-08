@@ -130,16 +130,10 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-gray-300 text-sm">
-                © 2024 Taichi Audit Group. All rights reserved.
+                © 2025 Taichi Audit Group. All rights reserved.
               </p>
             </div>
             <div className="flex items-center space-x-6">
-              <a href="#" className="text-gray-300 hover:text-primary-400 text-sm transition-colors duration-200">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-gray-300 hover:text-primary-400 text-sm transition-colors duration-200">
-                Terms of Service
-              </a>
               <button
                 onClick={scrollToTop}
                 className="bg-primary-600 hover:bg-primary-700 p-2 rounded-lg transition-colors duration-200"

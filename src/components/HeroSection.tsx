@@ -94,8 +94,8 @@ export default function HeroSection() {
               <div className="bg-primary-100 p-3 rounded-full mb-4 dark:bg-primary-900">
                 <FileCheck className="h-8 w-8 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">135+</div>
-              <div className="text-gray-600 dark:text-gray-300 text-center text-sm">Critical Findings</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">170+</div>
+              <div className="text-gray-600 dark:text-gray-300 text-center text-sm">H/M Findings</div>
             </div>
             
             <div className="flex flex-col items-center p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-lg dark:bg-slate-800/50">
