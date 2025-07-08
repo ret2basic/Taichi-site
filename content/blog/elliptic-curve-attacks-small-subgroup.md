@@ -114,7 +114,26 @@ Without getting stuck into details, let's say Alice can find a point $$Q$$ with 
 
 **Step 3 - Lagrange's theorem tells us what's possible**: By Lagrange's theorem, any point $$P$$ on the curve must have order dividing $$n = q \cdot h$$. So possible orders are: $$\{1, 2, 4, q, 2q, 4q, h, qh\}$$ (assuming $$h = 4$$ for example). This includes orders that divide $$h$$, but doesn't guarantee they exist.
 
-**Step 4 - The h-torsion subgroup**: Consider the set of all points $$P$$ such that $$h \cdot P = O$$. This is called the **$$h$$-torsion subgroup**, denoted $$E[h]$$. Any point in this subgroup has order dividing $$h$$.
+**Step 4 - The h-torsion subgroup**: Consider the set of all points $$P$$ such that $$h \cdot P = O$$. This is called the **$$h$$-torsion subgroup**, denoted $$E[h]$$. 
+
+**Why does any point in $$E[h]$$ have order dividing $$h$$?** Here's the proof:
+
+Let $$P \in E[h]$$, so by definition $$h \cdot P = O$$. Let $$k$$ be the order of $$P$$, meaning $$k$$ is the **smallest positive integer** such that $$k \cdot P = O$$.
+
+We know two facts:
+- $$k \cdot P = O$$ (by definition of order)  
+- $$h \cdot P = O$$ (since $$P \in E[h]$$)
+
+By the division algorithm, we can write $$h = qk + r$$ where $$q$$ is the quotient and $$0 \leq r < k$$.
+
+Now compute $$h \cdot P$$:
+$$h \cdot P = (qk + r) \cdot P = q(k \cdot P) + r \cdot P = q \cdot O + r \cdot P = r \cdot P$$
+
+Since $$h \cdot P = O$$, we have $$r \cdot P = O$$. But $$k$$ was the **smallest** positive integer such that $$k \cdot P = O$$. Since $$0 \leq r < k$$, we must have $$r = 0$$ (otherwise we'd contradict the minimality of $$k$$).
+
+Therefore $$h = qk$$, which means $$k$$ divides $$h$$. ∎
+
+**Intuition**: If you can "kill" a point $$P$$ by multiplying by $$h$$, then its natural "lifespan" (order $$k$$) must be a factor of $$h$$.
 
 **Step 5 - Why the h-torsion subgroup is non-trivial**: Here's the key insight: since our curve has order $$n = q \cdot h$$, we know that for ANY point $$P$$ on the curve, we have $$n \cdot P = (q \cdot h) \cdot P = O$$. This can be rewritten as $$h \cdot (q \cdot P) = O$$. This means $$q \cdot P$$ is always in the $$h$$-torsion subgroup $$E[h]$$!
 
