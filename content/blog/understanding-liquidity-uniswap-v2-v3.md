@@ -3,19 +3,19 @@ title: "How Uniswap V3 handles liquidity better than V2"
 slug: "understanding-liquidity-uniswap-v2-v3"
 excerpt: "A deep dive into the mathematical principles behind liquidity provision in Uniswap V2 and V3, exploring how concentrated liquidity revolutionizes capital efficiency while maintaining protocol consistency."
 author: "jesjupyter, ret2basic.eth"
-date: "2025-07-31"
+date: "2025-08-05"
 readTime: "30 min read"
 category: "DeFi"
 tags: ["Uniswap", "DeFi", "Liquidity", "AMM", "Smart Contracts", "Mathematics"]
 featured: true
-image: "/images/blog/uniswap-liquidity.png"
+image: "/images/blog/uniswap-liquidity.jpg"
 ---
 
 Everyone knows Uniswap V3 introduced concentrated liquidity mechanism to increase the efficiency of liquidity. In Uniswap V2, you provide liquidity against the entire curve, but only the middle part of the curve is utilized. In Uniswap V3, you provide liquidity to "commonly-visited buckets" as you wish, so the efficiency of liquidity is increased. For a visual approach you can read ["How Concentrated Liquidity in Uniswap V3 Works"](https://rareskills.io/post/uniswap-v3-concentrated-liquidity) by RareSkills.
 
-This article takes a fundamentally different approach from typical Uniswap explanations. While most treatments focus on the surface-level benefits—"V2 has poor capital efficiency" and "V3 enables concentrated liquidity"—we dig into the **engineering fundamentals** that make these systems work or fail. The core insight is that traditional articles assume liquidity composability as a given, treating it as a natural property of AMMs. But this assumption actually breaks down in V2 due to two critical engineering problems: **liquidity tracking inaccuracy** (where $$totalSupply \neq \sqrt{k}$$) and **liquidity composition failure** (where price deviations create mathematical inconsistencies when combining positions).
+This article takes a fundamentally different approach from typical Uniswap explanations. While most treatments focus on the surface-level benefits—"V2 has poor capital efficiency" and "V3 enables concentrated liquidity"—we dig into the engineering fundamentals that make these systems work or fail. The core insight is that traditional articles assume liquidity composability as a given, treating it as a natural property of AMMs. But this assumption actually breaks down in V2 due to two critical engineering problems: liquidity tracking inaccuracy (where $$totalSupply \neq \sqrt{k}$$) and liquidity composition failure (where price deviations create mathematical inconsistencies when combining positions).
 
-From this engineering perspective, V3's innovations become much clearer. Rather than just "improving capital efficiency," V3 fundamentally solves the **hidden assumption problem** that other analyses take for granted. Through virtual liquidity and enforced price alignment, V3 creates the mathematical conditions necessary for liquidity to be truly composable—something that V2 only achieves under very specific circumstances. This article first proves why the liquidity composability assumption fails in V2, then demonstrates how V3's design choices specifically address these foundational issues to make the assumption valid again. It's essentially a proof of the hidden assumptions that underpin all modern AMM design.
+From this engineering perspective, V3's innovations become much clearer. Rather than just "improving capital efficiency," V3 fundamentally solves the hidden assumption problem that other analyses take for granted. Through virtual liquidity and enforced price alignment, V3 creates the mathematical conditions necessary for liquidity to be truly composable—something that V2 only achieves under very specific circumstances. This article first proves why the liquidity composability assumption fails in V2, then demonstrates how V3's design choices specifically address these foundational issues to make the assumption valid again. It's essentially a proof of the hidden assumptions that underpin all modern AMM design.
 
 ## Core Principles
 
@@ -65,9 +65,9 @@ function mint(address to) external lock returns (uint liquidity) {
 
 At pool initialization, liquidity is computed as:
 
-```
-liquidity ≈ √(amount0 × amount1) - MINIMUM_LIQUIDITY
-```
+$$
+\text{liquidity} \approx \sqrt{\text{amount0} \times \text{amount1}} - \text{MINIMUM\_LIQUIDITY}
+$$
 
 This is essentially proportional to $$\sqrt{k}$$, where $$k = x \times y$$ is the constant product, with $$x = \text{amount0}$$ and $$y = \text{amount1}$$.
 
@@ -135,7 +135,7 @@ liquidity = Math.min(
 **Revisiting the example**:
 
 - Alice deposits (10 token0, 10 token1), she gets 10 LP tokens
-- Now `_totalSupply = 10`, `_reserve0 = 10`, `_reserve0 = 10`
+- Now `_totalSupply = 10`, `_reserve0 = 10`, `_reserve1 = 10`
 - Bob deposits (10 token0, 40 token1). The LP tokens minetd is capped at `min(10 * 10 / 10, 40 * 10 / 10) = min(10, 40) = 10 LP tokens` (`amount0 = 10`, `amount1 = 40`)
 
 **Consequences now**:
