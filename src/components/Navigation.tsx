@@ -41,7 +41,7 @@ export default function Navigation() {
                 alt="Taichi Audit Group" 
                 className="h-8 w-8 mr-2 rounded-md"
               />
-              <span className="text-xl font-bold gradient-text">Taichi Audit Group</span>
+              <span className="text-xl font-bold gradient-text">Taichi Audit</span>
             </div>
           </div>
 

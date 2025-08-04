@@ -33,10 +33,10 @@ export const metadata: Metadata = {
     siteName: 'Taichi Audit Group',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/taichi_logo.jpg',
         width: 1200,
         height: 630,
-        alt: 'Taichi Audit Group',
+        alt: 'Taichi Audit Group Logo',
       },
     ],
     locale: 'en_US',
@@ -46,7 +46,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Taichi Audit Group - DeFi Security Experts',
     description: 'Leading DeFi security audit group specializing in Solidity, Move, and Solana smart contract reviews.',
-    images: ['/og-image.jpg'],
+    images: ['/taichi_logo.jpg'],
+    site: '@TaichiAudit', // Add your Twitter handle here
+    creator: '@TaichiAudit', // Add your Twitter handle here
   },
   robots: {
     index: true,

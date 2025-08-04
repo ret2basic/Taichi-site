@@ -8,7 +8,7 @@ readTime: "30 min read"
 category: "Cryptography"
 tags: ["Elliptic Curves", "Cryptography"]
 featured: true
-image: "/images/blog/elliptic-curve-attacks.png"
+image: "/images/blog/elliptic-curve-attacks.jpg"
 ---
 
 # TL;DR
