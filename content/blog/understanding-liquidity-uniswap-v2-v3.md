@@ -83,14 +83,14 @@ This is essentially proportional to $$\sqrt{k}$$, where $$k = x \times y$$ is th
 
 **If we naively calculated everyone's liquidity as $$\sqrt{x \cdot y}$$ and simply added them up, we would face a mathematical inconsistency.**
 
-Suppose the current total liquidity (in idealized terms) is $$K_0 = \sqrt{x_0 y_0}$$. When someone adds new liquidity ($$k_1 = \sqrt{x_1 y_1}$$), for the total supply to equal $$K_0 + k_1$$, we would need:
+Suppose the current total liquidity (in idealized terms) is $$K_0 = \sqrt{x_0 y_0}$$. When someone adds new liquidity ($$K_1 = \sqrt{x_1 y_1}$$), for the total supply to equal $$K_0 + K_1$$, we would need:
 
 $$
-(x_0 + x_1)(y_0 + y_1) = (K_0 + k_1)^2
+(x_0 + x_1)(y_0 + y_1) = (K_0 + K_1)^2
 $$
 
 $$
-\Rightarrow x_0 y_1 + x_1 y_0 = 2K_0 k_1 = 2\sqrt{x_0 x_1 y_0 y_1}
+\Rightarrow x_0 y_1 + x_1 y_0 = 2K_0 K_1 = 2\sqrt{x_0 x_1 y_0 y_1}
 $$
 
 This only holds if:
