@@ -11,15 +11,17 @@ featured: true
 image: "/images/blog/uniswap-liquidity.jpg"
 ---
 
-Everyone knows Uniswap V3 introduced concentrated liquidity mechanism to increase the efficiency of liquidity. In Uniswap V2, you provide liquidity against the entire curve, but only the middle part of the curve is utilized. In Uniswap V3, you provide liquidity to "commonly-visited buckets" as you wish, so the efficiency of liquidity is increased. For a visual approach you can read ["How Concentrated Liquidity in Uniswap V3 Works"](https://rareskills.io/post/uniswap-v3-concentrated-liquidity) by RareSkills.
+Everyone knows Uniswap V3 introduced concentrated liquidity mechanism (CLMM) to increase the efficiency of liquidity. In Uniswap V2, you provide liquidity against the entire curve, but only the middle part of the curve is utilized. In Uniswap V3, you provide liquidity to "commonly-visited buckets" as you wish, so the efficiency of liquidity is increased. For a visual approach you can read ["How Concentrated Liquidity in Uniswap V3 Works"](https://rareskills.io/post/uniswap-v3-concentrated-liquidity) by RareSkills.
 
-This article takes a fundamentally different approach from typical Uniswap explanations. While most treatments focus on the surface-level benefits—"V2 has poor capital efficiency" and "V3 enables concentrated liquidity"—we dig into the engineering fundamentals that make these systems work or fail. The core insight is that traditional articles assume liquidity composability as a given, treating it as a natural property of AMMs. But this assumption actually breaks down in V2 due to two critical engineering problems: liquidity tracking inaccuracy (where $$totalSupply \neq \sqrt{k}$$) and liquidity composition failure (where price deviations create mathematical inconsistencies when combining positions).
+This article takes a fundamentally different approach from typical Uniswap explanations. While most other articles focus on the surface-level benefits—"V2 has poor capital efficiency" and "V3 enables concentrated liquidity"—we dig into the engineering fundamentals that make these systems work or fail. The core insight is that traditional articles assume liquidity composability as a given, treating it as a natural property of AMMs. But this assumption could actually break down in V2 due to two critical engineering problems: liquidity tracking inaccuracy (where $$totalSupply \neq \sqrt{k}$$) and liquidity composition failure (as price deviations will create mathematical inconsistencies when combining positions).
 
-From this engineering perspective, V3's innovations become much clearer. Rather than just "improving capital efficiency," V3 fundamentally solves the hidden assumption problem that other analyses take for granted. Through virtual liquidity and enforced price alignment, V3 creates the mathematical conditions necessary for liquidity to be truly composable—something that V2 only achieves under very specific circumstances. This article first proves why the liquidity composability assumption fails in V2, then demonstrates how V3's design choices specifically address these foundational issues to make the assumption valid again. It's essentially a proof of the hidden assumptions that underpin all modern AMM design.
+From this engineering perspective, V3's innovations become much clearer. Rather than just "improving capital efficiency," V3 fundamentally solves the hidden assumption problem that other analyses take for granted. 
+
+This article first proves why the liquidity composability assumption often fails in V2, then demonstrates how V3's design choices specifically address these foundational issues to make the assumption valid again. It's essentially a proof of the hidden assumptions that underpin all modern AMM design.
 
 ## Core Principles
 
-In a Uniswap pair (regardless V2 or V3), everyone can add liquidity with a few rules enforced:
+In an LP pool (whether V2 or V3), the system expects liquidity provision to adhere to the following principles:
 
 - **Consistency**: Liquidity calculation should be the same for all participants for fairness
 - **Non-harmful**: Providing liquidity should not negatively affect existing liquidity providers
@@ -29,7 +31,7 @@ In a Uniswap pair (regardless V2 or V3), everyone can add liquidity with a few r
 
 ### Overview
 
-In Uniswap V2, liquidity is represented by ERC20 LP tokens. Providing liquidity means you transfer two tokens (token0, token1) in the same ratio as in the pool, then within the same tx you mint LP tokens. The core logic lies in the `mint` function of the `UniswapV2Pair` contract:
+In Uniswap V2, liquidity is represented by ERC20 LP tokens. Providing liquidity means you transfer two tokens (`token0`, `token1`) in the same ratio as that in the pool, then within the same tx you will get some LP tokens in return. The core logic lies in the `mint` function of the `UniswapV2Pair` contract:
 
 ```solidity
 function mint(address to) external lock returns (uint liquidity) {
@@ -63,27 +65,27 @@ function mint(address to) external lock returns (uint liquidity) {
 
 ### Liquidity Calculation
 
-At pool initialization, liquidity is computed as:
+At pool initialization, `liquidity` is computed as:
 
 $$
 \text{liquidity} \approx \sqrt{\text{amount0} \times \text{amount1}} - \text{MINIMUM\_LIQUIDITY}
 $$
 
-This is essentially proportional to $$\sqrt{k}$$, where $$k = x \times y$$ is the constant product, with $$x = \text{amount0}$$ and $$y = \text{amount1}$$.
+This is essentially proportional to $$\sqrt{k}$$, where $$k = x \times y$$ is the CONSTANT PRODUCT FORMULA, with $$x = \text{amount0}$$ and $$y = \text{amount1}$$.
 
-**Key Insight**: If someone provides $$x$$ token0 and $$y$$ token1, we can say they are providing liquidity $$\sqrt{x \cdot y}$$.
+**Key Insight**: If someone provides $$x$$ `token0` and $$y$$ `token1`, we can say he is providing liquidity $$\sqrt{x \cdot y}$$ (only from the current LP's perspective, not from the pool's perspective).
 
 ### The LP Token Supply Problem
 
-**Question**: Can we expect the total LP token supply to always equal $$\sqrt{k}$$ (the total "idealized" liquidity)?
+**Question**: Can we expect the total LP token supply to always equal $$\sqrt{k}$$ (the total "idealized" liquidity)? (In other words, will the sum of individual LP's liquidity equal to the total liquidity of the pool?)
 
 **Answer**: No, and this reveals a fundamental design challenge.
 
 #### The Theoretical Problem
 
-**If we naively calculated everyone's liquidity as $$\sqrt{x \cdot y}$$ and simply added them up, we would face a mathematical inconsistency.**
+**If we naively calculated everyone's liquidity as $$\sqrt{x \cdot y}$$ and simply added them up(this is not UniswapV2's way), we would face a mathematical inconsistency.**
 
-Suppose the current total liquidity (in idealized terms) is $$K_0 = \sqrt{x_0 y_0}$$. When someone adds new liquidity ($$K_1 = \sqrt{x_1 y_1}$$), for the total supply to equal $$K_0 + K_1$$, we would need:
+Suppose the current total liquidity of the pool (in idealized terms) is $$K_0 = \sqrt{x_0 y_0}$$. When someone adds new liquidity ($$K_1 = \sqrt{x_1 y_1}$$), for the total supply to equal $$K_0 + K_1$$, we would need:
 
 $$
 (x_0 + x_1)(y_0 + y_1) = (K_0 + K_1)^2
@@ -98,32 +100,32 @@ $$
 x_0 y_1 = x_1 y_0
 $$
 
-which means the new liquidity is provided **at the same price** ($$x_0 / y_0 = x_1 / y_1$$).
+which means the new liquidity must be provided **exactly at the same price** ($$x_0 / y_0 = x_1 / y_1$$).
 
 #### Why This Matters
 
-This reveals two critical issues that any liquidity protocol must solve:
+Let's come back to the two critical issues that any liquidity protocol must solve:
 
 1. **Non-harmful Principle**: A new provider's action should not negatively affect existing LPs
 2. **Trackable Principle**: The protocol should maintain accurate state tracking
 
-Let's examine what happens when these principles are violated:
+Let's examine what will happen when we calculate the liquidity of each LP naively:
 
-**Example**: Alice deposits 10 token0 + 10 token1 at price 1.0, then Bob deposits 10 token0 + 40 token1 at price 4.0.
+**Example**: Alice deposits 10 token0 + 10 token1 at price 1.0(she will get 10 LP tokens in return), then Bob deposits 10 token0 + 40 token1 at price 4.0(he will get 20 LP tokens in return). 
 
 **Consequences**:
-1. The price moves from 1.0 to 2.5
-2. 1 LP token now corresponds to ≈0.67 token0 and 1.67 token1
-3. **Alice effectively loses token0 exposure due to Bob's action**
-4. Total LP supply = 30, but $$\sqrt{x_{\text{total}} \times y_{\text{total}}} \approx \sqrt{20 \times 50} \neq 30$$ → deviation occurs
+1. The price moves from 1.0 to 2.5 (old price is `price = reserve1 / reserve0 = 10 / 10 = 1.0`, new price is `price = reserve1 / reserve0 = 50 / 20 = 2.5`)
+2. 1 LP token now corresponds to ≈0.67 token0 and ≈1.67 token1
+3. **Alice effectively loses token0 exposure due to Bob's action** (Alice's 1 LP token was supposed to represent 1 token0, but now it can only represent 0.67 token0)
+4. Total LP supply = 10 + 20 = 30, but $$\sqrt{x_{\text{total}} \times y_{\text{total}}} \approx \sqrt{20 \times 50} \neq 30$$ → deviation occurs
 
 This demonstrates why a naive approach fails both principles:
-- Alice loses token0 exposure (violates Non-harmful Principle)
+- Alice loses `token0` exposure (violates Non-harmful Principle)
 - totalSupply = 30 but $$\sqrt{x_{\text{total}} \times y_{\text{total}}} \neq 30$$ (violates Trackable Principle)
 
 #### Case 2: With Uniswap V2's Protection Mechanism
 
-Uniswap V2 solves the Non-harmful Principle by adjusting Bob's minted liquidity to align with the current pool price:
+Uniswap V2 enforces the Non-harmful Principle by adjusting Bob's minted liquidity to align with the current pool price:
 
 ```solidity
 liquidity = Math.min(
@@ -134,18 +136,18 @@ liquidity = Math.min(
 
 **Revisiting the example**:
 
-- Alice deposits (10 token0, 10 token1), she gets 10 LP tokens
+- Alice deposits `(10 token0, 10 token1)`, she gets 10 LP tokens
 - Now `_totalSupply = 10`, `_reserve0 = 10`, `_reserve1 = 10`
-- Bob deposits (10 token0, 40 token1). The LP tokens minetd is capped at `min(10 * 10 / 10, 40 * 10 / 10) = min(10, 40) = 10 LP tokens` (`amount0 = 10`, `amount1 = 40`)
+- Bob deposits `(10 token0, 40 token1)`. The LP tokens minetd is capped at `min(10 * 10 / 10, 40 * 10 / 10) = min(10, 40) = 10 LP tokens` (`amount0 = 10`, `amount1 = 40`)
 
 **Consequences now**:
 
 - Price moves from 1.0 to 2.5 (old price is `price = reserve1 / reserve0 = 10 / 10 = 1.0`, new price is `price = reserve1 / reserve0 = 50 / 20 = 2.5`)
-- 1 LP token represents (1 token0, 2.5 token1), therefore Alice actually benefits from Bob's action since her 1 LP token was supposed to represent (1 token0, 1 token1).
-- For Bob, he holds 10 LP tokens which represent (10 token0, 25 token1), so he lost 15 token1 comparing to his portfolio before providing liquidity
-- Total LP supply = 20, but $$\sqrt{20 \times 50} \approx 31.622 \neq 20$$, deviation remains
+- 1 LP token represents `(1 token0, 2.5 token1)`, therefore Alice actually benefits from Bob's action since her 1 LP token was supposed to represent `(1 token0, 1 token1)`. And she is not harmed by Bob's action.
+- For Bob, he holds 10 LP tokens which now represent `(10 token0, 25 token1)`, so he lost `15 token1` comparing to his portfolio before providing liquidity.
+- Total LP supply = `20`, but $$\sqrt{20 \times 50} \approx 31.622 \neq 20$$, deviation remains unresolved.
 
-For Bob, the shrink of his portfolio is a "penalty" for providing liquidity in a wrong ratio.
+For Bob, the shrink of his portfolio is a "penalty" for providing liquidity at a wrong ratio.
 
 **Conclusion**: Uniswap V2 successfully addresses the Non-harmful Principle but still violates the Trackable Principle:
 
@@ -156,7 +158,7 @@ This fundamental limitation motivates the change for a better solution in V3.
 
 ### Router-Level Price Alignment
 
-The `router` contract makes an effort to mitigate this issue. In `UniswapV2Router02`, the `_addLiquidity` function attempts to adjust provided amounts to match the pool's current price ratio:
+In Uniswap V2, the `UniswapV2Router02` contract makes an effort to mitigate this issue. The `_addLiquidity` function attempts to adjust provided amounts to match the pool's current price ratio:
 
 ```solidity
 if (reserveA == 0 && reserveB == 0) {
@@ -182,7 +184,7 @@ if (reserveA == 0 && reserveB == 0) {
 
 ### Swap Mechanics
 
-Since we cannot accurately track liquidity through `totalSupply` (it does not correspond to actual liquidity $$\sqrt{k}$$), **it cannot be used in swap calculations**. Instead, swap validation strictly relies on pool reserves and the constant product formula.
+Since we cannot accurately track liquidity through `totalSupply` (it does not correspond to actual liquidity $$\sqrt{k}$$), **it cannot be used in swap calculations**. Instead, swap validation strictly relies on pool reserves(`_reserve0`, `_reserve1`) and the CONSTANT PRODUCT FORMULA.
 
 Every swap is validated by ensuring the product of reserves does not decrease after accounting for fees:
 
@@ -226,7 +228,7 @@ Again, this formula is derived directly from the constant product invariant and 
 
 Uniswap V2 suffers from two main issues:
 
-1. **Poor capital efficiency**: Liquidity is spread across the entire price range $$(0, \infty)$$, even though most of it is never used
+1. **Poor capital efficiency**: Liquidity is spread across the entire price range $$(0, \infty)$$, even though most of it is never used(all other articles talk about this)
 2. **Trackable Principle violation**: The `totalSupply` cannot accurately track actual liquidity state
 
 **Solution**: Uniswap V3 introduces **concentrated liquidity**, which:
@@ -244,20 +246,20 @@ Uniswap V2 suffers from two main issues:
 
 **Question**: What does it mean to provide liquidity over a range $$(p_0, p_1)$$?
 
-**Answer**: When we say **Alice is providing 10 units of liquidity from price 10 to 100**, we mean she is allocating liquidity to a segment of the constant product curve $$X \cdot Y = L^2$$, but only **within the price range [10, 100]**.
+**Answer**: When we say **Alice is providing 10 units of liquidity from price 10 to 100**, we mean she is allocating liquidity to a segment of the constant product curve $$X \cdot Y = L^2$$, but only with limited liquidity to support the trades within the price range [10, 100].
 
-This liquidity behaves as if she were supporting a virtual pool that maintains $$X \cdot Y = L^2 = 100$$ (since $$10^2 = 100$$), but only for trades where the price lies in the interval [10, 100]. Outside of this range, the liquidity is effectively **zero**—meaning she is not providing any capital for trades at those prices.
+This liquidity behaves as if she were supporting a virtual pool that maintains $$X \cdot Y = L^2 = 100$$ (since $$10^2 = 100$$), but this pool will only be used when the price lies in the interval `[10, 100]`. Outside of this range, the liquidity is effectively **zero**—her liquidity will never be used.
 
 **Under this model**:
-- At **price = 10**, Alice holds her liquidity entirely in **token0**
+- Before the price reaches 10, Alice's liquidity is not used(Alice holds her liquidity entirely in `token0`)
+- At **price = 10**, Alice holds her liquidity entirely in `token0`
 - As the price increases toward 100, her **token0** is gradually swapped into **token1**
 - At **price = 100**, Alice holds only **token1**
-
-So, her position behaves as a **customized liquidity band**, with a deterministic conversion between token0 and token1 across the range, mirroring the shape of the **Uniswap V3-style concentrated liquidity** curve. The key idea is that her liquidity contributes to the pool only within $$[p_0, p_1]$$, and follows the curve $$X \cdot Y = L^2$$ in that band.
+- After the price reaches 100, Alice's liquidity is not used(Alice holds her liquidity entirely in `token1`)
 
 **Virtual Liquidity/reserves: The Key Innovation**
 
-In reality, the token0 and token1 Alice provided is **not** the full amount required to maintain the constant product curve across the entire price range, but only the amount required to maintain the curve within the price range [10, 100]. 
+In reality, the `token0` and `token1` Alice provided is **not** the full amount required to maintain the constant product curve across the entire price range, but only the amount required to maintain the curve within the price range `[10, 100]`. 
 
 The missing liquidity outside this range is provided by **virtual liquidity** - liquidity that exists mathematically but is not backed by actual tokens. This virtual liquidity makes concentrated liquidity possible:
 
@@ -271,7 +273,7 @@ Where:
 - $$x_{\text{virtual}}, y_{\text{virtual}}$$: Virtual reserves that maintain the constant product curve
 
 - **Inside the range [10, 100]**: Alice's real tokens provide actual liquidity
-- **Outside the range**: Virtual liquidity maintains the constant product curve without requiring additional capital, but it will never be used.    
+- **Outside the range**: Virtual liquidity maintains the constant product curve without requiring additional capital, but it will never be used as the liquidity is never activated.
 
 This is why V3 can achieve much higher capital efficiency - LPs only need to provide tokens for the price range they expect to be active, while the protocol handles the rest through virtual liquidity.
 
@@ -292,13 +294,13 @@ $$
 X \times Y = L^2
 $$
 
-But liquidity is provided only within $$[p_0, p_1]$$, where:
-- $$p = Y / X$$ (price of token0 in terms of token1, Y and X are the total reserves of token0 and token1, containing the virtual liquidity)
+But things become a bit more complex when liquidity is provided only within $$[p_0, p_1]$$, where:
+- $$p = Y / X$$ (price of `token0` in terms of `token1`, `Y` and `X` are the total reserves of `token0` and `token1`, containing the virtual liquidity)
 - $$L$$ is constant within this range and zero elsewhere
 
-When providing $$\Delta x$$ token0 within the range $$[p_0, p_1]$$, we can express it in terms of liquidity $$L$$:
+When providing $$\Delta x$$ `token0` within the range $$[p_0, p_1]$$, we can express it in terms of liquidity $$L$$:
 
-**Key Insight**: For the curve $$X \times Y = L^2$$, the difference in token0 amounts between two price points equals the token0 liquidity we want to add.
+**Key Insight**: For the curve $$X \times Y = L^2$$, the difference in `token0` amounts between two price points equals the `token0` we want to add given liquidity `L`.(This is because the `token0` difference are all converted to `token1`)
 
 $$
 X(p_{\text{start}}) - X(p_1) = \Delta x
@@ -321,7 +323,7 @@ $$
 
 Here, $$p_{\text{start}}$$ is:
 - $$p_0$$, if the current price is below the lower bound $$p_0$$
-- the current price $$p_{\text{current}} = Y/X$$, otherwise, note here Y,X are different from the liquidity we are providing, they are the total reserves of token0 and token1, containing the virtual liquidity.
+- the current price $$p_{\text{current}} = Y/X$$, otherwise, note here `Y,X` are different from the real liquidity we are providing, they are the total reserves of `token0` and `token1`, containing the virtual liquidity.
 
 Similarly, for $$\Delta y$$ token1:
 
@@ -364,7 +366,7 @@ $$
 
 Thus, V2 can be viewed as a special case of V3 where liquidity spans the full price range.
 
-#### Why Calculate Both L_x and L_y?
+#### Why Calculate Both `L_x` and `L_y`?
 
 We compute liquidity from both $$\Delta x$$ and $$\Delta y$$ to ensure consistency:
 - Given $$(\Delta x, p_1)$$ (and possibly $$p_0$$), we calculate $$L_x$$
@@ -374,7 +376,7 @@ Both must match; otherwise, the provided token amounts are inconsistent with the
 
 **Key Concept: Bilateral Liquidity**
 
-$$L_x$$ and $$L_y$$ represent **bilateral liquidity** - the liquidity calculated from token0 and token1 perspectives respectively. For a valid liquidity position:
+$$L_x$$ and $$L_y$$ represent **bilateral liquidity** - the liquidity calculated from `token0` and `token1` perspectives respectively. For a valid liquidity position:
 
 $$
 L_x = L_y = L
@@ -391,7 +393,9 @@ If $$L_x \neq L_y$$, it means the provided token amounts don't match the expecte
 
 Let’s revisit the remaining questions:
 > 2. **How can different LPs add liquidity without affecting each other’s positions?**
+
 > 3. **How is the constant product (k) determined for a given price range?**
+
 > 4. **How do swaps work under this new model?**
 
 
@@ -413,13 +417,13 @@ When an LP adds liquidity in a range $$(p_0, p_1)$$ while the current market pri
 The price is currently below the range. The liquidity will only become active once the price **rises into** the range.
 
 - Liquidity is priced **as if added at** $$p_0$$
-- The LP supplies only **token0** as we discussed in the previous section that alice is providing liquidity from price 10 to 100, so at price 10, the position only holds token0.
+- The LP supplies only **token0** as we discussed in the previous section that alice is providing liquidity from price 10 to 100, so at price `10`, the position only holds token0.
 
 #### Case 2: $$p_0 \leq p \leq p_1$$
 The price is currently inside the range. Liquidity is added **at the current price**.
 
 - The LP supplies **token0 and token1**, based on the distance to each bound
-- This differs from V2, since the price is forced to be the current price
+- This differs from V2, since the price is forced to be the current price(but this aligns with V2's router-level price alignment)
 
 #### Case 3: $$p > p_1$$
 The price is currently above the range. The liquidity becomes active only if the price **drops into** the range.
@@ -431,7 +435,7 @@ In **cases 1 and 3**, although the liquidity is not immediately active, it is **
 
 This mechanism ensures:
 - **All LPs in the same price range are evaluated using the same entry price**
-- **Liquidity math is deterministic and composable across LPs**
+- **Liquidity math is thus deterministic and composable across LPs**
 - **Swaps operate consistently**, since virtual reserves are derived from shared liquidity at each active price
 
 ### Implementation in Smart Contracts
@@ -476,16 +480,16 @@ if (params.liquidityDelta != 0) {
 
 ### Liquidity Position Independence
 
-When the price is the same, the core liquidity invariant holds:
+When the price is the same, the core liquidity invariant holds per discussion above:
 $$
 (x_0 + x_1)(y_0 + y_1) = (K_0 + k_1)^2
 $$
 
-This ensures that liquidity positions are composable — meaning **Alice and Bob's liquidity contributions can be aggregated without interfering with each other**.
+This ensures that liquidity positions are composable — meaning **Alice and Bob's liquidity contributions can be aggregated without interfering with each other**(as long as the price is the same).
 
 ### Dynamic Liquidity Management
 
-In Uniswap V3, liquidity is concentrated within custom price ranges. The **total active liquidity at any moment** depends on how much liquidity is currently "in range."
+In Uniswap V3, liquidity is concentrated within custom price ranges. The **total active liquidity at any moment** depends on how much liquidity is currently "in range" or is being activated.
 
 To efficiently compute this, V3 uses a **bidirectional prefix sum structure** based on ticks (discrete price intervals).
 
@@ -518,10 +522,10 @@ When the price moves and crosses a tick/price boundary:
 ### Example: Liquidity Range Management
 
 Suppose an LP adds **10 units of liquidity** between prices 10 and 100. Internally:
-- At price(10)(or its corresponding tick), `liquidityNet += 10`
-- At price(100)(or its corresponding tick), `liquidityNet -= 10`
+- At price(`10`)(or its corresponding tick), `liquidityNet += 10`
+- At price(`100`)(or its corresponding tick), `liquidityNet -= 10`
 
-When the price rises from 9 → 11 (crossing 10), Uniswap **adds 10 to liquidity**. When it later crosses 100, **10 is subtracted**.
+When the price rises from `9` → `11` (crossing `10`), Uniswap **adds 10 to liquidity**. When it later crosses `100`, **10 is subtracted**.
 
 This mechanism allows Uniswap V3 to:
 - Efficiently update liquidity as price moves
@@ -552,6 +556,10 @@ This change reflects **LPs entering or exiting the price range**.
 
 Therefore, the swap process effectively walks through a sequence of micro-pools, each with fixed liquidity and its own constant product curve, adjusting liquidity dynamically at each transition.
 
+**Unlike V2, because `liquidity` can now precisely represent `K` (i.e., `K` in $$xy=K$$), the swap process can be directly calculated using `liquidity` variable. This eliminates the need to store `reserve0` and `reserve1` for arbitrary ranges which could be extremely complicated.**
+
+
+
 ## Summary
 
 | Aspect | V2 | V3 |
@@ -561,5 +569,6 @@ Therefore, the swap process effectively walks through a sequence of micro-pools,
 | **Trackability** | `totalSupply` may deviate from $$\sqrt{k}$$ | `liquidity` accurately reflects active liquidity |
 | **Price Alignment** | Router-level adjustment | Protocol-level enforcement |
 | **Complexity** | Simple | Complex but more efficient |
+| **Swap Computation** | Using Reserves | Using `liquidity` |
 
 The key innovation of V3 is that it maintains the mathematical consistency of V2 while dramatically improving capital efficiency through concentrated liquidity and precise price-level enforcement.
