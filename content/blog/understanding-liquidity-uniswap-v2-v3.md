@@ -3,7 +3,7 @@ title: "How Uniswap V3 handles liquidity better than V2"
 slug: "understanding-liquidity-uniswap-v2-v3"
 excerpt: "A deep dive into the mathematical principles behind liquidity provision in Uniswap V2 and V3, exploring how concentrated liquidity revolutionizes capital efficiency while maintaining protocol consistency."
 author: "jesjupyter, ret2basic.eth"
-date: "2025-08-05"
+date: "2025-09-06"
 readTime: "30 min read"
 category: "DeFi"
 tags: ["Uniswap", "DeFi", "Liquidity", "AMM", "Smart Contracts", "Mathematics"]

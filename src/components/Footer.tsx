@@ -27,7 +27,7 @@ export default function Footer() {
   }
 
   const socialLinks = [
-    { icon: Twitter, href: 'https://x.com/TaiChiWeb3Sec', name: 'Twitter' },
+    { icon: Twitter, href: 'https://x.com/taichiaudit', name: 'Twitter' },
     { icon: Github, href: 'https://github.com/TaiChiAuditGroup', name: 'GitHub' },
     { icon: MessageCircle, href: 'https://t.me/+egUmC7vd9TI4MGM9', name: 'Telegram' },
     { icon: Mail, href: 'mailto:taichiweb3sec@gmail.com', name: 'Email' }

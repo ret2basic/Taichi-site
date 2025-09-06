@@ -28,8 +28,8 @@ export default function ContactSection() {
     {
       icon: Twitter,
       title: 'Twitter',
-      value: '@TaiChiWeb3Sec',
-      href: 'https://x.com/TaiChiWeb3Sec',
+      value: '@taichiaudit',
+      href: 'https://x.com/taichiaudit',
       description: 'Follow us for security updates'
     }
   ]
@@ -110,7 +110,7 @@ export default function ContactSection() {
                 If you've discovered a critical vulnerability in one of our audited protocols, please contact us immediately via our emergency channels.
               </p>
               <a
-                href="https://x.com/TaiChiWeb3Sec"
+                href="https://x.com/taichiaudit"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-primary-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"

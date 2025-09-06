@@ -23,18 +23,6 @@ I am writing this article since I found most existing articles don't explain the
 
 Feel free to DM me on [Twitter](https://twitter.com/ret2basic) if you find any mistake in this article.
 
-# Prerequisite readings
-
-You need to understand basic abstract algebra and how elliptic curve works, but shallow understanding is enough. I recommend the following articles:
-
-- [https://www.rareskills.io/post/set-theory](https://www.rareskills.io/post/set-theory)
-- [https://www.rareskills.io/post/group-theory-and-coding](https://www.rareskills.io/post/group-theory-and-coding)
-- [https://www.rareskills.io/post/rings-and-fields](https://www.rareskills.io/post/rings-and-fields)
-- [https://www.rareskills.io/post/elliptic-curve-addition](https://www.rareskills.io/post/elliptic-curve-addition)
-- [https://www.rareskills.io/post/elliptic-curves-finite-fields](https://www.rareskills.io/post/elliptic-curves-finite-fields)
-- [https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction/](https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction/)
-- [https://andrea.corbellini.name/2015/05/23/elliptic-curve-cryptography-finite-fields-and-discrete-logarithms/](https://andrea.corbellini.name/2015/05/23/elliptic-curve-cryptography-finite-fields-and-discrete-logarithms/)
-
 # Some (sub)group theory: Lagrange's theorem and Cauchy's theorem
 
 We will need some group theory results to understand why small subgroup attack and invalid curve attack work. This part is missing from most of the articles / ctf writeups on the Internet, so pay attention. We are going to cover two theorems regarding subgroups: Lagrange's theorem and Cauchy's theorem.
