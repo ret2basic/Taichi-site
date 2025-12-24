@@ -7,11 +7,9 @@ date: "2024-04-12"
 readTime: "30 min read"
 category: "Cryptography"
 tags: ["Elliptic Curves", "Cryptography"]
-featured: true
+featured: false
 image: "/images/blog/elliptic-curve-attacks.jpg"
 ---
-
-# TL;DR
 
 When auditing elliptic curve libs, especially **ECDH** related code, double check if the code has sufficient validation on the points sent by the users. If not, attacker can send bogus points to trick the backend server, recovering server's private key in the worst case. 
 
@@ -23,7 +21,7 @@ I am writing this article since I found most existing articles don't explain the
 
 Feel free to DM me on [Twitter](https://twitter.com/ret2basic) if you find any mistake in this article.
 
-# Some (sub)group theory: Lagrange's theorem and Cauchy's theorem
+## Some (sub)group theory: Lagrange's theorem and Cauchy's theorem
 
 We will need some group theory results to understand why small subgroup attack and invalid curve attack work. This part is missing from most of the articles / ctf writeups on the Internet, so pay attention. We are going to cover two theorems regarding subgroups: Lagrange's theorem and Cauchy's theorem.
 
@@ -61,7 +59,7 @@ Recall the second corollary of Lagrange's theorem says any group of prime order 
 
 You might ask, why bother studying subgroups though? Abstractly, think of taking subgroup as reducing a big problem to a small one. In the two attacks we are going to talk about next, you will see how taking subgroups converts a hard problem into easy problem (computationally).
 
-# Understanding Elliptic Curve Diffie-Hellman (ECDH)
+## Understanding Elliptic Curve Diffie-Hellman (ECDH)
 
 ECDH is like traditional Diffie-Hellman (DH), but replaces the original discrete log problem (DLP) with elliptic curve discrete log problem (ECDLP). In short, DLP means given $$y = g^x \mod p$$, it is hard (hard means nearly impossible) to recover $$x$$. In comparison, ECDLP means given $$Q = nP$$ where $$P$$ is some point on an elliptic curve over a finite field, it is hard to recover $$n$$.
 
@@ -75,7 +73,7 @@ The next step is key exchange. They can just publish $$Q_A$$ and $$Q_B$$ on the 
 
 In the end they compute a shared secret (this is the shared key) using their private keys. Alice computes $$key = d_A * Q_B = d_A * (d_B * G) = d_A * d_B * G$$, and Bob computes $$key = d_B * Q_A = d_B * (d_A * G) = d_B * d_A * G$$. Since elliptic curve multiplication is commutative, both Alice and Bob arrive at the same shared secret $$d_A * d_B * G$$. After that, they can use this shared key for symmetric encryption.
 
-# Small subgroup attack
+## Small subgroup attack
 
 Small subgroup attack is a building block of invalid curve attack, so we discuss it first.
 
@@ -135,7 +133,7 @@ Therefore $$h = qk$$, which means $$k$$ divides $$h$$. ∎
 
 To prevent small subgroup attack, your code should reject any incoming point $$Q$$ such that $$h \cdot Q = O$$ from Alice. Another way to prevent this attack is to use curves with $$h = 1$$ (prime order curves), so that no small subgroups exist.
 
-# Invalid curve attack
+## Invalid curve attack
 
 If Bob does not verify if $$Q_A$$ is actually on the elliptic curve (call it **valid curve**), Alice can come up with some fake point which lies on some other elliptic curve (call it **invalid curve**). For example, if the valid curve is secp256k1 $$\rightarrow y^2 = x^3 + 7$$, then Alice can choose invalid curves $$y^2 = x^3 + c$$, where $$c \neq 7$$. You might ask, why keep the $$x^3$$ term fixed and only change the constant term? It is because **elliptic curve addition formulas for short Weierstrass curves $$y^2 = x^3 + ax + b$$ only depend on the $$a$$ coefficient, not the $$b$$ term**. Since most standardized curves have $$a = 0$$, the addition law works identically across curves $$y^2 = x^3 + c$$ for any constant $$c$$. This allows Bob's software to compute $$d_B \cdot Q$$ without errors, even though $$Q$$ is from a different curve. Check this [answer](https://crypto.stackexchange.com/a/88637/44397) for full derivation.
 
@@ -153,7 +151,7 @@ Since all moduli $$p_i$$ are prime, they are coprime to each other, satisfying t
 
 To prevent this attack, Bob should verify all points sent by Alice satisfy the Weierstrass equation of the valid curve.
 
-# Other references not mentioned in article
+## Other references not mentioned in article
 
 - [https://safecurves.cr.yp.to/twist.html](https://safecurves.cr.yp.to/twist.html)
 - [https://crypto.stackexchange.com/questions/18222/difference-between-ecdh-with-cofactor-key-and-ecdh-without-cofactor-key/26844#26844](https://crypto.stackexchange.com/questions/18222/difference-between-ecdh-with-cofactor-key-and-ecdh-without-cofactor-key/26844#26844)
