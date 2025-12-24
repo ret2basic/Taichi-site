@@ -6,13 +6,13 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import ZoomableImage from './ZoomableImage'
 
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
-// Import highlight.js CSS
-import 'highlight.js/styles/github-dark.css'
+// Import highlight.js CSS (GitHub light)
+import 'highlight.js/styles/github.css'
 
 interface MarkdownRendererProps {
   content: string
@@ -69,11 +69,11 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               
               return (
                 <div className="relative">
-                  <div className="absolute top-2 right-2 text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                  <div className="absolute top-2 right-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2 py-1 rounded">
                     {language}
                   </div>
                   <SyntaxHighlighter
-                    style={dracula}
+                    style={oneLight}
                     language={language}
                     PreTag="div"
                     customStyle={{

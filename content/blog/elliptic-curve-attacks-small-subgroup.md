@@ -2,7 +2,7 @@
 title: "Elliptic curve attacks - from small subgroup attack to invalid curve attack"
 slug: "elliptic-curve-attacks-small-subgroup"
 excerpt: "Discussion of two attack methods when the code does not check if an EC point is actually on the curve."
-author: "ret2basic.eth"
+author: "[ret2basic.eth](https://x.com/ret2basic)"
 date: "2024-04-12"
 readTime: "30 min read"
 category: "Cryptography"
