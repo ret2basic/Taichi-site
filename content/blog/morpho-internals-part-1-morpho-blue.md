@@ -4,7 +4,7 @@ slug: "morpho-internals-part-1-morpho-blue"
 excerpt: "Deep dive into Morpho Blue's core contract—market creation, supply/borrow/collateral flows, liquidation math, and interest accrual mechanics."
 author: "ret2basic.eth (reviewed by jesjupyter)"
 date: "2025-12-24"
-readTime: "TBD"
+readTime: "30 min read"
 category: "DeFi"
 tags: ["Morpho", "Lending", "Source Code Walkthrough"]
 featured: true
