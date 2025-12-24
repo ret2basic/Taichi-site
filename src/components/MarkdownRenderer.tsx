@@ -6,13 +6,11 @@ import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { ghcolors, vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import ZoomableImage from './ZoomableImage'
 
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
-// Import highlight.js CSS (GitHub light)
-import 'highlight.js/styles/github.css'
 
 interface MarkdownRendererProps {
   content: string
@@ -32,6 +30,20 @@ interface ImageProps {
 }
 
 export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  const [isDarkMode, setIsDarkMode] = React.useState(false)
+
+  React.useEffect(() => {
+    const root = document.documentElement
+    const update = () => setIsDarkMode(root.classList.contains('dark'))
+
+    update()
+
+    const observer = new MutationObserver(update)
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div className={`prose prose-lg max-w-none dark:prose-invert ${className}`}>
       <ReactMarkdown
@@ -73,9 +85,9 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                     {language}
                   </div>
                   <SyntaxHighlighter
-                    style={oneLight}
+                    style={isDarkMode ? vscDarkPlus : ghcolors}
                     language={language}
-                    PreTag="div"
+                    PreTag="pre"
                     customStyle={{
                       margin: 0,
                       borderRadius: '0.5rem',
