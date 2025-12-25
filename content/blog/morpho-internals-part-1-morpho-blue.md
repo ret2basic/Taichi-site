@@ -599,7 +599,11 @@ $$
 LIF = \min\left(M, \frac{1}{\beta \ast LLTV + (1 - \beta)}\right), \text{ with } \beta = 0.3 \text{ and } M = 1.15
 $$
 
-How this formula was derived isn’t important. Why? Recall that LLTV can be only chosen from a list of governance-approved values, so there is no computation of LLTV onchain. Instead, we can only focus on the relative relationship between LLTV and LIF. The following graph from doc visualizes this relationship:
+Here $\beta = 0.3$ is called `LIQUIDATION_CURSOR` in code and $M = 1.15$ is called `MAX_LIQUIDATION_INCENTIVE_FACTOR` in code.
+
+Simply speaking, the formula shows that LIF is capped by $M$ and otherwise decreases as LLTV increases. In practice, more volatile / riskier collateral is usually assigned a lower LLTV: this makes positions become liquidatable earlier (more time to liquidate before collateral is exhausted) and, through the formula, yields a higher LIF (higher liquidator incentive). The goal is to encourage timely liquidations so that large price drops or execution/oracle delays are less likely to translate into realized bad debt.
+
+The following graph from the docs visualizes this relationship:
 
 ![LIF.png](/images/blog/LIF.png)
 
