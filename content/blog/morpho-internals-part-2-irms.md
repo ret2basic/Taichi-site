@@ -216,7 +216,7 @@ $$
 
 Intuition: the “room” above target is small (only 10 percentage points from 90% to 100%), so the same absolute utilization deviation should be treated as a larger normalized error.
 
-![image.png](attachment:d56183d3-969c-455c-8e04-3e57490debf0:image.png)
+![Error_function.png](/images/blog/Error_function.png)
 
 When $u <= u_{target}$ the denominator is $u_{target}$; when $u > u_{target}$ the denominator is $1 - u_{target}$.
 
@@ -238,7 +238,7 @@ if (startRateAtTarget == 0) {
 
 The first interaction happens in `Morpho.createMarket()` (Morpho calls the IRM once to initialize it).
 
-![image.png](attachment:62f342db-8108-4991-8a4a-a18c0581ce92:image.png)
+![BorrowRate.png](/images/blog/BorrowRate.png)
 
 So on first interaction, both `avgRateAtTarget` and `endRateAtTarget` are set to `INITIAL_RATE_AT_TARGET`, which is 4%/year converted to a **per-second** WAD rate. The curve still applies the current `err`, so the very first returned borrow rate already reflects utilization; the anchor just has not drifted yet.
 
@@ -267,7 +267,7 @@ else {
 
 `elapsed` is measured in seconds. `speed` is “per second” (WAD-scaled), so `linearAdaptation = speed * elapsed` is a dimensionless WAD-scaled number (this corresponds to $(k_p/\text{secondsPerYear}) \cdot e(u) \cdot \Delta t$ in the docs notation). The comment about “underestimated” reflects that `speed` is frozen even though interest accrual nudges utilization during the interval, so the true path can be slightly steeper.
 
-![image.png](attachment:80750aab-58ea-4e93-88e9-6dc771adf3e6:image.png)
+![IIrm.png](/images/blog/IIrm.png)
 
 Linear adaptation refers to how $r_{90\%}$ (stored as `rateAtTarget`) automatically adjusts over time based on the error. When $u > 90\%$, `err > 0` so `rateAtTarget` increases; when $u < 90\%$, `err < 0` so `rateAtTarget` decreases. In code terms:
 
@@ -279,11 +279,11 @@ $$
 
 Visually we can see how $r_{90\%}$ (i.e., `rateAtTarget`) changes based on $u$ and elapsed time. Example when $u < 90\%$:
 
-![Small_utilization.png](attachment:8462926e-b87c-4a02-8d33-7bf868b170ed:Small_utilization.png)
+![Small_utilization.png](/images/blog/Small_utilization.png)
 
 Example when $u > 90\%$:
 
-![Large_utilization.png](attachment:338f4809-aadb-418d-bb5c-1b2076f4327b:Large_utilization.png)
+![Large_utilization.png](/images/blog/Large_utilization.png)
 
 Then the code handles a special case when `linearAdaptation == 0`:
 
