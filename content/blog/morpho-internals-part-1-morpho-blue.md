@@ -601,8 +601,6 @@ $$
 
 Here $\beta = 0.3$ is called `LIQUIDATION_CURSOR` in code and $M = 1.15$ is called `MAX_LIQUIDATION_INCENTIVE_FACTOR` in code.
 
-Simply speaking, the formula shows that LIF is capped by $M$ and otherwise decreases as LLTV increases. In practice, more volatile / riskier collateral is usually assigned a lower LLTV: this makes positions become liquidatable earlier (more time to liquidate before collateral is exhausted) and, through the formula, yields a higher LIF (higher liquidator incentive). The goal is to encourage timely liquidations so that large price drops or execution/oracle delays are less likely to translate into realized bad debt.
-
 The following graph from the docs visualizes this relationship:
 
 ![LIF.png](/images/blog/LIF.png)
@@ -611,7 +609,9 @@ Just from the graph you can tell:
 
 1. LIF is lower bounded by 1.00 and upper bounded by 1.15
 2. It stays constant 1.15 until LLTV is around 0.55 then it starts to decrease linearly
-3. Higher the LLTV, lower the LIF ← This makes sense because higher LLTV means smaller safety margin and we will need lower LIF to avoid bad debt.
+3. Higher the LLTV, lower the LIF
+
+Simply speaking, the formula shows that LIF is capped by $M$ and otherwise decreases as LLTV increases. In practice, more volatile / riskier collateral is usually assigned a lower LLTV: this makes positions become liquidatable earlier (more time to liquidate before collateral is exhausted) and, through the formula, yields a higher LIF (higher liquidator incentive). The goal is to encourage timely liquidations so that large price drops or execution/oracle delays are less likely to translate into realized bad debt.
 
 ### Bad debt
 
