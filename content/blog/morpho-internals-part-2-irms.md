@@ -4,7 +4,7 @@ slug: "morpho-internals-part-2-irms"
 excerpt: "How Morpho Blue computes borrow rates: FixedRate warm-up and a deep dive on AdaptiveCurve with utilization-driven anchor updates."
 author: "ret2basic.eth (reviewed by jesjupyter)"
 date: "2025-12-25"
-readTime: "40 min read"
+readTime: "1 hour read"
 category: "DeFi"
 tags: ["Morpho", "Lending", "Source Code Walkthrough"]
 featured: true
