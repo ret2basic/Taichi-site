@@ -4,7 +4,7 @@ slug: "morpho-internals-part-2-irms"
 excerpt: "How Morpho Blue computes borrow rates: FixedRate warm-up and a deep dive on AdaptiveCurve with utilization-driven anchor updates."
 author: "ret2basic.eth (reviewed by jesjupyter)"
 date: "2025-12-25"
-readTime: "1 hour read"
+readTime: "40 min read"
 category: "DeFi"
 tags: ["Morpho", "Lending", "Source Code Walkthrough"]
 featured: true
@@ -146,6 +146,41 @@ Even if two markets are both at 90% utilization today, their `rateAtTarget` can 
 ### borrowRate() vs borrowRateView()
 
 `borrowRate()` (non-view) computes an **average borrow rate over the elapsed interval** and updates `rateAtTarget`. `borrowRateView()` returns the same computed rate **without** updating state. Morpho calls `borrowRate()` during accrual / market creation; integrations call `borrowRateView()` for quoting.
+
+### BorrowRateUpdate: why there are two rates
+
+When Morpho calls `borrowRate()` it emits `BorrowRateUpdate(id, avgBorrowRate, rateAtTarget)`. It’s tempting to assume both numbers represent “the borrow rate”, but they serve different purposes:
+
+- `avgBorrowRate`: the **average per-second borrow rate** over the last accrual interval. This is the rate Morpho plugs into $e^{rt}-1$ in `_accrueInterest()`.
+- `rateAtTarget`: the **end-of-interval anchor** (the updated $r_{90\%}$) that will be used as the starting point next time.
+
+That split is the whole reason the implementation has the slightly unusual signature `(avgRate, endRateAtTarget)`.
+
+If you want to compare rates in human units, convert a per-second WAD rate $r$ to an annualized approximation:
+
+- APR (small-rate approximation): $\text{APR} \approx r \cdot \text{secondsPerYear}$
+- APY (continuous compounding): $\text{APY} = e^{r \cdot \text{secondsPerYear}} - 1$
+
+#### Worked example (numbers from an on-chain BorrowRateUpdate log)
+
+Suppose a `BorrowRateUpdate` log shows:
+
+```
+avgBorrowRate  = 2288292706
+rateAtTarget   = 2288771456
+```
+
+These are WAD-scaled **per-second** rates, so first convert to “plain per-second” by dividing by $1e18$.
+
+Using $\text{secondsPerYear} \approx 31{,}556{,}926$:
+
+- Anchor APR $\approx \frac{2288771456}{1e18} \cdot 31{,}556{,}926 \approx 0.0722$ (≈ 7.22%)
+- Average-rate APR $\approx \frac{2288292706}{1e18} \cdot 31{,}556{,}926 \approx 0.0722$ (very close, as expected for short intervals)
+
+The important conceptual point is not the tiny numerical difference in this particular log, but *which number Morpho uses where*:
+
+- `avgBorrowRate` is used to charge interest for the **past** interval.
+- `rateAtTarget` is stored to seed the IRM’s anchor update for the **next** interval.
 
 Concretely, whenever Morpho calls `borrowRate()`, the IRM updates its anchor rate approximately as:
 
