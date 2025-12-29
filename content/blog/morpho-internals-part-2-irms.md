@@ -4,7 +4,7 @@ slug: "morpho-internals-part-2-irms"
 excerpt: "How Morpho Blue computes borrow rates: FixedRate warm-up and a deep dive on AdaptiveCurve with utilization-driven anchor updates."
 author: "ret2basic.eth (reviewed by jesjupyter)"
 date: "2025-12-25"
-readTime: "1 hour read"
+readTime: "40 min read"
 category: "DeFi"
 tags: ["Morpho", "Lending", "Source Code Walkthrough"]
 featured: true
@@ -37,20 +37,39 @@ One theme to keep in mind throughout this article: Morpho accrues interest over 
 
 ## Background: units and fixed-point math
 
-Two details are easy to miss if you jump straight into the code:
+This post is much easier to follow if you lock in three “unit rules” up front:
 
-1. **Rates are per-second and WAD-scaled.** A yearly rate like 4% is converted to a per-second rate by dividing by `365 days`. In the code, “WAD-scaled” means $1e18$ represents 1.0.
-2. **`AdaptiveCurveIrm` uses signed fixed-point math.** Utilization can be above or below target, so the “error” is signed; Morpho uses `int256` math with helpers like:
-- `wMulToZero(x, y) = (x * y) / 1e18` (rounds toward zero)
-- `wDivToZero(x, y) = (x * 1e18) / y` (rounds toward zero)
+1. **Borrow rates are per-second and WAD-scaled.** The IRM returns a per-second rate $r$ where $1e18$ represents 1.0.
+    - Example: an annual rate of 4% is turned into a per-second WAD value by: $r = 0.04 / \text{secondsPerYear}$.
+2. **WAD-scaled values don’t all have the same “unit”.** `utilization`, `err`, `speed`, and `linearAdaptation` are all stored as fixed-point WAD numbers, but they don’t all represent the same kind of quantity.
+    - `utilization` and `err` are dimensionless fractions.
+    - `speed` is “per second” (so that `speed * elapsed` is dimensionless).
+3. **`AdaptiveCurveIrm` uses signed fixed-point math and rounds toward zero.** Because utilization can be above or below target, the “error” can be negative.
+    - `wMulToZero(x, y) = (x * y) / 1e18` (rounds toward 0)
+    - `wDivToZero(x, y) = (x * 1e18) / y` (rounds toward 0)
 
 ### Quick units cheat sheet
 
-- $u$ / `utilization`: WAD-scaled fraction in `[0, 1]`
-- $e(u)$ / `err`: signed, WAD-scaled, exactly in `[-1, +1]` by construction (it saturates to ±1 when utilization is 0% or 100%)
-- $k_d$ (docs) / `CURVE_STEEPNESS` (code): curve steepness. In docs $k_d = 4$.
-- $k_p$ (docs) / `ADJUSTMENT_SPEED` (code): adjustment aggressiveness. In docs $k_p = 50$ (per year); in code `ADJUSTMENT_SPEED = 50 ether / (365 days)` (per second, WAD-scaled).
-- `linearAdaptation = ADJUSTMENT_SPEED * err * elapsed`: dimensionless (still stored as WAD-scaled). In docs notation this corresponds to $(k_p/\text{secondsPerYear}) \cdot e(u) \cdot \Delta t$.
+- `WAD`: $1e18$ scaling factor used for fixed-point decimals.
+- $u$ / `utilization`: WAD-scaled fraction in $[0, 1]$.
+- $e(u)$ / `err`: signed, WAD-scaled, in $[-1, +1]$ by construction.
+- $k_d$ (docs) / `CURVE_STEEPNESS` (code): curve steepness (docs use $k_d = 4$).
+- $k_p$ (docs) / `ADJUSTMENT_SPEED` (code): adjustment aggressiveness (docs use $k_p = 50$ per year).
+
+**Anchor drift terms (this is where people usually get tripped up):**
+
+- `ADJUSTMENT_SPEED = 50 ether / (365 days)` is already “per second” (WAD-scaled).
+- `speed = ADJUSTMENT_SPEED.wMulToZero(err)` is also “per second” (WAD-scaled), because `err` is dimensionless.
+- `elapsed` is measured in seconds.
+- `linearAdaptation = speed * elapsed` is therefore dimensionless (but still represented as WAD-scaled fixed-point).
+
+So, in real-number math, this corresponds to:
+
+$$
+\mathrm{linearAdaptation} \approx (k_p/\mathrm{secondsPerYear}) \cdot e(u) \cdot \Delta t
+$$
+
+The approximation is only about fixed-point rounding; conceptually it’s the same quantity.
 
 ### borrowAPY and supplyAPY
 
@@ -371,13 +390,13 @@ You can summarize what’s happening as:
 The code performs exponentiation on linear adaptation:
 
 $$
-\text{endRateAtTarget} = \text{startRateAtTarget} \times e^{\text{linearAdaptation}} = \text{startRateAtTarget} \times e^{\text{speed} \cdot \Delta t}
+\mathrm{endRateAtTarget} = \mathrm{startRateAtTarget} \times e^{\mathrm{linearAdaptation}} = \mathrm{startRateAtTarget} \times e^{\mathrm{speed} \cdot \Delta t}
 $$
 
 Where:
 
 - `linearAdaptation = speed * time_elapsed`
-- `ExpLib.wExp(linearAdaptation)` computes $e^{\text{linearAdaptation}}$ in WAD-scaled fixed-point
+- `ExpLib.wExp(linearAdaptation)` computes $e^{\mathrm{linearAdaptation}}$ in WAD-scaled fixed-point
 
 Why exponentiation? The anchor is designed to drift **multiplicatively** over time: persistent positive error compounds upward; persistent negative error compounds downward. Across many accrual windows, the exponents add, so “being off-target for longer” has a stronger effect than “being off-target briefly”.
 
