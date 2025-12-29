@@ -388,5 +388,6 @@ if current_lamports == 0 {
 By doing so, Anchor effectively mitigates the pre-funding DoS vector.
 
 # References
-https://github.com/solana-labs/solana/blob/master/programs/system/src/system_processor.rs
-https://github.com/solana-foundation/anchor/blob/347c0599b8310d84af4086cfe5c975733a9e17cd/lang/syn/src/codegen/accounts/constraints.rs#L1675-L1728
+
+- https://github.com/solana-labs/solana/blob/master/programs/system/src/system_processor.rs
+- https://github.com/solana-foundation/anchor/blob/347c0599b8310d84af4086cfe5c975733a9e17cd/lang/syn/src/codegen/accounts/constraints.rs#L1675-L1728
