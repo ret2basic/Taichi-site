@@ -16,7 +16,7 @@ This post covers a **system-level DoS** vector on Solana: if your program initia
 ## TL;DR
 
 - `create_account` rejects the destination if it already has **non-zero lamports** (`AccountAlreadyInUse`).
-- Attackers can often **precompute** addresses you will initialize (especially PDAs) and **transfer 1 lamport** to them first.
+- Attackers can often **precompute** addresses you will initialize (especially PDAs) and **pre-fund them with the minimum lamports to keep the account rent-exempt**, making the DoS persistent.
 - Fix: don’t rely on `create_account` when the destination might be pre-funded; use the safer `transfer` + `allocate` + `assign` flow (or let Anchor handle it).
 
 ## Account Creation
@@ -161,7 +161,7 @@ Note: although the docs describe “allocate → transfer → assign” conceptu
 If the destination account address can be **precomputed** (for example, a PDA derived from predictable seeds), an attacker can:
 
 1. Precompute the target address
-2. Transfer a minimal amount of lamports to it
+2. Transfer the minimum lamports needed to keep it **rent-exempt** (commonly the minimum balance for a system-owned, 0-data account)
 3. Cause `create_account` to revert with `AccountAlreadyInUse`, blocking the entire logic.
 
 This results in a **persistent DoS**, as subsequent attempts to initialize the account will fail. While brute-forcing arbitrary addresses is impractical, this attack becomes realistic when PDA seeds are simple or predictable (e.g., `user_pubkey`, `mint`, or `static identifiers`).
