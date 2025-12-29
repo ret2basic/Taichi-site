@@ -264,6 +264,16 @@ html {
   border-radius: 0.25rem;
 }
 
+/* Prevent long URLs from overflowing the article container */
+.prose a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.prose li {
+  overflow-wrap: anywhere;
+}
+
 /* Image improvements */
 .prose img {
   @apply rounded-lg my-8;
