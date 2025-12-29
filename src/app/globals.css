@@ -153,11 +153,24 @@ html {
 .prose ul {
   @apply mb-5 space-y-2;
   padding-left: 1.5rem;
+  list-style-type: disc;
+  list-style-position: outside;
 }
 
 .prose ol {
   @apply mb-5 space-y-2;
   padding-left: 1.5rem;
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+/* Nested list markers */
+.prose ul ul {
+  list-style-type: circle;
+}
+
+.prose ol ol {
+  list-style-type: lower-alpha;
 }
 
 .prose li {
