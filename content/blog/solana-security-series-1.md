@@ -1,5 +1,5 @@
 ---
-title: "Pre-Funding DoS in Solana: Breaking `create_account` with Non-Zero Lamports"
+title: "Pre-Funding DoS in Solana: Breaking create_account with Non-Zero Lamports"
 slug: "solana-security-series-1"
 excerpt: "A system-level Solana DoS pattern: pre-funding a predictable address (e.g., a PDA) makes `create_account` fail with AccountAlreadyInUse. Includes mitigations and how Anchor avoids it."
 author: "jesjupyter (reviewed by ret2basic.eth)"
