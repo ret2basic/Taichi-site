@@ -231,7 +231,7 @@ Same for the quote side. When there is no vault, the factor is 1 and disappears.
 
 The terminology base and quote come from traditional finance, see [here](https://corporatefinanceinstitute.com/resources/foreign-exchange/currency-pair/) for reference. Consider the following example:
 
-> It is 2025, and Johnny plans to go to New York for vacation. He resides in Canada and only carries Canadian dollars. Thus, he goes to the currency exchange store and wishes to exchange his CAD to USD. The store clerk states that the quote is USD/CAD = 1.3. It means that $1 USD is equivalent to $1.3 CAD.
+> It is 2025, and Johnny plans to go to New York for vacation. He resides in Canada and only carries Canadian dollars. Thus, he goes to the currency exchange store and wishes to exchange his CAD to USD. The store clerk states that the quote is USD/CAD = 1.3. It means that 1 USD is equivalent to 1.3 CAD.
 > 
 
 In the currency pair USD/CAD, USD is the base currency and CAD is the quote currency. The same idea applies to the oracle, but in the oracle each `BASE_FEED` or `QUOTE_FEED` itself is a “currency pair”, say `BASE_FEED_1` = USDC/ETH, so you can think of `BASE_FEED / QUOTE_FEED` as “the pair of currency pairs”.
