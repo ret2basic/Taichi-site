@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -15,6 +16,55 @@ export const dynamic = 'force-dynamic'
 interface BlogPostPageProps {
   params: {
     slug: string
+  }
+}
+
+export async function generateMetadata(
+  { params }: BlogPostPageProps,
+): Promise<Metadata> {
+  const post = getPostBySlug(params.slug)
+
+  if (!post) {
+    return {
+      title: 'Post Not Found',
+      robots: { index: false, follow: false },
+    }
+  }
+
+  const title = post.title
+  const description = post.excerpt
+  const url = `/blog/${post.slug}`
+  const imageUrl = post.image || '/og-image.jpg'
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      publishedTime: post.date,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+      site: '@TaichiAudit',
+      creator: '@TaichiAudit',
+    },
   }
 }
 
