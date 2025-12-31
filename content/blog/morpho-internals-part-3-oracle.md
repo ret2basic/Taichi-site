@@ -165,7 +165,7 @@ The “`address(0)` means 1” convention is the key that makes “0/1/2 feeds p
 
 As per the [doc](https://docs.morpho.org/get-started/resources/contracts/oracles), Morpho expects `oracle.price()` to be:
 
-![image.png](attachment:d70a8636-6cff-4295-8e22-d78e00bda7a8:image.png)
+![price_return_value.png](/images/blog/price_return_value.png)
 
 This is exactly why Morpho stores it in a local variable named `collateralPrice`.
 
@@ -193,7 +193,7 @@ uint256 seizedAssetsQuoted = seizedAssets.mulDivUp(collateralPrice, ORACLE_PRICE
 
 Example: a collateral token might be an ERC4626 vault share token like [sDAI](https://etherscan.io/token/0x83f20f44975d03b1b09e64809b757c47f942beea#code), or a stablecoin yield vault share. In that case, the oracle must incorporate the conversion **shares → underlying assets**, because the external price feeds are usually expressed in terms of the underlying asset, not in “shares”.
 
-![image.png](attachment:bab7f8e7-51af-4cbb-b381-043afb5a6388:image.png)
+![convertToAssets.png](/images/blog/convertToAssets.png)
 
 That is exactly what `VaultLib.getAssets` does:
 
