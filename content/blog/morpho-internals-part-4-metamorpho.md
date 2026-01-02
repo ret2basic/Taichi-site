@@ -1,7 +1,7 @@
 ---
 title: "Morpho Internals Part 4: MetaMorpho"
 slug: "morpho-internals-part-4-metamorpho"
-excerpt: ""
+excerpt: "How MetaMorpho wraps Morpho markets into a single ERC4626 vault with supply/withdraw queues, role-gated caps, and fee/timelock design."
 author: "ret2basic.eth (reviewed by jesjupyter)"
 date: "2026-01-02"
 readTime: "30 min read"
