@@ -7,7 +7,7 @@ date: "2025-12-25"
 readTime: "1 hour read"
 category: "DeFi"
 tags: ["Morpho", "Lending", "Source Code Walkthrough"]
-featured: true
+featured: false
 image: "/images/blog/Morpho.jpg"
 ---
 
