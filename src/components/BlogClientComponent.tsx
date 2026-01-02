@@ -67,7 +67,7 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
             <p className="text-lg text-gray-700 dark:text-gray-200">A dedicated landing for long-form source dives. Start with Morpho now; Pendle and Balancer V2 are queued so the square stays reusable when new series ship.</p>
             <div className="flex flex-wrap gap-3">
               <Link href="/morpho" className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 transition-colors">
-                Open /morpho
+                View Morpho series
                 <ArrowRight className="w-4 h-4" />
               </Link>
               {morphoLead && (

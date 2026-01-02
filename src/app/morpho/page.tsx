@@ -15,6 +15,12 @@ function extractPartNumber(title: string): number {
 export default function MorphoPage() {
   const morphoPosts = getAllPosts().filter((post) => post.slug.startsWith('morpho-internals'))
 
+  const latestUpdate = morphoPosts.reduce<string | null>((latest, post) => {
+    if (!latest) return post.date
+    return new Date(post.date) > new Date(latest) ? post.date : latest
+  }, null)
+  const latestUpdateLabel = latestUpdate ? formatDate(latestUpdate) : 'soon'
+
   const chapters = morphoPosts
     .map((post) => ({
       ...post,
@@ -51,8 +57,8 @@ export default function MorphoPage() {
                 Source code walkthrough
               </div>
               <div className="max-w-3xl">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Morpho Internals field guide</h1>
-                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200">A living, code-first notebook for Morpho Blue. Every chapter traces production flows, invariants, and risk handoffs so you can reason about upgrades without diff fatigue.</p>
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Morpho Internals Series</h1>
+                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200">A deep-dive into the Morpho codebase. This is a line-by-line level walkthrough that you rarely find elsewhere.</p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link href={startSlug} className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 transition-colors">
@@ -62,11 +68,6 @@ export default function MorphoPage() {
                 <Link href="#chapters" className="inline-flex items-center gap-2 px-4 py-3 rounded-full border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-100 font-semibold hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
                   Browse chapters
                 </Link>
-              </div>
-              <div className="flex flex-wrap gap-3 text-sm text-gray-700 dark:text-gray-200">
-                <span className="px-3 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">{chapters.length} chapters live</span>
-                <span className="px-3 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">Morpho Blue focus</span>
-                <span className="px-3 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">Written for protocol engineers</span>
               </div>
             </div>
           </div>
@@ -81,7 +82,7 @@ export default function MorphoPage() {
               </div>
               <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-gray-200">
                 <Sparkles className="w-4 h-4 text-primary-500" />
-                Latest update {chapters[0] ? formatDate(chapters[0].date) : 'soon'}
+                Latest update {latestUpdateLabel}
               </span>
             </div>
 
