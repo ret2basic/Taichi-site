@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
+import rehypeRaw from 'rehype-raw'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { ghcolors, vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import ZoomableImage from './ZoomableImage'
@@ -48,7 +49,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
     <div className={`prose prose-lg max-w-none dark:prose-invert ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[rehypeKatex, rehypeRaw]}
         components={{
           // Custom code block renderer
           code({ inline, className, children, ...props }: CodeProps) {

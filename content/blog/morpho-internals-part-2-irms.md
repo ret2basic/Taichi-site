@@ -542,3 +542,23 @@ avgRateAtTarget = (startRateAtTarget + endRateAtTarget + 2 * midRateAtTarget) / 
 ```
 
 Note: in the contract, `_newRateAtTarget(start, x)` computes `start * exp(x)` and then clamps to `[MIN_RATE_AT_TARGET, MAX_RATE_AT_TARGET]`. The comment’s `startRateAtTarget*exp(...)` is the unclamped expression; the clamp only changes the math if the bounds are hit.
+
+### Visualization of trapezoidal rule
+
+Here is a [visualization in desmos](https://www.desmos.com/calculator/gzzs05rxjd) for the trapezoidal rule above. We don’t consider `_curve()` for simplicity: the visualization is made for $f(x) = \text{startRateAtTarget} \cdot e^{\text{speed} \cdot x}$. The visualization doesn’t mirror what is going on in the contract faithfully: the purpose is for readers to understand the trapezoidal rule intuitively so we sacrificed some rigor.
+
+The exact parameters used in the visualization are:
+
+```
+f(x) = s * e^(p*x)
+
+a = 0                  // lower bound of x in days. Fixed at 0.
+b = 10                 // upper bound of x in days. You can slide this value.
+e_rr = 0.5             // error function. You can slide this value
+n = 2                  // number of trapezoid to approximate the area under curve
+                       // It is fixed to 2 in code but you can slide this value here
+s = 0.04/365           // start rateAtTarget per day (not per second for better view)
+s_peed = 50/365 * e_rr // speed per day (not per second for better view)
+```
+
+<iframe src="https://www.desmos.com/calculator/gzzs05rxjd?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
