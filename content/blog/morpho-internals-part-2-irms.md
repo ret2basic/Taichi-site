@@ -404,23 +404,27 @@ Intuitively: long stretches below target contribute a sustained negative exponen
 
 In the end the code bounds the range of the result to a pre-defined interval `[MIN_RATE_AT_TARGET, MAX_RATE_AT_TARGET]`: if `rateAtTarget` goes outside the interval we clamp its value to minimum or maximum.
 
-#### _curve(): turning error into an actual borrow rate
+#### `_curve()`: turning error into an actual borrow rate
 
-Once we have `avgRateAtTarget`, `_curve()` scales it up or down based on `err`. The contract comment gives:
-
-$$
-r = \begin{cases}\left(\left(1 - \frac{1}{k_d}\right) \cdot e(u) + 1\right) \cdot r_{90\%} & \text{if } u \leq u_{target} \\[10pt]\left((k_d - 1) \cdot e(u) + 1\right) \cdot r_{90\%} & \text{if } u > u_{target}\end{cases}
-$$
-
-where $k_d$ = `CURVE_STEEPNESS` = 4 (WAD-scaled) and $r_{90\%}$ corresponds to the stored `rateAtTarget`.
-
-Both cases can be written as:
+Once `avgRateAtTarget` (the trapezoidal average of the anchor over the interval) is computed, `_curve()` applies the piecewise slope based on `err` ($e(u)$). In code it is parameterized by CURVE_STEEPNESS ($k_d = 4$):
 
 $$
-r = (\text{coeff} \cdot e(u) + 1) \cdot r_{90\%}
+r = \begin{cases}\left(\left(1 - \frac{1}{k_d}\right) \cdot e(u) + 1\right) \cdot \bar r_{90\%} & \text{if } u \leq u_{target} \\[10pt]\left((k_d - 1) \cdot e(u) + 1\right) \cdot \bar r_{90\%} & \text{if } u > u_{target}\end{cases}
 $$
 
-The curve is asymmetric: rates ramp up much faster when utilization is above target than they decay when utilization is below target.
+Here $\bar r_{90\%}$ is **the average anchor** `avgRateAtTarget` returned by the trapezoidal step, and $r$ is the average borrow rate that Morpho uses for $e^{rt}-1$. The stored `endRateAtTarget` is kept only to seed the next interval.
+
+Both cases collapse to a single linear form:
+
+$$
+r = (\text{coeff} \cdot e(u) + 1) \cdot \bar r_{90\%}
+$$
+
+`_curve()` doesn’t re-average over time; it takes an already averaged-at-target rate and scales it by how far utilization is from 90%. Because the curve is linear in its first argument, the result stays an average-type quantity: if utilization is on target (`err = 0`), you get the target average; if utilization drifts, you get that same average uniformly tilted up or down by the utilization error factor.
+
+The `+1` is the intercept that makes the curve pass through the anchor rate. In `_curve()` the borrow rate is modeled as $r = (\text{coeff} \cdot e(u) + 1)\,\bar r_{90\%}$, so when the utilization error $e(u)=0$ (exactly at the 90 % target) the term inside parentheses evaluates to 1 and Morpho returns the average anchor $\bar r_{90\%}$ instead of zero.
+
+The curve is asymmetric: rates ramp up much faster (4x faster, you can see this when you substitute $k_d$ into the formula) when utilization is above target than they decay when utilization is below target. **But why design this way?** When utilization is above target, lenders’ funds are nearly fully deployed and any shock (withdrawals, borrower growth, price moves) risks hitting a hard liquidity wall. Raising rates aggressively in that regime creates strong pressure for borrowers to repay or for new suppliers to enter, restoring a safe buffer quickly. Conversely, when utilization is well below target the situation is merely “cash drag”: capital is idle but not threatening solvency, so the protocol only trims rates gently to encourage more borrowing without shocking existing positions. In short, the asymmetric slope reflects two different economic priorities: severe penalties to cure liquidity stress when the pool is tight, and mild incentives to avoid over-penalizing lenders when the pool has slack.
 
 #### Full derivation as in the long comment
 
