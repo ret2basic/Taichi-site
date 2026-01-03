@@ -561,4 +561,6 @@ s = 0.04/365           // start rateAtTarget per day (not per second for better 
 s_peed = 50/365 * e_rr // speed per day (not per second for better view)
 ```
 
-<iframe src="https://www.desmos.com/calculator/gzzs05rxjd?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder=0></iframe>
+<div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+    <iframe src="https://www.desmos.com/calculator/gzzs05rxjd?embed" width="500" height="500" style="border: 1px solid #ccc" frameborder="0"></iframe>
+</div>
