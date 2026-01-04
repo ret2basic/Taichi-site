@@ -52,7 +52,7 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
                   <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20">New Drop</span>
                 </div>
                 <div>
-                  <p className="text-3xl md:text-4xl font-semibold leading-tight mb-3">Morpho source-code walkthroughs</p>
+                  <p className="text-3xl md:text-4xl font-semibold leading-tight mb-3">Morpho source code walkthroughs</p>
                   <p className="text-lg text-primary-50/80 max-w-xl">Purpose-built notes for DeFi engineers: annotated flows, risk handoffs, and math behind Morpho Blue.</p>
                 </div>
                 <div className="flex items-center justify-between text-sm text-primary-50">

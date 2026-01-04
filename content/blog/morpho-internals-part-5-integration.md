@@ -1,7 +1,7 @@
 ---
 title: "Morpho Internals Part 5: Integration Security Guide"
 slug: "morpho-internals-part-5-integration"
-excerpt: ""
+excerpt: "A security-focused guide for integrating with Morpho: an expanded walkthrough of the official integration checklist, with concrete pitfalls and code-level explanations for core and MetaMorpho vault flows."
 author: "ret2basic.eth (reviewed by jesjupyter)"
 date: "2026-01-04"
 readTime: "30 min read"
