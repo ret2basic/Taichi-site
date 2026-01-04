@@ -63,11 +63,11 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
             </div>
           </Link>
           <div className="space-y-5">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Internals series hub</h2>
-            <p className="text-lg text-gray-700 dark:text-gray-200">A dedicated landing for long-form source dives. Start with Morpho now; Pendle and Balancer V2 are queued so the square stays reusable when new series ship.</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Internals series</h2>
+            <p className="text-lg text-gray-700 dark:text-gray-200">A deep-dive into the Morpho codebase. This is a line-by-line level walkthrough that you rarely find elsewhere.</p>
             <div className="flex flex-wrap gap-3">
               <Link href="/morpho" className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 transition-colors">
-                View Morpho series
+                View the series
                 <ArrowRight className="w-4 h-4" />
               </Link>
               {morphoLead && (
