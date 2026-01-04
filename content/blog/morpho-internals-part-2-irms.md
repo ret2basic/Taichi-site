@@ -31,20 +31,20 @@ The function calls `irm.borrowRate()` to fetch the market’s current borrow rat
 
 In this part of the series we discuss how Morpho IRMs work and deep dive into `irm.borrowRate()`.
 
-Morpho implements two IRMs in `morpho-blue-irm`: `AdaptiveCurveIrm` and `FixedRateIrm`. We will spend more time on `AdaptiveCurveIrm` because it is the “production” model used most often, but we start with `FixedRateIrm` as a warm-up.
+Morpho implements two IRMs in `morpho-blue-irm`: `AdaptiveCurveIrm` and `FixedRateIrm`. We will spend more time on `AdaptiveCurveIrm` because it is the "production" model used most often, but we start with `FixedRateIrm` as a warm-up.
 
-One theme to keep in mind throughout this article: Morpho accrues interest over a time interval since the last update, so the “right” borrow rate to apply is the **average borrow rate over that interval**. `FixedRateIrm` makes that trivial (the rate is constant), while `AdaptiveCurveIrm` explicitly computes an average and updates internal state.
+One theme to keep in mind throughout this article: Morpho accrues interest over a time interval since the last update, so the "right" borrow rate to apply is the **average borrow rate over that interval**. `FixedRateIrm` makes that trivial (the rate is constant), while `AdaptiveCurveIrm` explicitly computes an average and updates internal state.
 
 ## Background: units and fixed-point math
 
-This post is much easier to follow if you lock in three “unit rules” up front:
+This post is much easier to follow if you lock in three "unit rules" up front:
 
 1. **Borrow rates are per-second and WAD-scaled.** The IRM returns a per-second rate $r$ where $1e18$ represents 1.0.
     - Example: an annual rate of 4% is turned into a per-second WAD value by: $r = 0.04 / \text{secondsPerYear}$.
-2. **WAD-scaled values don’t all have the same “unit”.** `utilization`, `err`, `speed`, and `linearAdaptation` are all stored as fixed-point WAD numbers, but they don’t all represent the same kind of quantity.
+2. **WAD-scaled values don’t all have the same "unit".** `utilization`, `err`, `speed`, and `linearAdaptation` are all stored as fixed-point WAD numbers, but they don’t all represent the same kind of quantity.
     - `utilization` and `err` are dimensionless fractions.
-    - `speed` is “per second” (so that `speed * elapsed` is dimensionless).
-3. **`AdaptiveCurveIrm` uses signed fixed-point math and rounds toward zero.** Because utilization can be above or below target, the “error” can be negative.
+    - `speed` is "per second" (so that `speed * elapsed` is dimensionless).
+3. **`AdaptiveCurveIrm` uses signed fixed-point math and rounds toward zero.** Because utilization can be above or below target, the "error" can be negative.
     - `wMulToZero(x, y) = (x * y) / 1e18` (rounds toward 0)
     - `wDivToZero(x, y) = (x * 1e18) / y` (rounds toward 0)
 
@@ -58,8 +58,8 @@ This post is much easier to follow if you lock in three “unit rules” up fron
 
 **Anchor drift terms (this is where people usually get tripped up):**
 
-- `ADJUSTMENT_SPEED = 50 ether / (365 days)` is already “per second” (WAD-scaled).
-- `speed = ADJUSTMENT_SPEED.wMulToZero(err)` is also “per second” (WAD-scaled), because `err` is dimensionless.
+- `ADJUSTMENT_SPEED = 50 ether / (365 days)` is already "per second" (WAD-scaled).
+- `speed = ADJUSTMENT_SPEED.wMulToZero(err)` is also "per second" (WAD-scaled), because `err` is dimensionless.
 - `elapsed` is measured in seconds.
 - `linearAdaptation = speed * elapsed` is therefore dimensionless (but still represented as WAD-scaled fixed-point).
 
@@ -90,7 +90,7 @@ Also note: the AdaptiveCurve implementation bounds the anchor rate (`rateAtTarge
 
 Borrow rate is the interest rate per second that borrowers pay on their loans. `FixedRateIrm` is intentionally simple: governance (or whoever controls the IRM) sets a per-market borrow rate once, and Morpho reads it later.
 
-One nuance from the actual implementation: `FixedRateIrm` does **not** implement access control on `setBorrowRate`—the rate is simply “write-once per market id”. In practice this still ends up being controlled by whoever is coordinating market creation (and by Morpho governance enabling the IRM address), but it’s worth knowing the contract itself does not enforce an owner.
+One nuance from the actual implementation: `FixedRateIrm` does **not** implement access control on `setBorrowRate`—the rate is simply "write-once per market id". In practice this still ends up being controlled by whoever is coordinating market creation (and by Morpho governance enabling the IRM address), but it’s worth knowing the contract itself does not enforce an owner.
 
 ```solidity
 mapping(Id => uint256) public borrowRateStored;
@@ -120,7 +120,7 @@ function borrowRate(MarketParams memory marketParams, Market memory) external vi
 }
 ```
 
-This is not “weird” once you look at the `IIrm` interface: Morpho calls `borrowRate()` in state-changing flows, while `borrowRateView()` is the view-only variant for off-chain quoting and integrations. In `FixedRateIrm`, both are `view` because the model has no internal state to update.
+This is not "weird" once you look at the `IIrm` interface: Morpho calls `borrowRate()` in state-changing flows, while `borrowRateView()` is the view-only variant for off-chain quoting and integrations. In `FixedRateIrm`, both are `view` because the model has no internal state to update.
 
 One important detail: `FixedRateIrm.borrowRate()` reverts if the rate is not set, so **rates must be set before market creation** if you want to use this IRM.
 
@@ -132,7 +132,7 @@ One important detail: `FixedRateIrm.borrowRate()` reverts if the rate is not set
 
 ### Overview
 
-At a high level, “adaptive” means continuously adjusting the interest rate to push utilization toward a target utilization.
+At a high level, "adaptive" means continuously adjusting the interest rate to push utilization toward a target utilization.
 
 $$
 u(t) = \frac{\text{totalBorrowAssets}(t)}{\text{totalSupplyAssets}(t)}
@@ -142,12 +142,12 @@ In Morpho, the numerator is `market[id].totalBorrowAssets` and the denominator i
 
 There are two cases where we want to adjust the interest rate curve:
 
-- When $u(t) > u_{target}$, demand is “too high”, so the IRM makes borrowing more expensive (to push borrowers to repay and to attract suppliers).
-- When $u(t) < u_{target}$, demand is “too low”, so the IRM makes borrowing cheaper (to encourage borrowing).
+- When $u(t) > u_{target}$, demand is "too high", so the IRM makes borrowing more expensive (to push borrowers to repay and to attract suppliers).
+- When $u(t) < u_{target}$, demand is "too low", so the IRM makes borrowing cheaper (to encourage borrowing).
 
 Here $u_{target}$ is a constant defined in `ConstantsLib`: `TARGET_UTILIZATION = 0.9 ether` (90%, WAD-scaled).
 
-**Why such a high target?** As the docs emphasize, Morpho markets do not use supplied assets as collateral, which removes the “must stay liquid at all times for liquidations” constraint common in pooled lending designs. This enables a more aggressive target utilization (90%) while still relying on the IRM to pull utilization back down when it gets too close to illiquidity.
+**Why such a high target?** As the docs emphasize, Morpho markets do not use supplied assets as collateral, which removes the "must stay liquid at all times for liquidations" constraint common in pooled lending designs. This enables a more aggressive target utilization (90%) while still relying on the IRM to pull utilization back down when it gets too close to illiquidity.
 
 ### Mental model: curve + anchor
 
@@ -158,7 +158,7 @@ With that motivation in mind, it helps to view AdaptiveCurve as having **two lay
 
 `AdaptiveCurveIrm` stores one piece of per-market state:
 
-- `rateAtTarget[id]`: the stored borrow rate at the target utilization (i.e., $r_{90\%}$). It sets the overall “height” of the curve.
+- `rateAtTarget[id]`: the stored borrow rate at the target utilization (i.e., $r_{90\%}$). It sets the overall "height" of the curve.
 
 Even if two markets are both at 90% utilization today, their `rateAtTarget` can differ if one has spent weeks above target and the other weeks below target.
 
@@ -168,7 +168,7 @@ Even if two markets are both at 90% utilization today, their `rateAtTarget` can 
 
 ### BorrowRateUpdate: why there are two rates
 
-When Morpho calls `borrowRate()` it emits `BorrowRateUpdate(id, avgBorrowRate, rateAtTarget)`. It’s tempting to assume both numbers represent “the borrow rate”, but they serve different purposes:
+When Morpho calls `borrowRate()` it emits `BorrowRateUpdate(id, avgBorrowRate, rateAtTarget)`. It’s tempting to assume both numbers represent "the borrow rate", but they serve different purposes:
 
 - `avgBorrowRate`: the **average per-second borrow rate** over the last accrual interval. This is the rate Morpho plugs into $e^{rt}-1$ in `_accrueInterest()`.
 - `rateAtTarget`: the **end-of-interval anchor** (the updated $r_{90\%}$) that will be used as the starting point next time.
@@ -189,7 +189,7 @@ avgBorrowRate  = 2288292706
 rateAtTarget   = 2288771456
 ```
 
-These are WAD-scaled **per-second** rates, so first convert to “plain per-second” by dividing by $1e18$.
+These are WAD-scaled **per-second** rates, so first convert to "plain per-second" by dividing by $1e18$.
 
 Using $\text{secondsPerYear} \approx 31{,}556{,}926$:
 
@@ -212,7 +212,7 @@ $$
 
 In the Solidity implementation, $(k_p/\text{secondsPerYear})$ is represented by `ConstantsLib.ADJUSTMENT_SPEED` (per-second, WAD-scaled) and $e(u)$ is stored in `err`.
 
-**Motivation:** if a market is chronically above target, the model ratchets the entire curve upward until liquidity returns; if it is chronically below target, it drifts the curve downward. Making the update proportional to $\Delta t$ keeps the economics closer to “per second” rather than “per call”, and matches Morpho’s “accrue over an interval” design.
+**Motivation:** if a market is chronically above target, the model ratchets the entire curve upward until liquidity returns; if it is chronically below target, it drifts the curve downward. Making the update proportional to $\Delta t$ keeps the economics closer to "per second" rather than "per call", and matches Morpho’s "accrue over an interval" design.
 
 ```solidity
 function borrowRate(MarketParams memory marketParams, Market memory market) external returns (uint256) {
@@ -254,7 +254,7 @@ $$
 
 Intuition: the "room" above target is small (only 10 percentage points from 90% to 100%), so the same absolute utilization deviation should be treated as a larger normalized error.
 
-Design intent: bound $e(u)$ to $[-1, +1]$ (so drift is capped) while making “fully empty” and “fully utilized” equally extreme in normalized units.
+Design intent: bound $e(u)$ to $[-1, +1]$ (so drift is capped) while making "fully empty" and "fully utilized" equally extreme in normalized units.
 
 A quick numeric feel with $u_{target}=0.9$:
 
@@ -313,7 +313,7 @@ else {
 
 ```
 
-`elapsed` is measured in seconds. `speed` is “per second” (WAD-scaled), so `linearAdaptation = speed * elapsed` is a dimensionless WAD-scaled number (this corresponds to $(k_p/\text{secondsPerYear}) \cdot e(u) \cdot \Delta t$ in the docs notation). The comment about “underestimated” reflects that `speed` is frozen even though interest accrual nudges utilization during the interval, so the true path can be slightly steeper.
+`elapsed` is measured in seconds. `speed` is "per second" (WAD-scaled), so `linearAdaptation = speed * elapsed` is a dimensionless WAD-scaled number (this corresponds to $(k_p/\text{secondsPerYear}) \cdot e(u) \cdot \Delta t$ in the docs notation). The comment about "underestimated" reflects that `speed` is frozen even though interest accrual nudges utilization during the interval, so the true path can be slightly steeper.
 
 When $u > 90\%$, `err > 0` so `rateAtTarget` increases; when $u < 90\%$, `err < 0` so `rateAtTarget` decreases.
 
@@ -398,11 +398,64 @@ Where:
 - `linearAdaptation = speed * time_elapsed`
 - `ExpLib.wExp(linearAdaptation)` computes $e^{\mathrm{linearAdaptation}}$ in WAD-scaled fixed-point
 
-Why exponentiation? The anchor is designed to drift **multiplicatively** over time: persistent positive error compounds upward; persistent negative error compounds downward. Across many accrual windows, the exponents add, so “being off-target for longer” has a stronger effect than “being off-target briefly”.
+### Where does the exponential come from?
 
-Intuitively: long stretches below target contribute a sustained negative exponent (anchor drifts down); long stretches above target contribute a sustained positive exponent (anchor drifts up).
+The exponential is what you get if you model the anchor rate $r_{90\%}(t)$ as changing **multiplicatively** at a constant relative speed over the elapsed interval.
 
-In the end the code bounds the range of the result to a pre-defined interval `[MIN_RATE_AT_TARGET, MAX_RATE_AT_TARGET]`: if `rateAtTarget` goes outside the interval we clamp its value to minimum or maximum.
+Concretely, the contract defines: $\text{speed} = \text{ADJUSTMENT\_SPEED} \cdot e(u)$ (signed; per-second, WAD-scaled). In the implementation, `err` (hence `speed`) is computed from the `market` snapshot passed to the IRM, so within a single accrual the model treats $\text{speed}$ as constant over the interval. Economically, if you imagine interest accruing continuously, `totalBorrowAssets` and `totalSupplyAssets` would drift during the interval, so utilization $u(t)$ (and thus `err`/`speed`) would not be perfectly constant. This is what the contract comment refers to when it says the "speed is assumed constant between two updates".
+
+Let $r(t)$ denote the anchor itself (so $r(t)=r_{90\%}(t)$). The modeling choice is: the **relative drift rate** of the anchor is `speed`:
+
+$$
+\text{relative change rate} := \frac{1}{r}\,\frac{dr}{dt}
+$$
+
+$$
+\Rightarrow \frac{1}{r}\,\frac{dr}{dt} = \text{speed}
+$$
+
+(Note that this is equivalent to $\frac{\Delta{r}}{r\Delta{t}}$ which models percentage change within a time range. For example, $\Delta{r} = 10$ and $r = 100$, then within 10 seconds the percentage change is 1% per second.)
+
+Multiplying both sides by $r$ gives:
+
+$$
+\frac{dr}{dt} = \text{speed} \cdot r
+$$
+
+Solving this ODE over an interval of length $\Delta t$ gives:
+
+$$
+\frac{dr}{dt} = \text{speed} \cdot r
+\quad\Longrightarrow\quad
+\frac{1}{r}\,dr = \text{speed}\, dt
+$$
+
+Integrate both sides from $t$ to $t+\Delta t$ (and use that `speed` is treated as constant over the interval):
+
+$$
+\int_{r(t)}^{r(t+\Delta t)} \frac{1}{r}\,dr
+\int_{t}^{t+\Delta t} \text{speed}\, dt
+$$
+
+$$
+\ln\bigl(r(t+\Delta t)\bigr) - \ln\bigl(r(t)\bigr) = \text{speed}\cdot \Delta t
+$$
+
+Exponentiate both sides:
+
+$$
+r(t+\Delta t) = r(t) \cdot e^{\text{speed} \cdot \Delta t}
+$$
+
+That’s exactly the shape implemented in `_newRateAtTarget()` via `startRateAtTarget * exp(speed * elapsed)`.
+
+In the Solidity variables, this is `linearAdaptation = speed * elapsed` and the update is `startRateAtTarget * exp(linearAdaptation)` (followed by clamping).
+
+This "relative" (multiplicative) update has a few practical advantages on-chain:
+
+- **Call-frequency invariance:** splitting $\Delta t$ into many smaller accruals gives the same result as one big accrual because $e^{a}\,e^{b}=e^{a+b}$.
+- **Scale-free adjustments:** the model changes rates by a percentage, not a fixed absolute amount, so it behaves sensibly whether rates are at 1% APR or 100% APR.
+- **Positivity by construction:** multiplying by $e^{x}$ cannot flip the sign of the rate, and the implementation still clamps to `[MIN_RATE_AT_TARGET, MAX_RATE_AT_TARGET]` for safety.
 
 #### `_curve()`: turning error into an actual borrow rate
 
@@ -424,7 +477,7 @@ $$
 
 The `+1` is the intercept that makes the curve pass through the anchor rate. In `_curve()` the borrow rate is modeled as $r = (\text{coeff} \cdot e(u) + 1)\,\bar r_{90\%}$, so when the utilization error $e(u)=0$ (exactly at the 90 % target) the term inside parentheses evaluates to 1 and Morpho returns the average anchor $\bar r_{90\%}$ instead of zero.
 
-The curve is asymmetric: rates ramp up much faster (4x faster, you can see this when you substitute $k_d$ into the formula) when utilization is above target than they decay when utilization is below target. **But why design this way?** When utilization is above target, lenders’ funds are nearly fully deployed and any shock (withdrawals, borrower growth, price moves) risks hitting a hard liquidity wall. Raising rates aggressively in that regime creates strong pressure for borrowers to repay or for new suppliers to enter, restoring a safe buffer quickly. Conversely, when utilization is well below target the situation is merely “cash drag”: capital is idle but not threatening solvency, so the protocol only trims rates gently to encourage more borrowing without shocking existing positions. In short, the asymmetric slope reflects two different economic priorities: severe penalties to cure liquidity stress when the pool is tight, and mild incentives to avoid over-penalizing lenders when the pool has slack.
+The curve is asymmetric: rates ramp up much faster (4x faster, you can see this when you substitute $k_d$ into the formula) when utilization is above target than they decay when utilization is below target. **But why design this way?** When utilization is above target, lenders’ funds are nearly fully deployed and any shock (withdrawals, borrower growth, price moves) risks hitting a hard liquidity wall. Raising rates aggressively in that regime creates strong pressure for borrowers to repay or for new suppliers to enter, restoring a safe buffer quickly. Conversely, when utilization is well below target the situation is merely "cash drag": capital is idle but not threatening solvency, so the protocol only trims rates gently to encourage more borrowing without shocking existing positions. In short, the asymmetric slope reflects two different economic priorities: severe penalties to cure liquidity stress when the pool is tight, and mild incentives to avoid over-penalizing lenders when the pool has slack.
 
 #### Full derivation as in the long comment
 
