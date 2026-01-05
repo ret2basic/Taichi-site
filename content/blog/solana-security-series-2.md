@@ -1,7 +1,7 @@
 ---
 title: "How init and init_if_needed work under the hood and the associated token account griefing attack"
 slug: "solana-security-series-2"
-excerpt: ""
+excerpt: "A deep dive into how Anchor’s #[account(init)] and #[account(init_if_needed)] are parsed and code-generated, what “needs initialization” really means at runtime, and how using init with associated token accounts can enable griefing/DoS via pre-created ATAs."
 author: "jesjupyter (reviewed by ret2basic.eth)"
 date: "2026-01-05"
 readTime: "30 min read"
