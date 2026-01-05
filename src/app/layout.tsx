@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import React from 'react'
 import './globals.css'
 import { DarkModeProvider } from '../lib/DarkModeContext'
@@ -68,6 +69,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL
+  const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
+  const umamiScriptSrc = umamiUrl ? `${umamiUrl.replace(/\/$/, '')}/script.js` : undefined
+
   return (
     <html lang="en" className="scroll-smooth">
       <head>
@@ -77,6 +82,15 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
+
+        {umamiWebsiteId && umamiScriptSrc ? (
+          <Script
+            async
+            defer
+            src={umamiScriptSrc}
+            data-website-id={umamiWebsiteId}
+          />
+        ) : null}
       </head>
       <body className="font-sans antialiased">
         <DarkModeProvider>
