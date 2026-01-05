@@ -316,6 +316,43 @@ The `seen` array is a classic way of detecting duplicates in DSA. This function 
     - If checks pass, `delete config[id]` to drop config for that market.
 - **Finalize:** Assign `withdrawQueue = newWithdrawQueue`.
 
+#### Forced removal, `removableAt`, and why PPS can drop
+
+The removal logic above enables a “forced delisting” path: a market can be removed from `withdrawQueue` **even if the vault still has `supplyShares` in that market**, as long as the curator first set the cap to 0 and scheduled removal, and the cooldown has elapsed.
+
+Concretely:
+
+1. The curator sets `cap = 0` (immediate, because it’s a risk reduction).
+2. The curator calls `submitMarketRemoval()` which sets `config[id].removableAt = block.timestamp + timelock`.
+3. After the cooldown, the allocator can omit the market when calling `updateWithdrawQueue()`. If `MORPHO.supplyShares(id, address(this)) != 0`, the function allows removal as long as `removableAt` is set and has passed.
+
+This is intentionally dangerous: it is a governance/ops escape hatch for “we no longer want this market in the vault’s active set”, even if assets are still stranded there.
+
+**Why this can decrease PPS (price per share).** MetaMorpho’s accounting uses the withdraw queue as the set of markets to value:
+
+```solidity
+function totalAssets() public view override returns (uint256 assets) {
+    for (uint256 i; i < withdrawQueue.length; ++i) {
+        assets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
+    }
+}
+```
+
+So if a market is removed from `withdrawQueue` while the vault still has `supplyShares` there, those assets are no longer included in `totalAssets()`. Since ERC4626 share price is roughly $\text{pps} = \frac{\text{totalAssets}}{\text{totalSupply}}$, dropping assets from `totalAssets()` mechanically lowers PPS.
+
+This is why `removableAt` exists: it gives the system time to unwind the position cleanly before a forced removal can “write off” that market from the vault’s accounting.
+
+**How allocators can prevent the loss: unwind before the cooldown ends.** During the `removableAt` window (after cap is set to 0, but before removal is executable), the allocator can call `reallocate()` to withdraw the vault’s position from the soon-to-be-removed market and move it into other enabled markets.
+
+In particular, `reallocate()` supports a “withdraw everything” target for a market by setting `allocation.assets == 0`:
+
+- If `allocation.assets == 0`, the code withdraws all `supplyShares` from that market (by passing `shares = supplyShares` to `MORPHO.withdraw`).
+- The withdrawn assets are then supplied into other markets in the same `reallocate()` call (net-zero invariant).
+
+If the allocator succeeds in withdrawing down to `supplyShares == 0` before `removableAt`, then later `updateWithdrawQueue()` can remove the market *without* any PPS haircut, because there is no longer any unaccounted position left behind.
+
+This mitigation is not magic: it only works if the market is withdrawable (liquid and not reverting) and there are other enabled markets with remaining caps to receive the assets.
+
 ### `reallocate()`: deterministic net-zero rebalance with caps
 
 `reallocate()` moves assets between markets to reach a target allocation vector. This function iterates through all allocations where each entry is a `MarketAllocation` struct: 

@@ -6,7 +6,7 @@ author: "jesjupyter (reviewed by ret2basic.eth)"
 date: "2025-12-29"
 readTime: "10 min read"
 category: "Solana"
-tags: ["Solana", "Security", "DoS", "System Program", "PDA", "Anchor"]
+tags: ["Solana", "Security", "Anchor"]
 featured: false
 image: "/images/blog/Solana.jpg"
 ---
