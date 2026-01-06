@@ -11,15 +11,7 @@ featured: false
 image: "/images/blog/Morpho.jpg"
 ---
 
-Morpho Blue is a concise lending protocol implementation. This series dives deep into Morpho internals and each component will be discussed in a separate article:
-
-- Part 1: Morpho Blue → [Morpho.sol](https://github.com/morpho-org/morpho-blue/blob/main/src/Morpho.sol)
-- Part 2: IRMs → [AdaptiveCurveIrm.sol](https://github.com/morpho-org/morpho-blue-irm/blob/main/src/adaptive-curve-irm/AdaptiveCurveIrm.sol) and [FixedRateIrm.sol](https://github.com/morpho-org/morpho-blue-irm/blob/main/src/fixed-rate-irm/FixedRateIrm.sol)
-- Part 3: Morpho Oracle → [MorphoChainlinkOracleV2.sol](https://github.com/morpho-org/morpho-blue-oracles/blob/main/src/morpho-chainlink/MorphoChainlinkOracleV2.sol)
-- Part 4: Metamorpho (Vault V1) → [MetaMorpho.sol](https://github.com/morpho-org/metamorpho/blob/main/src/MetaMorpho.sol)
-- Part 5: Morpho Vault V2 → [VaultV2.sol](https://github.com/morpho-org/vault-v2/blob/main/src/VaultV2.sol)
-
-In part 1, we first walk through Morpho.sol following the order of user actions and in the end we discuss the interest accrual math.
+Morpho Blue is a concise lending protocol implementation. This series dives deep into Morpho internals and each component will be discussed in a separate article. In part 1, we first walk through Morpho.sol following the order of user actions and in the end we discuss the interest accrual math.
 
 ## Action 1: Market Creation
 
