@@ -1,5 +1,5 @@
 ---
-title: "You Are Only Interacting With a View: CPI and the Hidden Reloading Requirement"
+title: "Why Anchor Accounts Go Stale After CPI (and When to Reload)"
 slug: "solana-security-series-3"
 excerpt: "In Anchor, `Account<T>` is a cached snapshot of account data. After CPI, the runtime account changes but your cached view does not—unless you `reload()`."
 author: "jesjupyter (reviewed by ret2basic.eth)"
