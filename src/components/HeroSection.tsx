@@ -1,6 +1,6 @@
-'use client'
 import React from 'react'
 import { Shield, ArrowRight, Star, Users, FileCheck, Trophy, Brain, Target } from 'lucide-react'
+import { STATS, AUDIT_REQUEST_URL, PORTFOLIO_URL } from '@/lib/constants'
 
 export default function HeroSection() {
   return (
@@ -32,7 +32,7 @@ export default function HeroSection() {
           
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4 max-w-4xl mx-auto leading-relaxed">
-            Leading DeFi security audit group with <span className="font-semibold text-primary-600 dark:text-primary-400">70+ audits</span>, <span className="font-semibold text-secondary-600 dark:text-secondary-400">11 times audit contest Top 3</span>, and <span className="font-semibold text-primary-600 dark:text-primary-400">170+ findings</span> across Solidity, Move, and Solana ecosystems.
+            Leading DeFi security audit group with <span className="font-semibold text-primary-600 dark:text-primary-400">{STATS.competitions} audits</span>, <span className="font-semibold text-secondary-600 dark:text-secondary-400">{STATS.contestTop3Label} audit contest Top 3</span>, and <span className="font-semibold text-primary-600 dark:text-primary-400">{STATS.totalFindings} findings</span> across Solidity, Move, and Solana ecosystems.
           </p>
           
           {/* Core methodology highlights */}
@@ -54,7 +54,7 @@ export default function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <a
-              href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+              href={AUDIT_REQUEST_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-all duration-200 flex items-center group shadow-lg hover:shadow-xl"
@@ -63,7 +63,7 @@ export default function HeroSection() {
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </a>
             <a
-              href="https://github.com/TaiChiAuditGroup/Portfolio"
+              href={PORTFOLIO_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="border-2 border-primary-600 text-primary-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-600 hover:text-white transition-all duration-200 flex items-center"
@@ -78,7 +78,7 @@ export default function HeroSection() {
               <div className="bg-primary-100 p-3 rounded-full mb-4 dark:bg-primary-900">
                 <Trophy className="h-8 w-8 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">60+</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{STATS.competitions}</div>
               <div className="text-gray-600 dark:text-gray-300 text-center text-sm">Audit Competitions</div>
             </div>
             
@@ -86,7 +86,7 @@ export default function HeroSection() {
               <div className="bg-secondary-100 p-3 rounded-full mb-4 dark:bg-secondary-900">
                 <Star className="h-8 w-8 text-secondary-600 dark:text-secondary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">11</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{STATS.contestTop3}</div>
               <div className="text-gray-600 dark:text-gray-300 text-center text-sm">Contest Top 3</div>
             </div>
             
@@ -94,7 +94,7 @@ export default function HeroSection() {
               <div className="bg-primary-100 p-3 rounded-full mb-4 dark:bg-primary-900">
                 <FileCheck className="h-8 w-8 text-primary-600 dark:text-primary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">170+</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{STATS.hmFindings}</div>
               <div className="text-gray-600 dark:text-gray-300 text-center text-sm">H/M Findings</div>
             </div>
             
@@ -102,7 +102,7 @@ export default function HeroSection() {
               <div className="bg-secondary-100 p-3 rounded-full mb-4 dark:bg-secondary-900">
                 <Users className="h-8 w-8 text-secondary-600 dark:text-secondary-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">≥2</div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{STATS.auditorsPerProject}</div>
               <div className="text-gray-600 dark:text-gray-300 text-center text-sm">Auditors per Project</div>
             </div>
           </div>

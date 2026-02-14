@@ -1,6 +1,8 @@
 'use client'
 import React from 'react'
+import Link from 'next/link'
 import { ArrowUp, Twitter, Github, Linkedin, Mail, MessageCircle } from 'lucide-react'
+import { STATS, PORTFOLIO_URL, WRITEUPS_URL, GITHUB_URL, TWITTER_URL, TELEGRAM_URL, EMAIL, DEFIHACKLABS_URL, LLM4SEC_URL } from '@/lib/constants'
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -10,27 +12,27 @@ export default function Footer() {
   const footerLinks = {
     company: [
       { name: 'About Us', href: '/about' },
-      { name: 'Portfolio', href: 'https://github.com/TaiChiAuditGroup/Portfolio' },
+      { name: 'Portfolio', href: PORTFOLIO_URL },
       { name: 'Blog', href: '/blog' },
-      { name: 'Writeups', href: 'https://ret2basic.gitbook.io/ctfwriteup' },
+      { name: 'Writeups', href: WRITEUPS_URL },
     ],
     resources: [
-      { name: 'DeFiHackLabs', href: 'https://defihacklabs.io/' },
-      { name: 'LLM4Sec', href: 'https://llm4sec.net/' },
+      { name: 'DeFiHackLabs', href: DEFIHACKLABS_URL },
+      { name: 'LLM4Sec', href: LLM4SEC_URL },
       { name: 'OnlyPwner', href: 'https://onlypwner.xyz/' },
       { name: 'Secureum', href: 'https://x.com/TheSecureum' },
     ],
     contact: [
       { name: 'Get in Touch', href: '/#contact' },
-      { name: 'Email Us', href: 'mailto:taichiweb3sec@gmail.com' }
+      { name: 'Email Us', href: `mailto:${EMAIL}` }
     ]
   }
 
   const socialLinks = [
-    { icon: Twitter, href: 'https://x.com/taichiaudit', name: 'Twitter' },
-    { icon: Github, href: 'https://github.com/TaiChiAuditGroup', name: 'GitHub' },
-    { icon: MessageCircle, href: 'https://t.me/+egUmC7vd9TI4MGM9', name: 'Telegram' },
-    { icon: Mail, href: 'mailto:taichiweb3sec@gmail.com', name: 'Email' }
+    { icon: Twitter, href: TWITTER_URL, name: 'Twitter' },
+    { icon: Github, href: GITHUB_URL, name: 'GitHub' },
+    { icon: MessageCircle, href: TELEGRAM_URL, name: 'Telegram' },
+    { icon: Mail, href: `mailto:${EMAIL}`, name: 'Email' }
   ]
 
   return (
@@ -50,7 +52,7 @@ export default function Footer() {
                 <span className="text-xl font-bold">Taichi Audit Group</span>
               </div>
               <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md">
-                Leading DeFi security audit group from DeFiHackLabs community with 60+ competitions, 12 first-place wins, and team-based audit approach across Solidity, Move, and Solana ecosystems.
+                Leading DeFi security audit group from DeFiHackLabs community with {STATS.competitions} competitions, {STATS.firstPlaceWins} first-place wins, and team-based audit approach across Solidity, Move, and Solana ecosystems.
               </p>
               <div className="flex space-x-4">
                 {socialLinks.map((social, index) => (
@@ -130,7 +132,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-gray-300 text-sm">
-                © 2025 Taichi Audit Group. All rights reserved.
+                © {new Date().getFullYear()} Taichi Audit Group. All rights reserved.
               </p>
             </div>
             <div className="flex items-center space-x-6">

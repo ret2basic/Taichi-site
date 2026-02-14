@@ -1,6 +1,6 @@
-'use client'
 import React from 'react'
 import { Users, Target, Brain, Shield, ArrowRight } from 'lucide-react'
+import { STATS, AUDIT_REQUEST_URL } from '@/lib/constants'
 
 export default function WhyChooseUsSection() {
   const highlights = [
@@ -25,7 +25,7 @@ export default function WhyChooseUsSection() {
     {
       icon: Shield,
       title: 'Competition-Proven',
-      description: '60+ competitions with 12 first-place wins across major platforms validate our security expertise.',
+      description: `${STATS.competitions} competitions with ${STATS.firstPlaceWins} first-place wins across major platforms validate our security expertise.`,
       accent: 'Proven excellence'
     }
   ]
@@ -81,7 +81,7 @@ export default function WhyChooseUsSection() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform"
+                href={AUDIT_REQUEST_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-primary-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-700 transition-colors duration-200 inline-flex items-center justify-center group"

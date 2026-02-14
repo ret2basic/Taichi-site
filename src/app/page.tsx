@@ -6,9 +6,6 @@ import WhyChooseUsSection from '@/components/WhyChooseUsSection'
 import ContactSection from '@/components/ContactSection'
 import Footer from '@/components/Footer'
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
-
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">

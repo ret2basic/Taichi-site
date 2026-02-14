@@ -120,4 +120,62 @@ export function getRelatedPosts(currentPost: BlogPost, limit: number = 3): BlogP
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
     .map(item => item.post)
-} 
+}
+
+// ─── Series helpers ──────────────────────────────────────────────
+
+/** Known series definitions: slug prefix → part-number extractor */
+const SERIES_DEFS: { prefix: string; partNumber: (slug: string, title: string) => number }[] = [
+  {
+    prefix: 'morpho-internals',
+    partNumber: (_slug, title) => {
+      const m = title.match(/Part\s*(\d+)/i)
+      return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER
+    },
+  },
+  {
+    prefix: 'solana-security-series',
+    partNumber: (slug) => {
+      const m = slug.match(/solana-security-series-(\d+)/i)
+      return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER
+    },
+  },
+]
+
+export interface SeriesNav {
+  seriesName: string
+  seriesHubUrl: string
+  prev: { slug: string; title: string } | null
+  next: { slug: string; title: string } | null
+  currentPart: number
+  totalParts: number
+}
+
+/**
+ * If `post` belongs to a known series, returns prev/next navigation info.
+ * Returns null for standalone (non-series) posts.
+ */
+export function getSeriesNav(post: BlogPost): SeriesNav | null {
+  const def = SERIES_DEFS.find((d) => post.slug.startsWith(d.prefix))
+  if (!def) return null
+
+  const allPosts = getAllPosts().filter((p) => p.slug.startsWith(def.prefix))
+  const sorted = allPosts
+    .map((p) => ({ ...p, _part: def.partNumber(p.slug, p.title) }))
+    .sort((a, b) => a._part - b._part)
+
+  const idx = sorted.findIndex((p) => p.slug === post.slug)
+  if (idx === -1) return null
+
+  const seriesName = def.prefix === 'morpho-internals' ? 'Morpho Internals' : 'Solana Security'
+  const seriesHubUrl = def.prefix === 'morpho-internals' ? '/morpho' : '/solana-security'
+
+  return {
+    seriesName,
+    seriesHubUrl,
+    prev: idx > 0 ? { slug: sorted[idx - 1].slug, title: sorted[idx - 1].title } : null,
+    next: idx < sorted.length - 1 ? { slug: sorted[idx + 1].slug, title: sorted[idx + 1].title } : null,
+    currentPart: idx + 1,
+    totalParts: sorted.length,
+  }
+}

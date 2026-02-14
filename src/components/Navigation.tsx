@@ -1,11 +1,45 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { Menu, X, ExternalLink } from 'lucide-react'
 import DarkModeToggle from './DarkModeToggle'
+import { AUDIT_REQUEST_URL, PORTFOLIO_URL, WRITEUPS_URL } from '@/lib/constants'
+
+function isExternal(href: string) {
+  return href.startsWith('http')
+}
+
+function NavLink({ href, className, children, onClick }: {
+  href: string
+  className: string
+  children: React.ReactNode
+  onClick?: () => void
+}) {
+  if (isExternal(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={onClick}>
+        {children}
+      </a>
+    )
+  }
+  return (
+    <Link href={href} className={className} onClick={onClick}>
+      {children}
+    </Link>
+  )
+}
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const pathname = usePathname()
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,10 +52,10 @@ export default function Navigation() {
 
   const menuItems = [
     { name: 'Home', href: '/' },
-    { name: 'Portfolio', href: 'https://github.com/TaiChiAuditGroup/Portfolio' },
+    { name: 'Portfolio', href: PORTFOLIO_URL },
     { name: 'Blog', href: '/blog' },
     { name: 'About', href: '/about' },
-    { name: 'Writeups', href: 'https://ret2basic.gitbook.io/ctfwriteup' },
+    { name: 'Writeups', href: WRITEUPS_URL },
     { name: 'Contact', href: '/#contact' },
   ]
 
@@ -35,32 +69,33 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <img 
-                src="/taichi_logo.jpg" 
-                alt="Taichi Audit Group" 
-                className="h-8 w-8 mr-2 rounded-md"
+            <Link href="/" className="flex-shrink-0 flex items-center">
+              <Image
+                src="/taichi_logo.jpg"
+                alt="Taichi Audit Group"
+                width={32}
+                height={32}
+                className="mr-2 rounded-md"
+                priority
               />
               <span className="text-xl font-bold gradient-text">Taichi Audit</span>
-            </div>
+            </Link>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               {menuItems.map((item) => (
-                <a
+                <NavLink
                   key={item.name}
                   href={item.href}
-                  target={item.href.startsWith('http') ? '_blank' : '_self'}
-                  rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
                   className="text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
                 >
                   {item.name}
-                </a>
+                </NavLink>
               ))}
               <a
-                href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+                href={AUDIT_REQUEST_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-primary-700 transition-colors duration-200 flex items-center"
@@ -94,19 +129,17 @@ export default function Navigation() {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-lg shadow-lg dark:bg-slate-900/95">
             {menuItems.map((item) => (
-              <a
+              <NavLink
                 key={item.name}
                 href={item.href}
-                target={item.href.startsWith('http') ? '_blank' : '_self'}
-                rel={item.href.startsWith('http') ? 'noopener noreferrer' : ''}
                 className="text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 block px-3 py-2 text-base font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.name}
-              </a>
+              </NavLink>
             ))}
             <a
-              href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+              href={AUDIT_REQUEST_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-primary-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-primary-700 transition-colors duration-200 flex items-center"

@@ -5,6 +5,7 @@ import { useDarkMode } from '../lib/DarkModeContext'
 
 export default function DarkModeToggle() {
   const [mounted, setMounted] = useState(false)
+  const { isDarkMode, toggleDarkMode } = useDarkMode()
   
   useEffect(() => {
     setMounted(true)
@@ -24,8 +25,6 @@ export default function DarkModeToggle() {
       </button>
     )
   }
-
-  const { isDarkMode, toggleDarkMode } = useDarkMode()
 
   return (
     <button

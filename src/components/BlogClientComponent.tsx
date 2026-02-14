@@ -20,6 +20,8 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
     : allPosts.filter(post => post.category === selectedCategory)
   const morphoInternals = allPosts.filter(post => post.slug.startsWith('morpho-internals'))
   const morphoLead = morphoInternals.find(post => /part\s*1/i.test(post.title)) || morphoInternals[0]
+  const solanaSeries = allPosts.filter(post => post.slug.startsWith('solana-security-series'))
+  const solanaLead = solanaSeries.find(post => /series-1$/i.test(post.slug)) || solanaSeries[0]
 
   return (
     <>
@@ -49,7 +51,6 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
               <div className="absolute inset-0 p-8 flex flex-col justify-between text-white">
                 <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] font-semibold">
                   <span className="text-primary-50/80">Internals Series</span>
-                  <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20">New Drop</span>
                 </div>
                 <div>
                   <p className="text-3xl md:text-4xl font-semibold leading-tight mb-3">Morpho source code walkthroughs</p>
@@ -79,6 +80,50 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
             <div className="flex flex-wrap gap-3 text-sm">
               <span className="px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200">Pendle Internals • coming soon</span>
               <span className="px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200">Balancer V2 Internals • coming soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Solana Security Showcase */}
+      <div className="mb-20">
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr,0.95fr]">
+          <Link href="/solana-security" className="group block w-full">
+            <div className="relative w-full pt-[100%] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-emerald-500 via-slate-900 to-cyan-600">
+              <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.16),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.12),transparent_40%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.1),transparent_40%)]" />
+              <div className="absolute inset-0 p-8 flex flex-col justify-between text-white">
+                <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] font-semibold">
+                  <span className="text-emerald-50/80">Security Series</span>
+                </div>
+                <div>
+                  <p className="text-3xl md:text-4xl font-semibold leading-tight mb-3">Solana security series</p>
+                  <p className="text-lg text-emerald-50/80 max-w-xl">Reviewer-grade walkthroughs of account creation, token program internals, and real exploit patterns.</p>
+                </div>
+                <div className="flex items-center justify-between text-sm text-emerald-50">
+                  <span>{solanaSeries.length} parts live • Token + System Programs</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </Link>
+          <div className="space-y-5">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Solana security series</h2>
+            <p className="text-lg text-gray-700 dark:text-gray-200">A tactical series for protocol teams and security researchers mapping real Solana attack surfaces.</p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/solana-security" className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-primary-600 text-white font-semibold shadow-md hover:bg-primary-700 transition-colors">
+                View the series
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              {solanaLead && (
+                <Link href={`/blog/${solanaLead.slug}`} className="inline-flex items-center gap-2 px-4 py-3 rounded-full border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-100 font-semibold hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
+                  Start at Part 1
+                </Link>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <span className="px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200">Account creation + PDAs</span>
+              <span className="px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200">Token programs + ATA</span>
+              <span className="px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200">DoS + extension edges</span>
             </div>
           </div>
         </div>

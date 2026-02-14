@@ -2,6 +2,7 @@ import React from 'react'
 import Navigation from '@/components/Navigation'
 import AboutSection from '@/components/AboutSection'
 import Footer from '@/components/Footer'
+import { STATS } from '@/lib/constants'
 
 export default function AboutPage() {
   return (
@@ -21,19 +22,19 @@ export default function AboutPage() {
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">60+</div>
+                  <div className="text-3xl font-bold mb-2">{STATS.competitions}</div>
                   <div className="text-sm opacity-90">Competitions</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">11 times</div>
+                  <div className="text-3xl font-bold mb-2">{STATS.contestTop3Label}</div>
                   <div className="text-sm opacity-90">Audit Contests Top 3</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">170+</div>
+                  <div className="text-3xl font-bold mb-2">{STATS.totalFindings}</div>
                   <div className="text-sm opacity-90">Findings</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">#7</div>
+                  <div className="text-3xl font-bold mb-2">{STATS.remedyCTF2025}</div>
                   <div className="text-sm opacity-90">Remedy CTF 2025</div>
                 </div>
               </div>

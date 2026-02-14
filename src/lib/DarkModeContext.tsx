@@ -9,19 +9,19 @@ interface DarkModeContextType {
 const DarkModeContext = createContext<DarkModeContextType | undefined>(undefined)
 
 export function DarkModeProvider({ children }: { children: React.ReactNode }) {
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  // Initialize from the class the blocking <script> already set on <html>
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark')
+    }
+    return false
+  })
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Check if we're on the client side and get initial theme
-    const savedTheme = localStorage.getItem('darkMode')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    if (savedTheme !== null) {
-      setIsDarkMode(savedTheme === 'true')
-    } else {
-      setIsDarkMode(prefersDark)
-    }
+    // Sync state with what the blocking script already applied
+    const hasDark = document.documentElement.classList.contains('dark')
+    setIsDarkMode(hasDark)
     setMounted(true)
   }, [])
 
@@ -43,11 +43,9 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
     setIsDarkMode(prev => !prev)
   }
 
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return <>{children}</>
-  }
-
+  // Always provide the context — even before mount — so useDarkMode() never throws.
+  // The blocking <script> in layout.tsx already set the correct `dark` class on <html>
+  // before paint, so there is no FOUC.
   return (
     <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
       {children}

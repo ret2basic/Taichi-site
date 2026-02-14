@@ -14,7 +14,7 @@ cd /root/Taichi-site
 # git pull origin main
 
 echo "📦 Installing any new dependencies..."
-npm ci --only=production
+npm ci
 
 echo "🏗️ Building the updated site..."
 npm run build

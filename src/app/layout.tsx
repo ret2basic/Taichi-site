@@ -1,8 +1,21 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
+import { Inter, Fira_Code } from 'next/font/google'
 import './globals.css'
 import { DarkModeProvider } from '../lib/DarkModeContext'
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
+const firaCode = Fira_Code({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fira-code',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://taichiaudit.com'),
@@ -62,6 +75,11 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  alternates: {
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
+  },
 }
 
 export default function RootLayout({
@@ -73,16 +91,23 @@ export default function RootLayout({
   const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
   const umamiScriptSrc = umamiUrl ? `${umamiUrl.replace(/\/$/, '')}/script.js` : undefined
 
-  return (
-    <html lang="en" className="scroll-smooth">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
+  // Inline script to prevent dark mode FOUC — runs before any paint
+  const themeScript = `
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'true' || (saved === null && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch(e) {}
+    })();
+  `
 
+  return (
+    <html lang="en" className={`scroll-smooth ${inter.variable} ${firaCode.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {umamiWebsiteId && umamiScriptSrc ? (
           <Script
             async

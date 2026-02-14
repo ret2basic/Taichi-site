@@ -11,7 +11,9 @@ featured: false
 image: "/images/blog/Morpho.jpg"
 ---
 
-MetaMorpho is Morpho’s "asset management layer": an ERC4626 wrapper that turns many discrete Morpho markets into a single fungible share token, while preserving Morpho’s core design (isolated markets, explicit risk configuration, permissionless user actions).
+MetaMorpho is Morpho's "asset management layer": an ERC4626 wrapper that turns many discrete Morpho markets into a single fungible share token, while preserving Morpho's core design (isolated markets, explicit risk configuration, permissionless user actions).
+
+For lenders (suppliers), the smallest unit of interaction with Morpho is a vault. Morpho itself does not ship an "official" vault; instead, third parties create and manage different vaults to serve different risk/return preferences. That means a supplier doesn't just decide to use Morpho—they also choose which curator and vault to trust for market selection and risk parameters.
 
 This part assumes you already understand Morpho markets at the level of:
 
@@ -19,7 +21,7 @@ This part assumes you already understand Morpho markets at the level of:
 - interest accrual updating `totalBorrowAssets` and `totalSupplyAssets`
 - the liquidity constraint `totalBorrowAssets <= totalSupplyAssets`
 
-We’ll focus on what MetaMorpho adds on top of Morpho, and how it does it.
+We'll focus on what MetaMorpho adds on top of Morpho, and how it does it.
 
 MetaMorpho is known as “vault v1”, and there is a recently developed vault v2. We will cover that in the next article.
 
@@ -34,7 +36,7 @@ The contract that enforces this is `Morpho.sol`.
 
 ### The missing product primitive: pooled deposit with strategy-level allocation
 
-If you’re a sophisticated lender, you might want to supply across multiple markets (diversification, best rate, risk appetite). If you call `Morpho.supply()` directly, it means:
+If you're a sophisticated lender, you might want to supply across multiple markets (diversification, best rate, risk appetite). If you call `Morpho.supply()` directly, it means:
 
 - holding multiple “positions” across markets (each with its own `supplyShares`)
 - rebalancing yourself when rates move
@@ -80,7 +82,7 @@ MetaMorpho splits responsibilities across roles:
 - **Allocator**: chooses the operational allocation path (queues) and can rebalance between enabled markets
 - **Guardian**: emergency brake for pending changes (revoke pending updates)
 
-The curator’s job is to answer: “Which markets are allowed, and what is our maximum exposure?” That is encoded as per-market supply caps:
+The curator's job is to answer: “Which markets are allowed, and what is our maximum exposure?” That is encoded as per-market supply caps:
 
 ```solidity
 mapping(Id => MarketConfig) public config;
@@ -117,12 +119,12 @@ function submitCap(MarketParams memory marketParams, uint256 newSupplyCap)
 
 The function does the following things before calling `_setCap()`:
 
-1. **Check if vault underlying asset matches market loan token**: the market’s `loanToken` must equal the vault’s `asset()` (the ERC4626 underlying). MetaMorpho is a single-asset vault; it cannot allocate USDC deposits into a WETH loan-token market.
+1. **Check if vault underlying asset matches market loan token**: the market's `loanToken` must equal the vault's `asset()` (the ERC4626 underlying). MetaMorpho is a single-asset vault; it cannot allocate USDC deposits into a WETH loan-token market.
 2. **Check if the market actually exists on Morpho**: it checks `MORPHO.lastUpdate(id) != 0` (equivalent to “market was created”).
 3. **Risk asymmetry is encoded in timelocks**:
     - Decreasing cap is immediate (risk reduction should be fast) → in this branch, `_setCap()` is invoked and `if (!marketConfig.enabled)` branch is skipped. Only the following state updates will be performed:
-        - `marketConfig.removableAt **=** 0`
-        - `marketConfig.cap **=** supplyCap`
+        - `marketConfig.removableAt = 0`
+        - `marketConfig.cap = supplyCap`
         - `delete pendingCap[id]`
     - Increasing cap is timelocked (risk expansion should be slow) → `pendingCap[id]` is updated and there is a timelock on it. After the timelock, anyone can call `acceptCap()` to invoke `_setCap()` on it. If the market was already enabled, `_setCap()` behaves the same way as in the decreasing cap case; otherwise, it will do more things as we will explain next.
 
@@ -204,12 +206,12 @@ The actual removal from the withdraw queue is performed later by the allocator t
 
 ## 3. Allocator functions: setSupplyQueue(), updateWithdrawQueue(), and reallocate()
 
-The allocator’s job is operational, not strategic:
+The allocator's job is operational, not strategic:
 
 - “Given the allowed markets and their caps, how should we route deposits and withdrawals?”
 - “How do we rebalance across enabled markets without breaking invariants?”
 
-MetaMorpho’s answer is two queues.
+MetaMorpho's answer is two queues.
 
 ### Two-queue design: supply routing vs withdrawal routing
 
@@ -248,19 +250,19 @@ This separation solves two different problems:
 
 Two practical consequences:
 
-- You can’t “accidentally” send deposits into a market that the curator has not enabled because of the check `if (config[newSupplyQueue[i]].cap == 0)`.
-- Duplicates are allowed (they are not prevented). This is explicitly tolerated but discouraged; duplicates only increase gas and can make `maxDeposit`/`maxMint` less accurate (MetaMorpho warns about this), but duplicates don’t cause any damage to the business logic itself.
+- You can't “accidentally” send deposits into a market that the curator has not enabled because of the check `if (config[newSupplyQueue[i]].cap == 0)`.
+- Duplicates are allowed (they are not prevented). This is explicitly tolerated but discouraged; duplicates only increase gas and can make `maxDeposit`/`maxMint` less accurate (MetaMorpho warns about this), but duplicates don't cause any damage to the business logic itself.
 
 ### `updateWithdrawQueue()`: reorder + remove markets, never add new ones
 
 Market removal flow is two-step:
 
 - **Curator path:** zero the cap (via `submitCap(..., 0)`, immediate) and then schedule removal with `submitMarketRemoval()`. This sets `removableAt` after the timelock.
-- **Allocator path:** after the timelock has elapsed, call `updateWithdrawQueue()` with indexes that omit the market you’re removing. That function enforces: cap must be 0, no pending cap, and either zero supply or `removableAt` has passed before it deletes the config entry and writes the new queue.
+- **Allocator path:** after the timelock has elapsed, call `updateWithdrawQueue()` with indexes that omit the market you're removing. That function enforces: cap must be 0, no pending cap, and either zero supply or `removableAt` has passed before it deletes the config entry and writes the new queue.
 
 So curator schedules; allocator executes the actual removal.
 
-`updateWithdrawQueue()` takes `indexes`, which are indexes into the previous `withdrawQueue`. It constructs the new queue by reusing those elements.
+`updateWithdrawQueue()` takes `indexes`, which are indexes into the previous `withdrawQueue`. It constructs the new queue by reusing those elements. This is why `updateWithdrawQueue()` cannot introduce a new market: it only pulls existing entries via `Id id = withdrawQueue[prevIndex]` and never calls `push`.
 
 ```solidity
 function updateWithdrawQueue(uint256[] calldata indexes) external onlyAllocatorRole {
@@ -299,22 +301,42 @@ function updateWithdrawQueue(uint256[] calldata indexes) external onlyAllocatorR
 }
 ```
 
-The `seen` array is a classic way of detecting duplicates in DSA. This function gets `indexes` (positions in the current withdraw queue), allocates a `seen` bool array sized to the current queue, and a new queue sized to `indexes`.
+**Where new items in the `withdrawQueue` come from:** The only place a new market is added to `withdrawQueue` is when the curator *enables* a market by setting a positive cap for the first time. That happens inside `_setCap()`:
 
-- **Inputs:** `indexes` is a list of positions in the current `withdrawQueue`. You can only keep/reorder existing markets; you cannot add new ones. In other words `updateWithdrawQueue()` is meant to remove existing markets in the withdraw queue.
-- **Setup:** Allocate `seen[currLength]` to mark which old positions are reused, and `newWithdrawQueue[newLength]` to build the new queue.
-- **First loop (rebuild & dedupe):**
-    - For each `prevIndex` in `indexes`, read `withdrawQueue[prevIndex]` (native bounds check).
-    - If `seen[prevIndex]` is already true, revert `DuplicateMarket` (prevents duplicates and enforces “no new markets”).
-    - Mark `seen[prevIndex] = true` and place that market `id` into the corresponding slot of `newWithdrawQueue`.
-- **Second loop (validate removals):**
-    - For every old position `i` that was not marked `seen` (i.e., omitted from `indexes`), treat it as a removal candidate.
-    - Enforce removal safety:
-        - `cap == 0` or revert `InvalidMarketRemovalNonZeroCap`.
-        - `pendingCap` must be clear or revert `PendingCap`.
-        - If the vault still has `supplyShares` in that market, require `removableAt` set and timelock elapsed, otherwise revert.
-    - If checks pass, `delete config[id]` to drop config for that market.
-- **Finalize:** Assign `withdrawQueue = newWithdrawQueue`.
+```solidity
+if (!marketConfig.enabled) {
+    withdrawQueue.push(id);
+    if (withdrawQueue.length > ConstantsLib.MAX_QUEUE_LENGTH) revert ErrorsLib.MaxQueueLengthExceeded();
+    marketConfig.enabled = true;
+    // ...
+}
+```
+
+So the flow is explicit: curator enables → `_setCap()` pushes, allocator later reorders/removes via `updateWithdrawQueue()`.
+
+Here is a toy example of how the "seen" algorithm works:
+
+**Setup**
+
+- Old `withdrawQueue = [A, B, C, D]` (indices 0..3)
+- Allocator wants to keep `[A, C, D]` and drop B, so it passes `indexes = [0, 2, 3]`.
+
+**First loop (build the new queue):**
+
+- `i = 0`, `prevIndex = 0` → new queue gets `withdrawQueue[0] = A`, set `seen[0] = true`
+- `i = 1`, `prevIndex = 2` → new queue gets `withdrawQueue[2] = C`, set `seen[2] = true`
+- `i = 2`, `prevIndex = 3` → new queue gets `withdrawQueue[3] = D`, set `seen[3] = true`
+
+At this point, `seen = [true, false, true, true]`.
+
+**Second loop (find removals):**
+
+- `i = 0` → `seen[0]` is true, keep A
+- `i = 1` → `seen[1]` is false, remove B after passing some checks
+- `i = 2` → `seen[2]` is true, keep C
+- `i = 3` → `seen[3]` is true, keep D
+
+When solving leetcode chals, `seen` often means "visited before." Here `seen` means something different: "this old entry at this index will still exist in the new `withdrawQueue`." In other words, `seen` means "we won't remove this entry from the `withdrawQueue`." That's why it's indexed by the old queue positions, and why the second loop treats `!seen[i]` as a removal candidate.
 
 #### Forced removal, `removableAt`, and why PPS can drop
 
@@ -322,13 +344,13 @@ The removal logic above enables a “forced delisting” path: a market can be r
 
 Concretely:
 
-1. The curator sets `cap = 0` (immediate, because it’s a risk reduction).
+1. The curator sets `cap = 0` (immediate, because it's a risk reduction).
 2. The curator calls `submitMarketRemoval()` which sets `config[id].removableAt = block.timestamp + timelock`.
 3. After the cooldown, the allocator can omit the market when calling `updateWithdrawQueue()`. If `MORPHO.supplyShares(id, address(this)) != 0`, the function allows removal as long as `removableAt` is set and has passed.
 
-This is intentionally dangerous: it is a governance/ops escape hatch for “we no longer want this market in the vault’s active set”, even if assets are still stranded there.
+This is intentionally dangerous: it is a governance/ops escape hatch for “we no longer want this market in the vault's active set”, even if assets are still stranded there.
 
-**Why this can decrease PPS (price per share).** MetaMorpho’s accounting uses the withdraw queue as the set of markets to value:
+**Why this can decrease PPS (price per share).** MetaMorpho's accounting uses the withdraw queue as the set of markets to value:
 
 ```solidity
 function totalAssets() public view override returns (uint256 assets) {
@@ -340,9 +362,9 @@ function totalAssets() public view override returns (uint256 assets) {
 
 So if a market is removed from `withdrawQueue` while the vault still has `supplyShares` there, those assets are no longer included in `totalAssets()`. Since ERC4626 share price is roughly $\text{pps} = \frac{\text{totalAssets}}{\text{totalSupply}}$, dropping assets from `totalAssets()` mechanically lowers PPS.
 
-This is why `removableAt` exists: it gives the system time to unwind the position cleanly before a forced removal can “write off” that market from the vault’s accounting.
+This is why `removableAt` exists: it gives the system time to unwind the position cleanly before a forced removal can “write off” that market from the vault's accounting.
 
-**How allocators can prevent the loss: unwind before the cooldown ends.** During the `removableAt` window (after cap is set to 0, but before removal is executable), the allocator can call `reallocate()` to withdraw the vault’s position from the soon-to-be-removed market and move it into other enabled markets.
+**How allocators can prevent the loss: unwind before the cooldown ends.** During the `removableAt` window (after cap is set to 0, but before removal is executable), the allocator can call `reallocate()` to withdraw the vault's position from the soon-to-be-removed market and move it into other enabled markets.
 
 In particular, `reallocate()` supports a “withdraw everything” target for a market by setting `allocation.assets == 0`:
 
@@ -385,6 +407,18 @@ For each allocation in the array, the code first accrues interest and then compu
             uint256 withdrawn = supplyAssets.zeroFloorSub(allocation.assets);
 ```
 
+`withdrawn` is computed with `zeroFloorSub`, which clamps negative results to 0. So `withdrawn == 0` simply means `allocation.assets >= supplyAssets` (the target is at least the current supply), and the code takes the supply path. The helper is implemented as:
+
+```solidity
+    function zeroFloorSub(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        assembly {
+            z := mul(gt(x, y), sub(x, y))
+        }
+    }
+```
+
+This returns `max(0, x - y)` without ever underflowing.
+
 `_accruedSupplyBalance()` is just a helper that calls `MORPHO.accrueInterest(marketParams)` and returns some info of that market:
 
 ```solidity
@@ -403,7 +437,7 @@ For each allocation in the array, the code first accrues interest and then compu
     }
 ```
 
-If `withdrawn > 0` (allocator wants to withdraw from this market), the code handles a special case where `allocation.assets == 0` (withdraw all assets from a market) but there is a frontrunning donation. In that case the code calls `MORPHO.withdraw()` with `supplyShares` to withdraw all shares the vault holds for that market, so the frontrunning donation is withdrawn too. Recall that `MORPHO.withdraw()` can be called by specifying number of assets or number of shares, here we use number of shares since we don’t know how much donation exists in a frontrunning context.
+If `withdrawn > 0` (allocator wants to withdraw from this market), the code handles a special case where `allocation.assets == 0` (withdraw all assets from a market) but there is a frontrunning donation. In that case the code calls `MORPHO.withdraw()` with `supplyShares` to withdraw all shares the vault holds for that market, so the frontrunning donation is withdrawn too. Recall that `MORPHO.withdraw()` can be called by specifying number of assets or number of shares, here we use number of shares since we don't know how much donation exists in a frontrunning context.
 
 ```solidity
             if (withdrawn > 0) {
@@ -423,7 +457,7 @@ If `withdrawn > 0` (allocator wants to withdraw from this market), the code hand
             }
 ```
 
-If `withdrawn <= 0` (allocator wants to supply to this market), the code checks if the supply assets after the delta exceed `supplyCap`.
+If `withdrawn == 0` (allocator wants to supply to this market), the code checks whether the post-supply assets would exceed `supplyCap`.
 
 ```solidity
             else {
@@ -446,14 +480,20 @@ If `withdrawn <= 0` (allocator wants to supply to this market), the code checks 
             }
 ```
 
-When the entire for loop exits, the code enforces net-zero reallocation (`totalWithdrawn == totalSupplied`) invariant to make sure there is no net increase or decrease of the total asset, only rearrangement.
+At the end of this function (exiting the for loop), there is a [one-line check](https://github.com/morpho-org/metamorpho/blob/37714d67104523f32f8e7e31cd2c7a0506f800aa/src/MetaMorpho.sol#L414):
+
+```solidity
+if (totalWithdrawn != totalSupplied) revert ErrorsLib.InconsistentReallocation(); 
+```
+
+Here we throw out an important question: What is this check doing? Why does it exist?
 
 ## 4. User deposit & withdrawal: how it works, and what the supplied asset is used for
 
 MetaMorpho is built on top of ERC4626:
 
-- Users deposit the vault’s underlying `asset()`.
-- They receive MetaMorpho shares (ERC20) representing a claim on the vault’s total supplied assets across markets.
+- Users deposit the vault's underlying `asset()`.
+- They receive MetaMorpho shares (ERC20) representing a claim on the vault's total supplied assets across markets.
 - They can later withdraw/redeem; the vault pulls liquidity from Morpho markets to satisfy redemptions.
 
 ### The critical point: deposits are used to supply as **loan token** (lend), not as collateral
@@ -469,11 +509,11 @@ It never calls:
 - `MORPHO.supplyCollateral(...)`
 - `MORPHO.borrow(...)`
 
-So depositors earn passive lending yield; they do not open borrow positions. (MetaMorpho shares could be used as collateral in external systems, but that’s outside of MetaMorpho and Morpho.)
+So depositors earn passive lending yield; they do not open borrow positions. (MetaMorpho shares could be used as collateral in external systems, but that's outside of MetaMorpho and Morpho.)
 
 ### ERC4626 conversions: how shares map to assets
 
-MetaMorpho relies on OpenZeppelin ERC4626’s “inflation attack” mitigation via a virtual offset. `DECIMALS_OFFSET` provides virtual offset so that the asset behaves like 18-decimal:
+MetaMorpho relies on OpenZeppelin ERC4626's “inflation attack” mitigation via a virtual offset. `DECIMALS_OFFSET` provides virtual offset so that the asset behaves like 18-decimal:
 
 ```solidity
 DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
@@ -495,7 +535,7 @@ function _convertToAssetsWithTotals(uint256 shares, uint256 newTotalSupply, uint
 }
 ```
 
-**However this approach doesn’t protect 18-decimal assets** (no virtual offset is given since the decimal is already 18). This caveat is clearly documented in the comment of `deposit()` function:
+**However this approach doesn't protect 18-decimal assets** (no virtual offset is given since the decimal is already 18). This caveat is clearly documented in the comment of `deposit()` function:
 
 ```solidity
     /// @inheritdoc IERC4626
@@ -532,10 +572,12 @@ function _convertToAssetsWithTotals(uint256 shares, uint256 newTotalSupply, uint
 Sequence:
 
 1. Accrue vault-level performance fee first (ignore for now, more later).
-2. Compute shares using totals that account for fee accrual.
-3. Execute ERC4626 deposit: transfer `assets` into the vault, mint `shares`.
-4. Route the deposited assets into Morpho markets via `_supplyMorpho()`.
-5. Update `lastTotalAssets` optimistically.
+2. Set `lastTotalAssets = newTotalAssets` to keep the vault's accounting consistent if a re-entrant call happens during `_deposit` (which can trigger external calls via token hooks). This makes any nested call see a post-fee baseline rather than a stale one; the value is updated again after the assets are supplied.
+    - `deposit()` updates `lastTotalAssets` up front because the underlying asset transfer can re‑enter the vault if the token is ERC777 (via tokensToSend during `safeTransferFrom()`). See [ERC4626.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/239795bea728c8dca4deb6c66856dd58a6991112/contracts/token/ERC20/extensions/ERC4626.sol#L290-L295) for more info. Without that pre‑update, any re‑entrant call would observe a stale, lower `lastTotalAssets`, making `totalInterest` look larger and over‑accrue fees, which dilutes the depositor unfairly. Setting `lastTotalAssets = newTotalAssets` first ensures fee math and share pricing stay consistent throughout the deposit flow even if a token hook fires.
+3. Compute shares using totals that account for fee accrual.
+4. Execute ERC4626 deposit: transfer `assets` into the vault, mint `shares`.
+5. Route the deposited assets into Morpho markets via `_supplyMorpho()`.
+6. Update `lastTotalAssets` optimistically.
 
 ### `_supplyMorpho()`: best-effort routing, caps, and skipping broken markets
 
@@ -561,7 +603,7 @@ Sequence:
     }
 ```
 
-Here `MORPHO.supplyShares()` is implemented in morpho-blue/src/libraries/periphery/MorphoLib.sol. It fetches how many shares the vault is supplying currently from Morpho’s storage:
+Here `MORPHO.supplyShares()` is implemented in morpho-blue/src/libraries/periphery/MorphoLib.sol. It fetches how many shares the vault is supplying currently from Morpho's storage:
 
 ```solidity
     // MorphoLib.so
@@ -593,7 +635,7 @@ Then `_supplyMorpho()` computes the minimum between `supplyCap - supplyAssets` a
             if (assets == 0) return;
 ```
 
-Outside the for loop, the code catches the case where user-specified `assets` are too large, all caps are exhausted, and there is still leftover that isn’t supplied to any market:
+Outside the for loop, the code catches the case where user-specified `assets` are too large, all caps are exhausted, and there is still leftover that isn't supplied to any market:
 
 ```solidity
         if (assets != 0) revert ErrorsLib.AllCapsReached();
@@ -627,7 +669,7 @@ ERC4626 withdrawal calls `_withdrawMorpho(assets)` to free liquidity first:
     }
 ```
 
-Again: fee accrual first, then conversions using updated totals.
+The logic here mirrors the deposit flow. One thing to note is that, `_updateLastTotalAssets(newTotalAssets.zeroFloorSub(assets))` is set before `_withdraw()` because the asset transfer can trigger ERC777 tokensReceived re‑entrancy after the transfer. See [ERC4626.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/239795bea728c8dca4deb6c66856dd58a6991112/contracts/token/ERC20/extensions/ERC4626.sol#L290-L295) for more info. If `lastTotalAssets` weren't pre‑reduced, a re‑entrant call during `_withdraw()` would see a stale, higher `lastTotalAssets`, compute a smaller `totalInterest`, and under‑accrue fees (benefiting the re‑entrant caller). Pre‑updating keeps fee accrual and share pricing consistent even if the asset's transfer hook re‑enters.
 
 ### `_withdrawMorpho()`: withdraw only what is actually liquid
 
@@ -692,11 +734,11 @@ Just like deposits:
 
 - It accrues interest per market before computing balances.
 - It uses `try/catch` to skip markets that revert.
-- It reverts only if, after trying all markets, it can’t free enough assets.
+- It reverts only if, after trying all markets, it can't free enough assets.
 
 ## 5. How yield is calculated and accounted
 
-MetaMorpho’s yield is Morpho’s lender yield.
+MetaMorpho's yield is Morpho's lender yield.
 
 ### Where yield comes from in Morpho
 
@@ -726,7 +768,7 @@ If a user has supply shares $s$, and the market has totals $(S_A, S_S)$ meaning:
 - totalSupplyAssets = $S_A$
 - totalSupplyShares = $S_S$
 
-Then the lender’s claim (down-rounded) is:
+Then the lender's claim (down-rounded) is:
 
 $$
 \text{supplyAssets} = s\cdot\frac{S_A}{S_S}
@@ -736,7 +778,7 @@ Interest increases $S_A$ while $S_S$ remains fixed for lenders (except protocol 
 
 ### How MetaMorpho computes `totalAssets()`
 
-MetaMorpho’s `totalAssets()` sums the expected supply assets across all markets in `withdrawQueue`:
+MetaMorpho's `totalAssets()` sums the expected supply assets across all markets in `withdrawQueue`:
 
 ```solidity
     function totalAssets() public view override returns (uint256 assets) {
@@ -783,7 +825,7 @@ This uses `MorphoBalancesLib.expectedSupplyAssets()`, which virtually accrues in
 
 ### Share price evolution
 
-The vault’s share price is:
+The vault's share price is:
 
 $$
 \text{pps} = \frac{\text{totalAssets}}{\text{totalSupply}}
@@ -795,14 +837,14 @@ As Morpho interest accrues, `totalAssets()` increases, so pps increases. ERC4626
 
 There are two fee layers relevant to a MetaMorpho depositor:
 
-1. **Morpho market fee**: Morpho markets can mint supply shares to Morpho’s `feeRecipient` during interest accrual.
+1. **Morpho market fee**: Morpho markets can mint supply shares to Morpho's `feeRecipient` during interest accrual.
 2. **MetaMorpho vault fee**: MetaMorpho mints vault shares to its `feeRecipient` as a performance fee on vault-level interest.
 
 They are independent.
 
 ### Morpho market fee (protocol-level fee)
 
-In `Morpho._accrueInterest()`, if `market.fee != 0`, Morpho mints supply shares representing a portion of interest:
+In `Morpho._accrueInterest()`, if `market.fee != 0`, Morpho increases supply shares in the accounting, representing a portion of interest:
 
 ```solidity
 uint256 feeAmount = interest.wMulDown(market[id].fee);
@@ -878,7 +920,7 @@ _updateLastTotalAssets(_accrueFee());
 
 ### Timelock design for fee/guardian/timelock changes
 
-MetaMorpho’s timelock is used for parameters that increase risk:
+MetaMorpho's timelock is used for parameters that increase risk:
 
 - **Cap increases** are timelocked.
 - **Timelock decreases** are timelocked; increases are immediate:
@@ -892,56 +934,3 @@ if (newTimelock > timelock) {
 ```
 
 This ensures you can always move to a safer governance posture immediately.
-
-## Additional notes that matter in practice
-
-### Role gating and emergency revocation
-
-Pending values exist for:
-
-- cap increases (`pendingCap[id]`)
-- guardian changes (`pendingGuardian`)
-- timelock decreases (`pendingTimelock`)
-
-They are accepted by anyone after timelock:
-
-```solidity
-modifier afterTimelock(uint256 validAt) {
-	if (validAt == 0) revert ErrorsLib.NoPendingValue();
-	if (block.timestamp < validAt) revert ErrorsLib.TimelockNotElapsed();
-	_;
-}
-
-```
-
-But can be revoked by guardian/curator depending on the item:
-
-- guardian can revoke `pendingTimelock` and `pendingGuardian`
-- curator or guardian can revoke `pendingCap` and market removal
-
-This gives a “stop the train” lever if governance detects a bad pending change.
-
-### Skimming unrelated tokens
-
-MetaMorpho allows the owner to set a `skimRecipient` and anyone to call:
-
-```solidity
-function skim(address token) external {
-	uint256 amount = IERC20(token).balanceOf(address(this));
-	IERC20(token).safeTransfer(skimRecipient, amount);
-}
-```
-
-This is for operational cleanup (airdrops, mistaken transfers). It is not used for the underlying `asset()` in normal operation, because underlying is immediately routed to Morpho on deposit.
-
-### Why deposits/withdrawals are “best effort” (try/catch)
-
-Both `_supplyMorpho` and `_withdrawMorpho` skip markets that revert. This is a conscious product choice:
-
-- A single misbehaving market shouldn’t brick the vault.
-- But it also means allocation might deviate from “ideal” routing.
-
-The hard fail conditions are:
-
-- Deposit fails only if no route can accept the assets (`AllCapsReached`).
-- Withdrawal fails only if no route can free enough liquidity (`NotEnoughLiquidity`).

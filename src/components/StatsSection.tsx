@@ -1,30 +1,30 @@
-'use client'
 import React from 'react'
 import { TrendingUp, Shield, Users, Award, DollarSign, FileText, Clock, Star, Trophy, Brain, Target, Eye, Zap } from 'lucide-react'
+import { STATS, ACHIEVEMENTS, FEATURED_WINS, AUDIT_REQUEST_URL } from '@/lib/constants'
 
 export default function StatsSection() {
   const stats = [
     {
       icon: Trophy,
-      number: '60+',
+      number: STATS.competitions,
       label: 'Audit Competitions',
       description: 'Participated across Code4rena, CodeHawks, Secure3, and Cantina platforms'
     },
     {
       icon: Star,
-      number: '11',
+      number: STATS.contestTop3,
       label: 'Contest Top 3',
       description: 'ZKsync Era, Maia DAO, Arbitrum BoLD, Arcadexyz, Coinbase SpendPermission, and more'
     },
     {
       icon: TrendingUp,
-      number: '170+',
+      number: STATS.totalFindings,
       label: 'Total Findings',
-      description: '60+ High severity and 75+ Medium severity vulnerabilities identified'
+      description: `${STATS.highFindings} High severity and ${STATS.mediumFindings} Medium severity vulnerabilities identified`
     },
     {
       icon: Users,
-      number: '≥2',
+      number: STATS.auditorsPerProject,
       label: 'Auditors per Project',
       description: 'Team-based approach ensures comprehensive coverage and quality'
     },
@@ -42,24 +42,7 @@ export default function StatsSection() {
     }
   ]
 
-  const achievements = [
-    {
-      platform: 'Audit contests',
-      description: '11 times Top 3 wins including 6 first places. Recent wins: OneWorld #1, Coinbase SpendPermission #1, Arbitrum BoLD #1.'
-    },
-    {
-      platform: 'Web3 CTFs',
-      description: 'Remedy CTF 2025 #7, Blaz CTF 2024 #4, OpenZeppelin Ethernaut CTF 2024 #9, Secureum RACEs multiple Top 3 wins.'
-    },
-    {
-      platform: 'Our specialization',
-      description: 'We enjoy finding bugs in Solidity, Move, and Solana codebases. Anything DeFi is welcome.'
-    },
-    {
-      platform: 'Our philosophy',
-      description: 'We believe that the best way to demonstrate security expertise is to participate in audit contests and CTFs. No public record, no skills.'
-    }
-  ]
+  const achievements = ACHIEVEMENTS
 
   return (
     <section id="portfolio" className="py-20 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-slate-900 dark:to-slate-800">
@@ -122,14 +105,7 @@ export default function StatsSection() {
               Featured Contest Top 3
             </h3>
             <div className="space-y-4">
-              {[
-                { name: 'ZKsync Era', type: 'L2 Scaling Solution' },
-                { name: 'Maia DAO', type: 'DeFi Governance' },
-                { name: 'Arbitrum BoLD', type: 'Dispute Resolution' },
-                { name: 'Arcadexyz', type: 'NFT Gaming Platform' },
-                { name: 'Coinbase SpendPermission', type: 'Account Abstraction' },
-                { name: 'OneWorld', type: 'DeFi Platform' }
-              ].map((win, index) => (
+              {FEATURED_WINS.map((win, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                   <div>
                     <div className="font-semibold text-gray-900 dark:text-white">{win.name}</div>
@@ -153,7 +129,7 @@ export default function StatsSection() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform"
+                href={AUDIT_REQUEST_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-primary-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center justify-center"

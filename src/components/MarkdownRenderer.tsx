@@ -3,12 +3,20 @@ import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import rehypeHighlight from 'rehype-highlight'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
+import solidity from 'react-syntax-highlighter/dist/cjs/languages/prism/solidity'
+import rust from 'react-syntax-highlighter/dist/cjs/languages/prism/rust'
+import json from 'react-syntax-highlighter/dist/cjs/languages/prism/json'
 import { ghcolors, vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import ZoomableImage from './ZoomableImage'
+import MetaMorphoQueueAnimation from './MetaMorphoQueueAnimation'
+
+// Register only the languages used in blog posts
+SyntaxHighlighter.registerLanguage('solidity', solidity)
+SyntaxHighlighter.registerLanguage('rust', rust)
+SyntaxHighlighter.registerLanguage('json', json)
 
 // Import KaTeX CSS
 import 'katex/dist/katex.min.css'
@@ -143,7 +151,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           },
           
           // Custom heading renderer with anchor links
-          h1({ children, ...props }) {
+          h1({ children, ...props }: React.ComponentPropsWithoutRef<'h1'>) {
             const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
             return (
               <h1 id={id} className="scroll-mt-16 group" {...props}>
@@ -155,7 +163,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             )
           },
           
-          h2({ children, ...props }) {
+          h2({ children, ...props }: React.ComponentPropsWithoutRef<'h2'>) {
             const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
             return (
               <h2 id={id} className="scroll-mt-16 group" {...props}>
@@ -167,7 +175,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             )
           },
           
-          h3({ children, ...props }) {
+          h3({ children, ...props }: React.ComponentPropsWithoutRef<'h3'>) {
             const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
             return (
               <h3 id={id} className="scroll-mt-16 group" {...props}>
@@ -180,7 +188,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           },
           
           // Custom blockquote renderer
-          blockquote({ children, ...props }) {
+          blockquote({ children, ...props }: React.ComponentPropsWithoutRef<'blockquote'>) {
             return (
               <blockquote 
                 className="border-l-4 border-primary-500 bg-primary-50 dark:bg-primary-900/20 px-4 py-2 my-4 italic"
@@ -192,7 +200,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           },
           
           // Custom table renderer
-          table({ children, ...props }) {
+          table({ children, ...props }: React.ComponentPropsWithoutRef<'table'>) {
             return (
               <div className="overflow-x-auto my-6">
                 <table className="min-w-full border border-gray-300 dark:border-gray-700" {...props}>
@@ -203,29 +211,40 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           },
           
           // Custom paragraph renderer to handle images properly
-          p({ children, ...props }) {
-            // Check if children contains an img element
+          p({ children, ...props }: React.ComponentPropsWithoutRef<'p'>) {
+            // Check if children contains an img element or a block-level custom component
             const childrenArray = React.Children.toArray(children)
-            const hasImage = childrenArray.some((child: any) => {
+            const hasBlockElement = childrenArray.some((child: any) => {
               if (typeof child === 'object' && child !== null) {
                 // Check if it's an img element or our ZoomableImage component
-                return child.type === 'img' || 
-                       (child.props && child.props.src !== undefined)
+                if (child.type === 'img' || (child.props && child.props.src !== undefined)) {
+                  return true
+                }
+
+                // Check if it's our custom animation component
+                if (child.type === MetaMorphoQueueAnimation) {
+                  return true
+                }
               }
               return false
             })
-            
-            // If paragraph contains an image, render as div to avoid invalid HTML
-            if (hasImage) {
+
+            // If paragraph contains a block element, render as div to avoid invalid HTML
+            if (hasBlockElement) {
               return <div className="my-4" {...props}>{children}</div>
             }
-            
+
             // Normal paragraph
             return <p {...props}>{children}</p>
           },
           
+          // Custom animation embeds
+          'metamorpho-queue-animation'() {
+            return <MetaMorphoQueueAnimation />
+          },
+
           // Custom link renderer
-          a({ href, children, ...props }) {
+          a({ href, children, ...props }: React.ComponentPropsWithoutRef<'a'>) {
             // External links
             if (href?.startsWith('http')) {
               return (
@@ -252,7 +271,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               </a>
             )
           },
-        }}
+        } as any}
       >
         {content}
       </ReactMarkdown>

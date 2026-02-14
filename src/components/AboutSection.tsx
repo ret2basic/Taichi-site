@@ -1,6 +1,6 @@
-'use client'
 import React from 'react'
 import { Users, BookOpen, Target, Zap, Shield, Code, Award, Globe, Brain, Eye, Trophy } from 'lucide-react'
+import { STATS, LLM4SEC_URL } from '@/lib/constants'
 
 export default function AboutSection() {
   const teamMembers = [
@@ -8,7 +8,7 @@ export default function AboutSection() {
       name: 'Competition Champions',
       role: 'Senior Security Researchers',
       expertise: 'Multi-chain Security, Competition Winners',
-      description: '60+ audit competitions with 11 Top 3 wins including 6 first places across major contest platforms'
+      description: `${STATS.competitions} audit competitions with ${STATS.contestTop3Label} Top 3 wins including ${STATS.firstPlaceWins} first places across major contest platforms`
     },
     {
       name: 'DeFiHackLabs Veterans',
@@ -43,7 +43,7 @@ export default function AboutSection() {
     {
       icon: Trophy,
       title: 'Proven Excellence',
-      description: 'Track record of 60+ competitions, 170+ findings, and 11 Top 3 wins including 6 first places'
+      description: `Track record of ${STATS.competitions} competitions, ${STATS.totalFindings} findings, and ${STATS.contestTop3Label} Top 3 wins including ${STATS.firstPlaceWins} first places`
     }
   ]
 
@@ -102,7 +102,7 @@ export default function AboutSection() {
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">AI-Enhanced Security</h3>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                We don't rely solely on AI tools, but we use them strategically to ensure we don't miss obvious bugs in client codebases. Our AI tools, primarily sourced from <a href="https://llm4sec.net/" target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">llm4sec.net</a>, serve as an additional layer of security analysis.
+                We don't rely solely on AI tools, but we use them strategically to ensure we don't miss obvious bugs in client codebases. Our AI tools, primarily sourced from <a href={LLM4SEC_URL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">llm4sec.net</a>, serve as an additional layer of security analysis.
               </p>
               <p className="text-gray-700 dark:text-gray-300">
                 Each audit we perform provides more data to improve our AI tools, creating a continuous feedback loop that enhances our security capabilities.
@@ -274,19 +274,19 @@ export default function AboutSection() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold mb-2">60+</div>
+              <div className="text-3xl font-bold mb-2">{STATS.competitions}</div>
               <div className="text-sm opacity-90">Total Competitions</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">11 times</div>
+              <div className="text-3xl font-bold mb-2">{STATS.contestTop3Label}</div>
               <div className="text-sm opacity-90">Audit Contests Top 3</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">170+</div>
+              <div className="text-3xl font-bold mb-2">{STATS.totalFindings}</div>
               <div className="text-sm opacity-90">Findings Reported</div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">#7</div>
+              <div className="text-3xl font-bold mb-2">{STATS.remedyCTF2025}</div>
               <div className="text-sm opacity-90">Remedy CTF 2025</div>
             </div>
           </div>

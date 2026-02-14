@@ -15,6 +15,8 @@ Morpho Blue is a concise lending protocol implementation. This series dives deep
 
 ## Action 1: Market Creation
 
+Morpho Blue is a singleton contract: all markets live inside the same deployed contract rather than being separate market-specific contracts. As a result, creating a new market is just writing a new `MarketParams` entry into storage—cheap compared to deploying a new pool. This also explains why features like flashloans are shared at the protocol level: a single contract can access all supplied liquidity across markets in one transaction.
+
 ```solidity
     function createMarket(MarketParams memory marketParams) external {
         Id id = marketParams.id();

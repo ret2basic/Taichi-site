@@ -1,35 +1,35 @@
-'use client'
 import React from 'react'
 import { Mail, MessageCircle, Github, Twitter, ExternalLink } from 'lucide-react'
+import { AUDIT_REQUEST_URL, GITHUB_URL, TWITTER_URL, TELEGRAM_URL, EMAIL } from '@/lib/constants'
 
 export default function ContactSection() {
   const contactInfo = [
     {
       icon: Mail,
       title: 'Email',
-      value: 'taichiweb3sec@gmail.com',
-      href: 'mailto:taichiweb3sec@gmail.com',
+      value: EMAIL,
+      href: `mailto:${EMAIL}`,
       description: 'Get in touch with our team'
     },
     {
       icon: MessageCircle,
       title: 'Telegram',
       value: 'Taichi Audit Group',
-      href: 'https://t.me/+egUmC7vd9TI4MGM9',
+      href: TELEGRAM_URL,
       description: 'Join our community chat'
     },
     {
       icon: Github,
       title: 'GitHub',
       value: '@TaiChiAuditGroup',
-      href: 'https://github.com/TaiChiAuditGroup',
+      href: GITHUB_URL,
       description: 'View our repositories and portfolio'
     },
     {
       icon: Twitter,
       title: 'Twitter',
       value: '@taichiaudit',
-      href: 'https://x.com/taichiaudit',
+      href: TWITTER_URL,
       description: 'Follow us for security updates'
     }
   ]
@@ -57,7 +57,7 @@ export default function ContactSection() {
               Click the button below to open our audit request form. We'll get back to you within 24-48 hours.
             </p>
             <a
-              href="https://docs.google.com/forms/d/14s22jxDEjYRs1syrSLUQa62FpB4qVLAgbRl6FaXtbBI/viewform?pli=1&ts=670e18d0&pli=1&edit_requested=true"
+              href={AUDIT_REQUEST_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full max-w-xs bg-primary-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-primary-700 transition-colors duration-200 flex items-center justify-center group"
@@ -110,7 +110,7 @@ export default function ContactSection() {
                 If you've discovered a critical vulnerability in one of our audited protocols, please contact us immediately via our emergency channels.
               </p>
               <a
-                href="https://x.com/taichiaudit"
+                href={TWITTER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-primary-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"

@@ -3,26 +3,27 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Calendar, Clock, User, ArrowLeft, Share2, Tag } from 'lucide-react'
-import { getPostBySlug, getAllPosts, getRelatedPosts } from '@/lib/blog'
+import { Calendar, Clock, User, ArrowLeft, Tag } from 'lucide-react'
+import { getPostBySlug, getAllPosts, getRelatedPosts, getSeriesNav } from '@/lib/blog'
 import { formatDate } from '@/lib/utils'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import TableOfContents from '@/components/TableOfContents'
+import SeriesNavigation from '@/components/SeriesNavigation'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
-
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
+import ShareButton from '@/components/ShareButton'
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export async function generateMetadata(
   { params }: BlogPostPageProps,
 ): Promise<Metadata> {
-  const post = getPostBySlug(params.slug)
+  const { slug } = await params
+  const post = getPostBySlug(slug)
 
   if (!post) {
     return {
@@ -68,14 +69,16 @@ export async function generateMetadata(
   }
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = getPostBySlug(params.slug)
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { slug } = await params
+  const post = getPostBySlug(slug)
 
   if (!post) {
     notFound()
   }
 
   const relatedPosts = getRelatedPosts(post, 3)
+  const seriesNav = getSeriesNav(post)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -160,26 +163,34 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
         )}
 
         {/* Article Content */}
-        <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 md:p-12">
-            <MarkdownRenderer content={post.content} />
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex flex-col xl:flex-row gap-8">
+            {/* TOC sidebar */}
+            <aside className="xl:w-64 xl:shrink-0 xl:order-last">
+              <TableOfContents markdown={post.content} />
+            </aside>
 
-          {/* Share Section */}
-          <div className="mt-12 p-6 bg-gray-50 dark:bg-slate-800 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Share this article
-              </h3>
-              <div className="flex items-center space-x-4">
-                <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
-                </button>
+            {/* Main article */}
+            <article className="flex-1 min-w-0">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 md:p-12">
+                <MarkdownRenderer content={post.content} />
               </div>
-            </div>
+
+              {/* Share Section */}
+              <div className="mt-12 p-6 bg-gray-50 dark:bg-slate-800 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Share this article
+                  </h3>
+                  <ShareButton title={post.title} slug={post.slug} />
+                </div>
+              </div>
+
+              {/* Series prev/next navigation */}
+              {seriesNav && <SeriesNavigation nav={seriesNav} />}
+            </article>
           </div>
-        </article>
+        </div>
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
