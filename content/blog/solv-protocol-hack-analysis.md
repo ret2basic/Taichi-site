@@ -21,6 +21,11 @@ On callback-driven deposit paths, one deposit can therefore be counted twice.
 
 ## Executive summary
 
+Solv protocol `BitcoinReserveOffering` contract was exploit on March 6th, 2026 for around $2.7M of loss.
+
+- Tx: [https://app.blocksec.com/phalcon/explorer/tx/eth/0x44e637c7d85190d376a52d89ca75f2d208089bb02b7c4708ad2aaae3a97a958d](https://app.blocksec.com/phalcon/explorer/tx/eth/0x44e637c7d85190d376a52d89ca75f2d208089bb02b7c4708ad2aaae3a97a958d)
+- Code: [https://vscode.blockscan.com/ethereum/0x15f7c1ac69f0c102e4f390e45306bd917f21cfcf](https://vscode.blockscan.com/ethereum/0x15f7c1ac69f0c102e4f390e45306bd917f21cfcf)
+
 `BitcoinReserveOffering` wraps ERC-3525 value into an ERC20-like token through `mint(uint256 sftId_, uint256 amount_)`. The vulnerability is that some deposit branches trigger `onERC721Received()` or `onERC3525Received()` on the wrapper, and those callbacks already call `_mint(...)`. After the callback returns, `mint()` still calls `_mint(...)` again unconditionally. The result is that wrapped share supply can become larger than the underlying SFT value actually deposited, and `burn()` then lets the attacker redeem that inflated share balance for real SFT value.
 
 ## Background knowledge: ERC-3525
