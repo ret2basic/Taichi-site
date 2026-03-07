@@ -28,11 +28,11 @@ The following Morpho doc pages describe the rewards mechanism:
 
 Rewards are generated passively when users:
 
-- supplying assets to a market
-- borrowing from a market
-- or simply depositing collateral without borrowing
+- supply assets to a market
+- borrow from a market
+- or simply deposit collateral without borrowing
 
-Morpho used to use [URD](https://github.com/morpho-org/universal-rewards-distributor/blob/main/src/UniversalRewardsDistributor.sol) for reward distribution, but it now uses [Merkl](https://merkl.xyz/). However, Morpho/Merkl do not magically “push” rewards into your contract—reward tokens can still end up held by your integration contract address:
+Morpho used to use [URD (Universal Rewards Distributor)](https://github.com/morpho-org/universal-rewards-distributor/blob/main/src/UniversalRewardsDistributor.sol) for reward distribution, but it now uses [Merkl](https://merkl.xyz/). However, Morpho/Merkl do not magically “push” rewards into your contract—reward tokens can still end up held by your integration contract address:
 
 - Merkl claiming is parameterized by a `user` address (the Merkle-proof “owner”): integrations fetch claim data for `user={address}` and then call the distributor’s `claim(...)` with that same `user` value.
 - If your integration uses a contract as the position owner (vault/strategy/managed account), then Merkl rewards are attributed to that contract address and claiming will transfer ERC20 reward tokens to the contract.
@@ -46,7 +46,7 @@ In other words: you don’t need a withdrawal function because Morpho pushes rew
 
 cETH code is [here](https://etherscan.io/token/0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5#code). You can use [cUSDC](https://etherscan.io/token/0x39aa39c021dfbae8fac545936693ac917d5e7563#code) as a contrast.
 
-You only need to care about cETH if your integration (contract or off-chain code) is interacting with Compound markets where the underlying is native ETH, i.e. the market’s cToken is cETH. Typical scenarios:
+This item is relevant when your integration touches Morpho's legacy Compound optimizer flavor (Morpho-Compound). You only need to care about cETH if your integration (contract or off-chain code) is interacting with Compound markets where the underlying is native ETH, i.e. the market's cToken is cETH. Typical scenarios:
 
 - Your contract integrates Morpho’s Compound flavor and ends up needing to interact with the underlying cToken (directly or via a “Lens”/market-discovery layer) to:
     - detect the underlying asset (`underlying()`), or
@@ -63,11 +63,18 @@ You only need to care about cETH if your integration (contract or off-chain code
 
 > You can repay/withdraw the whole debt/supply by passing `type(uint256).max` as argument to avoid leaving dust on Morpho.
 
-Morpho does not special-case `type(uint256).max` as “withdraw/repay everything.” Instead, close positions by passing the exact share balance (i.e., use the `shares` input). The interface notes this for withdraw/repay in morpho-blue/src/interfaces/IMorpho.sol.
+In Morpho Blue, all four position functions (`supply`, `withdraw`, `borrow`, `repay`) require exactly one of `assets` or `shares` to be zero (`exactlyOneZero(assets, shares)`). Morpho Blue does not special-case `type(uint256).max` as "withdraw/repay everything" — if you pass `type(uint256).max` as `shares`, the subsequent `position[id][onBehalf].supplyShares -= shares` will underflow and revert because no one holds that many shares.
+
+Instead, close positions by passing the exact share balance (i.e., use the `shares` input with `assets = 0`). The interface documents this for both `withdraw` and `repay` in morpho-blue/src/interfaces/IMorpho.sol:
 
 ```solidity
+    // For withdraw:
     /// @dev It is advised to use the `shares` input when withdrawing the full position to avoid reverts due to
     /// conversion roundings between shares and assets.
+
+    // For repay:
+    /// @dev It is advised to use the `shares` input when repaying the full position to avoid reverts due to conversion
+    /// roundings between shares and assets.
 ```
 
 ### 2. Positions are non-fungible
@@ -178,7 +185,7 @@ ERC4626 intentionally separates “where value goes” from “whose shares are 
     }
 ```
 
-That has two important integration consequences.
+This separation has two important integration consequences.
 
 First, you only get “withdraw on behalf of someone else” if the share owner (`owner`) previously approved the caller for at least `shares`. If you pass `owner = user` but your integration contract is the `caller`, the call will revert unless the user approved your contract’s share allowance.
 

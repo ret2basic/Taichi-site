@@ -54,7 +54,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
   }, [])
 
   return (
-    <div className={`prose prose-lg max-w-none dark:prose-invert ${className}`}>
+    <div className={`prose prose-lg max-w-none prose-invert ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex, rehypeRaw]}
@@ -90,7 +90,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               
               return (
                 <div className="relative">
-                  <div className="absolute top-2 right-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2 py-1 rounded">
+                  <div className="absolute top-2 right-2 text-xs text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded">
                     {language}
                   </div>
                   <SyntaxHighlighter
@@ -127,7 +127,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             
             return (
               <code 
-                className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
+                className="bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono"
                 {...props}
               >
                 {children}
@@ -203,7 +203,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           table({ children, ...props }: React.ComponentPropsWithoutRef<'table'>) {
             return (
               <div className="overflow-x-auto my-6">
-                <table className="min-w-full border border-gray-300 dark:border-gray-700" {...props}>
+                <table className="min-w-full border border-gray-200 dark:border-slate-700" {...props}>
                   {children}
                 </table>
               </div>
@@ -252,7 +252,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+                  className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline"
                   {...props}
                 >
                   {children}
@@ -264,7 +264,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
             return (
               <a
                 href={href}
-                className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline"
+                className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline"
                 {...props}
               >
                 {children}
@@ -291,7 +291,7 @@ export const proseStyles = `
   .prose li { @apply leading-relaxed }
   .prose strong { @apply font-semibold }
   .prose em { @apply italic }
-  .prose hr { @apply my-8 border-gray-300 dark:border-gray-700 }
+  .prose hr { @apply my-8 border-slate-700 }
   
   /* Code styles */
   .prose pre { @apply my-6 }
@@ -302,6 +302,6 @@ export const proseStyles = `
   .prose .katex { @apply text-base }
   
   /* Table styles */
-  .prose th { @apply bg-gray-50 dark:bg-gray-800 font-semibold p-3 text-left }
-  .prose td { @apply p-3 border-t border-gray-300 dark:border-gray-700 }
+  .prose th { @apply bg-slate-800 font-semibold p-3 text-left }
+  .prose td { @apply p-3 border-t border-slate-700 }
 ` 

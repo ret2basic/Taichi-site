@@ -151,7 +151,7 @@ Here $u_{target}$ is a constant defined in `ConstantsLib`: `TARGET_UTILIZATION =
 
 ### Mental model: curve + anchor
 
-With that motivation in mind, it helps to view AdaptiveCurve as having **two layers**:
+With that motivation in mind, it helps to view `AdaptiveCurveIrm` as having **two layers**:
 
 1. **Instantaneous layer (the curve):** given the current utilization $u$, compute a signed normalized error $e(u)$ (stored as `err`) and apply a curve to scale a base rate.
 2. **Slow-moving layer (the anchor):** update the base rate over time based on persistent error.
@@ -168,14 +168,14 @@ Even if two markets are both at 90% utilization today, their `rateAtTarget` can 
 
 ### BorrowRateUpdate: why there are two rates
 
-When Morpho calls `borrowRate()` it emits `BorrowRateUpdate(id, avgBorrowRate, rateAtTarget)`. It’s tempting to assume both numbers represent "the borrow rate", but they serve different purposes:
+When Morpho calls `borrowRate()`, it emits `BorrowRateUpdate(id, avgBorrowRate, rateAtTarget)`. It’s tempting to assume both numbers represent "the borrow rate", but they serve different purposes:
 
 - `avgBorrowRate`: the **average per-second borrow rate** over the last accrual interval. This is the rate Morpho plugs into $e^{rt}-1$ in `_accrueInterest()`.
 - `rateAtTarget`: the **end-of-interval anchor** (the updated $r_{90\%}$) that will be used as the starting point next time.
 
 That split is the whole reason the implementation has the slightly unusual signature `(avgRate, endRateAtTarget)`.
 
-If you want to compare rates in human units, convert a per-second WAD rate $r$ to an annualized approximation:
+If you want to compare rates in human units, first de-WAD a per-second rate (divide by $1e18$) to get a plain number $r$, then annualize:
 
 - APR (small-rate approximation): $\text{APR} \approx r \cdot \text{secondsPerYear}$
 - APY (continuous compounding): $\text{APY} = e^{r \cdot \text{secondsPerYear}} - 1$
@@ -266,7 +266,7 @@ This asymmetry is intentional: small moves above target represent a much more ur
 
 ![Error_function.png](/images/blog/Error_function.png)
 
-When $u <= u_{target}$ the denominator is $u_{target}$; when $u > u_{target}$ the denominator is $1 - u_{target}$.
+When $u \leq u_{target}$ the denominator is $u_{target}$; when $u > u_{target}$ the denominator is $1 - u_{target}$.
 
 After computing `err`, the IRM reads the prior `rateAtTarget`:
 
@@ -414,7 +414,7 @@ $$
 \Rightarrow \frac{1}{r}\,\frac{dr}{dt} = \text{speed}
 $$
 
-(Note that this is equivalent to $\frac{\Delta{r}}{r\Delta{t}}$ which models percentage change within a time range. For example, $\Delta{r} = 10$ and $r = 100$, then within 10 seconds the percentage change is 1% per second.)
+(Note that this is equivalent to $\frac{\Delta{r}}{r\Delta{t}}$, which models percentage change within a time range. For example, if $\Delta{r} = 10$, $r = 100$, and $\Delta t = 10$ seconds, then the percentage change is $\frac{10}{100 \cdot 10} = 1\%$ per second.)
 
 Multiplying both sides by $r$ gives:
 
@@ -433,8 +433,7 @@ $$
 Integrate both sides from $t$ to $t+\Delta t$ (and use that `speed` is treated as constant over the interval):
 
 $$
-\int_{r(t)}^{r(t+\Delta t)} \frac{1}{r}\,dr
-\int_{t}^{t+\Delta t} \text{speed}\, dt
+\int_{r(t)}^{r(t+\Delta t)} \frac{1}{r}\,dr = \int_{t}^{t+\Delta t} \text{speed}\, dt
 $$
 
 $$
@@ -449,7 +448,7 @@ $$
 
 That’s exactly the shape implemented in `_newRateAtTarget()` via `startRateAtTarget * exp(speed * elapsed)`.
 
-In the Solidity variables, this is `linearAdaptation = speed * elapsed` and the update is `startRateAtTarget * exp(linearAdaptation)` (followed by clamping).
+In Solidity, this is `linearAdaptation = speed * elapsed` and the update is `startRateAtTarget * exp(linearAdaptation)` (followed by clamping).
 
 This "relative" (multiplicative) update has a few practical advantages on-chain:
 
@@ -462,7 +461,7 @@ This "relative" (multiplicative) update has a few practical advantages on-chain:
 Once `avgRateAtTarget` (the trapezoidal average of the anchor over the interval) is computed, `_curve()` applies the piecewise slope based on `err` ($e(u)$). In code it is parameterized by CURVE_STEEPNESS ($k_d = 4$):
 
 $$
-r = \begin{cases}\left(\left(1 - \frac{1}{k_d}\right) \cdot e(u) + 1\right) \cdot \bar r_{90\%} & \text{if } u \leq u_{target} \\[10pt]\left((k_d - 1) \cdot e(u) + 1\right) \cdot \bar r_{90\%} & \text{if } u > u_{target}\end{cases}
+r = \begin{cases}\left(\left(1 - \frac{1}{k_d}\right) \cdot e(u) + 1\right) \cdot \bar r_{90\%} & \text{if } e(u) < 0 \\[10pt]\left((k_d - 1) \cdot e(u) + 1\right) \cdot \bar r_{90\%} & \text{if } e(u) \geq 0\end{cases}
 $$
 
 Here $\bar r_{90\%}$ is **the average anchor** `avgRateAtTarget` returned by the trapezoidal step, and $r$ is the average borrow rate that Morpho uses for $e^{rt}-1$. The stored `endRateAtTarget` is kept only to seed the next interval.
@@ -475,9 +474,9 @@ $$
 
 `_curve()` doesn’t re-average over time; it takes an already averaged-at-target rate and scales it by how far utilization is from 90%. Because the curve is linear in its first argument, the result stays an average-type quantity: if utilization is on target (`err = 0`), you get the target average; if utilization drifts, you get that same average uniformly tilted up or down by the utilization error factor.
 
-The `+1` is the intercept that makes the curve pass through the anchor rate. In `_curve()` the borrow rate is modeled as $r = (\text{coeff} \cdot e(u) + 1)\,\bar r_{90\%}$, so when the utilization error $e(u)=0$ (exactly at the 90 % target) the term inside parentheses evaluates to 1 and Morpho returns the average anchor $\bar r_{90\%}$ instead of zero.
+The `+1` is the intercept that makes the curve pass through the anchor rate. In `_curve()` the borrow rate is modeled as $r = (\text{coeff} \cdot e(u) + 1)\,\bar r_{90\%}$, so when the utilization error $e(u)=0$ (exactly at the 90% target), the term inside parentheses evaluates to 1 and Morpho returns the average anchor $\bar r_{90\%}$ instead of zero.
 
-The curve is asymmetric: rates ramp up much faster (4x faster, you can see this when you substitute $k_d$ into the formula) when utilization is above target than they decay when utilization is below target. **But why design this way?** When utilization is above target, lenders’ funds are nearly fully deployed and any shock (withdrawals, borrower growth, price moves) risks hitting a hard liquidity wall. Raising rates aggressively in that regime creates strong pressure for borrowers to repay or for new suppliers to enter, restoring a safe buffer quickly. Conversely, when utilization is well below target the situation is merely "cash drag": capital is idle but not threatening solvency, so the protocol only trims rates gently to encourage more borrowing without shocking existing positions. In short, the asymmetric slope reflects two different economic priorities: severe penalties to cure liquidity stress when the pool is tight, and mild incentives to avoid over-penalizing lenders when the pool has slack.
+The curve is asymmetric: rates ramp up 4× steeper above target than they decay below target. Concretely, the slope above target is $k_d - 1 = 3$ while the slope below target is $1 - 1/k_d = 0.75$, a ratio of $(k_d - 1)/(1 - 1/k_d) = k_d = 4$. At the extremes, $e(u)=-1$ gives $r = \bar r_{90\%}/4$ (minimum) and $e(u)=1$ gives $r = 4\,\bar r_{90\%}$ (maximum), so the full borrow-rate range spans $[\bar r_{90\%}/4,\; 4\,\bar r_{90\%}]$. **But why design this way?** When utilization is above target, lenders’ funds are nearly fully deployed and any shock (withdrawals, borrower growth, price moves) risks hitting a hard liquidity wall. Raising rates aggressively in that regime creates strong pressure for borrowers to repay or for new suppliers to enter, restoring a safe buffer quickly. Conversely, when utilization is well below target the situation is merely "cash drag": capital is idle but not threatening solvency, so the protocol only trims rates gently to encourage more borrowing without shocking existing positions. In short, the asymmetric slope reflects two different economic priorities: severe penalties to cure liquidity stress when the pool is tight, and mild incentives to avoid over-penalizing lenders when the pool has slack.
 
 #### Full derivation as in the long comment
 
@@ -598,7 +597,7 @@ Note: in the contract, `_newRateAtTarget(start, x)` computes `start * exp(x)` an
 
 ### Visualization of trapezoidal rule
 
-Here is a [visualization in desmos](https://www.desmos.com/calculator/gzzs05rxjd) for the trapezoidal rule above. We don’t consider `_curve()` for simplicity: the visualization is made for $f(x) = \text{startRateAtTarget} \cdot e^{\text{speed} \cdot x}$. The visualization doesn’t mirror what is going on in the contract faithfully: the purpose is for readers to understand the trapezoidal rule intuitively so we sacrificed some rigor.
+Here is a [visualization in desmos](https://www.desmos.com/calculator/gzzs05rxjd) for the trapezoidal rule above. We don’t consider `_curve()` for simplicity: the visualization is made for $f(x) = \text{startRateAtTarget} \cdot e^{\text{speed} \cdot x}$. The visualization doesn’t mirror the contract faithfully: the purpose is to build intuition for the trapezoidal rule, so we sacrificed some rigor.
 
 The exact parameters used in the visualization are:
 

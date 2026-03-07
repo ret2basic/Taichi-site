@@ -81,17 +81,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const seriesNav = getSeriesNav(post)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#090e19]">
       <Navigation />
       
       <main className="pt-20">
         {/* Article Header */}
-        <header className="bg-white dark:bg-slate-900 py-12 border-b border-gray-200 dark:border-slate-700">
+        <header className="bg-gray-50 dark:bg-[#090e19] py-12 border-b border-gray-200 dark:border-slate-800">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Back Link */}
             <Link 
               href="/blog"
-              className="inline-flex items-center text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 mb-8 transition-colors"
+              className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 mb-8 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blog
@@ -99,7 +99,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
             {/* Category Badge */}
             <div className="mb-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300">
                 <Tag className="w-4 h-4 mr-1" />
                 {post.category}
               </span>
@@ -111,12 +111,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </h1>
 
             {/* Excerpt */}
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-500 dark:text-slate-400 mb-8 leading-relaxed">
               {post.excerpt}
             </p>
 
             {/* Meta Information */}
-            <div className="flex flex-wrap items-center gap-6 text-gray-600 dark:text-gray-400">
+            <div className="flex flex-wrap items-center gap-6 text-gray-400 dark:text-slate-500">
               <div className="flex items-center">
                 <User className="w-4 h-4 mr-2" />
                 <span>{post.author}</span>
@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   {post.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm"
+                      className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 rounded-full text-sm"
                     >
                       {tag}
                     </span>
@@ -151,7 +151,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Featured Image */}
         {post.image && (
-          <div className="relative h-64 md:h-80 lg:h-96 bg-white dark:bg-gray-900 border-y border-gray-200 dark:border-gray-700">
+          <div className="relative h-64 md:h-80 lg:h-96 bg-gray-100 dark:bg-slate-900 border-y border-gray-200 dark:border-slate-800">
             <Image
               src={post.image}
               alt={post.title}
@@ -172,12 +172,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
             {/* Main article */}
             <article className="flex-1 min-w-0">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 md:p-12">
+              <div className="bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 rounded-2xl p-8 md:p-12">
                 <MarkdownRenderer content={post.content} />
               </div>
 
               {/* Share Section */}
-              <div className="mt-12 p-6 bg-gray-50 dark:bg-slate-800 rounded-2xl">
+              <div className="mt-12 p-6 bg-gray-100 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-800 rounded-2xl">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Share this article
@@ -205,9 +205,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   href={`/blog/${relatedPost.slug}`}
                   className="group"
                 >
-                  <article className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-200">
+                  <article className="bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:border-gray-300 dark:hover:border-slate-700 transition-all duration-200">
                     {relatedPost.image && (
-                      <div className="relative h-48 bg-white dark:bg-gray-900">
+                      <div className="relative h-48 bg-gray-100 dark:bg-slate-900">
                         <Image
                           src={relatedPost.image}
                           alt={relatedPost.title}
@@ -218,7 +218,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     )}
                     <div className="p-6">
                       <div className="flex items-center space-x-4 mb-4">
-                        <span className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <span className="bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 px-3 py-1 rounded-full text-sm font-medium">
                           {relatedPost.category}
                         </span>
                       </div>
@@ -227,11 +227,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         {relatedPost.title}
                       </h3>
                       
-                      <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                      <p className="text-gray-500 dark:text-slate-400 mb-4 line-clamp-3">
                         {relatedPost.excerpt}
                       </p>
                       
-                      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center justify-between text-sm text-gray-400 dark:text-slate-500">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
                           {formatDate(relatedPost.date)}

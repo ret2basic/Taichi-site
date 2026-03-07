@@ -2,67 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Using system fonts for better performance and reliability */
+/* ─── Base ──────────────────────────────────────────────────────── */
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 17, 24, 39;
+  --background-rgb: 249, 250, 251;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+html.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-rgb: 9, 14, 25;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: rgb(var(--background-rgb));
 }
 
+/* Subtle dot grid for dark sections */
+.grid-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+.dark .grid-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+}
+
+/* Accent gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.gradient-bg {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.gradient-border {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1px;
-  border-radius: 0.5rem;
-}
-
-.gradient-border > * {
-  background: white;
-  border-radius: calc(0.5rem - 1px);
-}
-
-.dark .gradient-border > * {
-  background: #1a1a1a;
-}
-
-.noise-texture {
-  background-image: 
-    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0);
-  background-size: 20px 20px;
-}
-
-.dark .noise-texture {
-  background-image: 
-    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+/* Glow effect for hero accent */
+.glow {
+  box-shadow: 0 0 60px rgba(14, 165, 233, 0.15), 0 0 120px rgba(14, 165, 233, 0.05);
 }
 
 html {
@@ -194,12 +170,16 @@ html {
 }
 
 .prose hr {
-  @apply my-10 border-gray-200 dark:border-gray-700;
+  @apply my-10 border-gray-200;
+}
+
+.dark .prose hr {
+  @apply border-slate-700;
 }
 
 /* Code styles - RareSkills style */
 .prose pre {
-  @apply my-6 overflow-x-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-4;
+  @apply my-6 overflow-x-auto bg-gray-50 rounded-lg p-4;
   font-family: var(--font-fira-code), monospace;
   font-size: 0.875rem;
   line-height: 1.6;
@@ -207,8 +187,10 @@ html {
 }
 
 .dark .prose pre {
+  @apply bg-slate-900;
   border: 1px solid #374151;
 }
+
 
 .prose code {
   font-family: var(--font-fira-code), monospace;
@@ -217,7 +199,7 @@ html {
 }
 
 .prose :not(pre) > code {
-  @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md;
+  @apply bg-gray-100 px-2 py-1 rounded-md;
   font-family: var(--font-fira-code), monospace;
   font-size: 0.875rem;
   font-weight: 500;
@@ -226,6 +208,7 @@ html {
 }
 
 .dark .prose :not(pre) > code {
+  @apply bg-slate-800;
   color: #f87171;
   border: 1px solid #374151;
 }
@@ -293,20 +276,32 @@ html {
 
 /* Table styles */
 .prose table {
-  @apply min-w-full border border-gray-300 dark:border-gray-700;
+  @apply min-w-full border border-gray-300;
+}
+
+.dark .prose table {
+  @apply border-slate-700;
 }
 
 .prose th {
-  @apply bg-gray-50 dark:bg-gray-800 font-semibold p-3 text-left border-b border-gray-300 dark:border-gray-700;
+  @apply bg-gray-50 font-semibold p-3 text-left border-b border-gray-300;
+}
+
+.dark .prose th {
+  @apply bg-slate-800 border-slate-700;
 }
 
 .prose td {
-  @apply p-3 border-b border-gray-300 dark:border-gray-700;
+  @apply p-3 border-b border-gray-300;
+}
+
+.dark .prose td {
+  @apply border-slate-700;
 }
 
 /* Blockquote styles - RareSkills style */
 .prose blockquote {
-  @apply border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 px-6 py-4 my-6;
+  @apply border-l-4 border-blue-500 bg-blue-50 px-6 py-4 my-6;
   font-style: italic;
   font-size: 1.125rem;
   line-height: 1.7;
@@ -315,8 +310,8 @@ html {
 }
 
 .dark .prose blockquote {
+  @apply bg-blue-900/20;
   color: #d1d5db;
-  background: rgba(59, 130, 246, 0.1);
 }
 
 .prose blockquote p {

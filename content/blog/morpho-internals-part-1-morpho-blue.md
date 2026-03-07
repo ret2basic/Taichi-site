@@ -11,7 +11,7 @@ featured: false
 image: "/images/blog/Morpho.jpg"
 ---
 
-Morpho Blue is a concise lending protocol implementation. This series dives deep into Morpho internals and each component will be discussed in a separate article. In part 1, we first walk through Morpho.sol following the order of user actions and in the end we discuss the interest accrual math.
+Morpho Blue is a concise lending protocol implementation. This series dives deep into Morpho internals; each component will be discussed in a separate article. In part 1, we walk through Morpho.sol following the order of user actions, and at the end we discuss the interest accrual math.
 
 ## Action 1: Market Creation
 
@@ -37,7 +37,7 @@ Morpho Blue is a singleton contract: all markets live inside the same deployed c
 
 ### ID calculation
 
-The code takes `MarketParams` from user and stores it in memory. The market ID (unique identifier representing which market we are working with) is computed as a hash of user input. This design avoids SLOAD in the future: if the code accepts market ID from user, it will need to perform `idToMarketParams[id]` lookup for each call, which is expensive. Instead, in this design the code lets user provide the entire `MarketParams` struct and only performs a keccak256 computation and use that hash as ID. If the user "lies" about an entry in the `MarketParams` struct, the ID will be completely different and very likely not registered, therefore the security isn’t compromised.
+The code takes `MarketParams` from the user as a `memory` parameter. The market ID (unique identifier representing which market we are working with) is computed as a hash of this input. This design avoids SLOADs in subsequent calls: if the code accepted only a market ID from the user, it would need to perform an `idToMarketParams[id]` storage lookup every time, which is expensive. Instead, the code lets the user provide the entire `MarketParams` struct and only performs a keccak256 computation, using that hash as the ID. If the user "lies" about an entry in the `MarketParams` struct, the ID will be completely different and will map to a market whose `lastUpdate` is zero, causing the transaction to revert. Therefore the security isn’t compromised.
 
 ```solidity
 Id id = marketParams.id();
@@ -139,7 +139,7 @@ In "Advanced" tab, we see more information about the underlying components used 
 
 ![Advanced_Tab.png](/images/blog/Advanced_Tab.png)
 
-- Oracle also has a **"reference price"**. This is a backup oracle price used to sanity-check whether the main oracle returns a reasonable price.
+- Oracle also has a **"reference price"**. In Morpho's oracle design, this refers to an additional price feed that participates in constructing the final collateral/loan price (the oracle mechanism will be discussed in detail in a later article).
 - **IRM** (interest rate model) is the engine behind the scenes that pushes utilization towards target utilization, as we already discussed.
 - Liquidation has concepts of **"penalty"** and **"bad debt"**.
     - Penalty is the portion that the borrower loses when a liquidator liquidates the position. The borrower’s penalty is the liquidator’s incentive. We will discuss this in depth in the LIF part of this article.
@@ -147,7 +147,9 @@ In "Advanced" tab, we see more information about the underlying components used 
 
 ## Action 2: Supply and Withdraw
 
-Supply / withdraw flow is related to interest earning only and this supplied asset can’t be used as collateral for borrowing. Note that this design is different from other lending protocols such as Compound and Aave. The collateral related functions (`supplyCollateral()` and `withdrawCollateral()`) will be discussed in Action 3.
+The supply / withdraw flow is related to interest earning only — the supplied assets cannot be used as collateral for borrowing. Note that this design is different from other lending protocols such as Compound and Aave. The collateral-related functions (`supplyCollateral()` and `withdrawCollateral()`) will be discussed in Action 3.
+
+**Before diving in, a quick note on the share system and scaling.** Morpho Blue uses an ERC4626-style share mechanism to track each user's claim on the pool. Rather than recording how many tokens you deposited, the contract records *shares*. As interest accrues, the total assets backing those shares grow while the number of shares stays constant, so each share becomes worth more over time. Conversions between assets and shares use `SharesMathLib`, which adds **virtual shares** (`VIRTUAL_SHARES = 1e6`) and **virtual assets** (`VIRTUAL_ASSETS = 1`) to prevent ERC4626 inflation attacks (front-running the first deposit to manipulate the share price). Throughout the codebase, all fixed-point quantities are **WAD-scaled** (1 WAD = $10^{18}$): a value like 0.965 is stored as `0.965e18`.
 
 ### Supply
 
@@ -183,9 +185,9 @@ Supply / withdraw flow is related to interest earning only and this supplied ass
     }
 ```
 
-User is expected to pass in `marketParams` for saving gas since reading from storage is expensive. The code computes id onchain so that malicious user can’t provide a non-existent `marketParams`.
+The user is expected to pass in `marketParams` to save gas since reading from storage is expensive. The code computes the ID on-chain from the struct so that a malicious user cannot make the contract operate on an unregistered market.
 
-`UtilsLib.exactlyOneZero()` is an assembly function that returns true iff one of the two inputs is 0 (just a simple XOR):
+`UtilsLib.exactlyOneZero()` is a small assembly function that returns true if and only if exactly one of the two inputs is zero. It works by XOR-ing the boolean results of `iszero(x)` and `iszero(y)`:
 
 ```solidity
     function exactlyOneZero(uint256 x, uint256 y) internal pure returns (bool z) {
@@ -195,13 +197,13 @@ User is expected to pass in `marketParams` for saving gas since reading from sto
     }
 ```
 
-This check is needed because the code expects user to either supply by asset or supply by share, it won’t make sense to provide non-zero asset and share. This pattern is for merging two similar functionalities into one single function, otherwise we will have two functions like "supplyByAsset" and "supplyByShare".
+This check is needed because the code expects the user to either supply by asset amount or by share amount — it wouldn't make sense to provide both. This pattern merges two similar operations into a single function, avoiding the need for separate functions like `supplyByAsset` and `supplyByShare`.
 
-`onBehalf` allows user to supply for some other address. This is the usual operator design for integration.
+`onBehalf` allows a user to supply on behalf of another address. This is the standard operator pattern used by integrators (e.g., vaults, aggregators).
 
-We will go over `_accrueInterest()` at the end of this article, ignore it for now.
+We will go over `_accrueInterest()` at the end of this article; ignore it for now.
 
-Then the code either converts asset to share or share to asset depending on what user specified when calling the function. Both asset and share are needed for updating some state variables (supplyShares, totalSupplyShares, totalSupplyAssets). Here share is rounded down and asset is rounded up. In general, the contract picks rounding modes case-by-case to be conservative: mint fewer shares than the assets justify, burn more shares than the assets being withdrawn, require more shares when borrowing, and accept more assets when repaying. The gold rule is that rounding direction must favor protocol.
+Then the code either converts assets to shares or shares to assets depending on what the user specified. Both asset and share are needed for updating some state variables (supplyShares, totalSupplyShares, totalSupplyAssets). Here shares are rounded down and assets are rounded up. In general, the contract picks rounding modes case-by-case to be conservative: mint fewer shares than the assets justify, burn more shares than the assets being withdrawn, require more borrow shares when borrowing, and accept more assets when repaying. The golden rule is that rounding direction must favor the protocol.
 
 Next the code updates 3 state variables for reflecting the change:
 
@@ -218,7 +220,7 @@ Next the code updates 3 state variables for reflecting the change:
 - `market[id].totalSupplyShares += shares.toUint128();` ← Market-level accounting of shares total
 - `market[id].totalSupplyAssets += assets.toUint128();` ← Market-level accounting of assets total
 
-Then there is an optional callback functionality. At last the code pulls supplied tokens from the user (the user has to approve ahead before calling `supply()`).
+Then there is an optional callback (useful for flash-supply patterns). Finally, the code pulls the supplied tokens from the user (the user must have approved the Morpho contract beforehand).
 
 ### Withdraw
 
@@ -258,7 +260,7 @@ Then there is an optional callback functionality. At last the code pulls supplie
     }
 ```
 
-`supply()` doesn’t have this check because user can supply for any other user, but `withdraw()` must have this check for obvious reason:
+`supply()` doesn't have this check because a user can supply for any other user, but `withdraw()` must have this check for obvious reasons:
 
 ```solidity
     function _isSenderAuthorized(address onBehalf) internal view returns (bool) {
@@ -272,7 +274,7 @@ After that the code performs a liquidity check: `market[id].totalBorrowAssets <=
 
 ## Action 3: supplyCollateral and withdrawCollateral
 
-As we mentioned earlier, `supply()` and `withdraw()` are related to the interest-earning functionality only, the tokens provided via `supply()` can’t be used as collateral. The collateral related functions are `supplyCollateral()` and `withdrawCollateral()`.
+As we mentioned earlier, `supply()` and `withdraw()` are related to the interest-earning functionality only — the tokens provided via `supply()` cannot be used as collateral. The collateral-related functions are `supplyCollateral()` and `withdrawCollateral()`.
 
 ### supplyCollateral
 
@@ -307,7 +309,7 @@ struct Position {
 }
 ```
 
-A natural question to ask is: why do most functions in Morpho.sol call `_accrueInterest(marketParams, id);`, but `supplyCollateral()` is the only exception? This is because `supplyCollateral()` essentially only performs `position[id][onBehalf].collateral += assets.toUint128();`, and this state variable update does not depend on interest accrual or any state variable that is updated during interest accrual.
+A natural question to ask is: why do most market-level functions in Morpho.sol call `_accrueInterest(marketParams, id);`, but `supplyCollateral()` does not? (Note that `flashLoan()` also skips interest accrual, but that function is not market-specific.) The reason is that `supplyCollateral()` essentially only performs `position[id][onBehalf].collateral += assets.toUint128();`, and this state variable update does not depend on interest accrual or any state variable that is updated during interest accrual.
 
 ### withdrawCollateral
 
@@ -363,15 +365,15 @@ Health check is needed here to avoid the situation where the user withdraws coll
     }
 ```
 
-Here collateral price is the price of the collateral token denominated in the loan token. In other words it is collateral token : loan token ratio. More precisely, IOracle.sol says this price "Returns the price of 1 asset of collateral token quoted in 1 asset of loan token, scaled by 1e36." The price fetched from the oracle is used to compute max borrow amount for this user.
+Here collateral price is the price of the collateral token denominated in the loan token — in other words, the collateral : loan token exchange rate. More precisely, `IOracle.sol` specifies that this price "returns the price of 1 asset of collateral token quoted in 1 asset of loan token, scaled by 1e36." (The `ORACLE_PRICE_SCALE` constant is $10^{36}$.) The price fetched from the oracle is used to compute the max borrow amount for a given user.
 
 The mechanism of the oracle will be discussed in a future article.
 
-The inner level of `_isHealthy()` computes the current asset amount that the user borrowed and the maximum that the user can borrow. If former value doesn’t exceed the later value then the position is still healthy. The formula used here is:
+The inner level of `_isHealthy()` computes the current asset amount that the user borrowed and the maximum that the user can borrow. If the former doesn't exceed the latter then the position is still healthy. The formula used here is:
 
-- `borrowed = "borrowShares converted to asset"`, rounding up ← this rounding direction favors protocol because more "borrowed" means more debt for the user
-- `maxBorrow = collateral * collateralPrice * LLTV / ORACLE_PRICE_SCALE`, rounding down ← this rounding direction favors protocol too because less max borrow amount is a restriction put on user
-    - LLTV stands for "[Liquidation Loan-To-Value](https://docs.morpho.org/build/borrow/concepts/ltv#liquidation-loan-to-value-lltv)" and it is a hardcoded value defined during market creation. [Doc](https://docs.morpho.org/curate/tutorials-market-v1/creating-market/#fill-all-attributes) mentions that governance had approved a list of LLTV values, so you must choose from this list when you create market:
+- `borrowed = "borrowShares converted to assets"`, rounding up ← this rounding direction favors the protocol because more "borrowed" means more debt for the user
+- `maxBorrow = collateral * collateralPrice / ORACLE_PRICE_SCALE * LLTV / WAD`, rounding down at each step ← this rounding direction favors the protocol too because a smaller max-borrow amount is a tighter restriction on the user. (In the code, `mulDivDown` handles the price conversion and `wMulDown` handles the LLTV multiplication, both rounding down.)
+    - LLTV stands for "[Liquidation Loan-To-Value](https://docs.morpho.org/build/borrow/concepts/ltv#liquidation-loan-to-value-lltv)" and it is a hardcoded value defined during market creation. [The docs](https://docs.morpho.org/curate/tutorials-market-v1/creating-market/#fill-all-attributes) mention that governance has approved a list of LLTV values, so you must choose from this list when you create a market:
         - 0%
         - 38.5%
         - 62.5%
@@ -381,11 +383,11 @@ The inner level of `_isHealthy()` computes the current asset amount that the use
         - 94.5%
         - 96.5%
         - 98.0%
-    - Doc also defines theoretical concepts such as [LTV](https://docs.morpho.org/build/borrow/concepts/ltv#how-to-calculate-ltv) (Loan-To-Value) and [Health Factor](https://docs.morpho.org/build/borrow/concepts/ltv#health-factor), but these concepts are not directly computed in the code. The code only compares `maxBorrow ≥ borrowed`, which is mathematically equivalent to LTV and Health Factor calculation and this approach avoids some division math to avoid precision loss. Also division is expensive on EVM so there is a good reason to avoid it.
+    - The docs also define theoretical concepts such as [LTV](https://docs.morpho.org/build/borrow/concepts/ltv#how-to-calculate-ltv) (Loan-To-Value) and [Health Factor](https://docs.morpho.org/build/borrow/concepts/ltv#health-factor), but these concepts are not directly computed in the code. The code only compares `maxBorrow >= borrowed`, which is mathematically equivalent to the LTV and Health Factor calculations. This approach avoids division, preventing precision loss and saving gas (division is expensive on the EVM).
 
 ## Action 4: Borrow and Repay
 
-Until this point you should be very familiar with the coding pattern of Morpho Blue. The borrow/repay flow is very similar to `withdrawCollateral()` and you should be able to understand the code instantaneously.
+By this point you should be very familiar with the coding pattern of Morpho Blue. The borrow/repay flow is very similar to the supply/withdraw flow and you should be able to understand the code readily.
 
 ### Borrow
 
@@ -429,7 +431,7 @@ The only thing worth discussing here is the rounding direction:
 - `shares = assets.toSharesUp(market[id].totalBorrowAssets, market[id].totalBorrowShares);` ← This is borrowed shares, so rounding up favors protocol (more borrowed shares means more debt for user).
 - `assets = shares.toAssetsDown(market[id].totalBorrowAssets, market[id].totalBorrowShares);` ← `assets` is the token amount sent to `receiver`; rounding down favors the protocol (the borrower gets slightly fewer assets for a given number of shares).
 
-Rest of the code such as the health check and liquidity check is pretty intuitive for a lending protocol.
+The rest of the code (the health check and liquidity check) is straightforward for a lending protocol.
 
 ### Repay
 
@@ -483,7 +485,7 @@ Let’s write out all the possible cases:
 - If x ≤ y, `gt(x, y)` returns 0, `sub(x, y)` underflows (wraps) in `uint256`, but `mul(0, <anything>) = 0`.
 - Therefore this assembly returns either x - y or 0 but never returns anything negative.
 
-Back to `repay()`, the line `market[id].totalBorrowAssets = UtilsLib.zeroFloorSub(market[id].totalBorrowAssets, assets).toUint128();` means computing `market[id].totalBorrowAssets - assets` but clamping the result to 0 if it would underflow. So basically here we allow the user to repay more than necessary and this clamp avoids an underflow.
+Back to `repay()`, the line `market[id].totalBorrowAssets = UtilsLib.zeroFloorSub(market[id].totalBorrowAssets, assets).toUint128();` computes `market[id].totalBorrowAssets - assets` but clamps the result to 0 if it would underflow. The code allows the user to repay slightly more than necessary and this clamp prevents a revert. (As the code comment notes, `assets` may exceed `totalBorrowAssets` by 1 due to rounding.)
 
 ## Action 5: Flashloan
 
@@ -503,7 +505,7 @@ No fee, no need to repay manually: the code sends you tokens, then pulls them ba
     }
 ```
 
-**WARNING:** The easy part of the codebase ends here. Action 6 and 7 are hardcore, be prepared.
+**WARNING:** The easy part of the codebase ends here. Actions 6 and 7 are more involved — be prepared.
 
 ## Action 6: Liquidation
 
@@ -524,7 +526,7 @@ The most crucial functions in this codebase are `liquidate()` and `_accrueIntere
         _accrueInterest(marketParams, id);
 ```
 
-Next you will see some code enclosed in curly braces `{ ... }` (this is for preventing "Stack Too Deep" error). Inside the block it performs the following computations:
+Next you will see some code enclosed in bare curly braces `{ ... }` (this is a scoping block to prevent the "Stack Too Deep" compiler error). Inside the block the code performs the following computations:
 
 - Fetch collateral price from oracle
 - Perform health check to make sure the position isn’t healthy
@@ -601,9 +603,9 @@ The following graph from the docs visualizes this relationship:
 
 Just from the graph you can tell:
 
-1. LIF is lower bounded by 1.00 and upper bounded by 1.15
-2. It stays constant 1.15 until LLTV is around 0.55 then it starts to decrease linearly
-3. Higher the LLTV, lower the LIF
+1. LIF is always strictly above 1.0 (since LLTV < 100% is enforced by the code) and capped at 1.15
+2. It stays constant at 1.15 until LLTV is around 0.565, then it starts to decrease (the formula is a hyperbola $1/(ax+b)$, though it looks roughly linear over the visible range)
+3. The higher the LLTV, the lower the LIF
 
 Simply speaking, the formula shows that LIF is capped by $M$ and otherwise decreases as LLTV increases. In practice, more volatile / riskier collateral is usually assigned a lower LLTV: this makes positions become liquidatable earlier (more time to liquidate before collateral is exhausted) and, through the formula, yields a higher LIF (higher liquidator incentive). The goal is to encourage timely liquidations so that large price drops or execution/oracle delays are less likely to translate into realized bad debt.
 
@@ -641,15 +643,15 @@ $$
 Share Price = \frac{TotalSupplyAssets}{TotalSupplyShares}
 $$
 
-So when total supply assets goes down and total supply shares stays the same, share price is decreased, meaning each supplier suffered some loss.
+So when total supply assets goes down while total supply shares stays the same, the share price decreases — meaning every supplier absorbs a proportional loss.
 
-At this stage we covered all user actions in this codebase. The only thing left is `_accrueInterest()` and the IRM, which is notably more difficult than the content we discussed earlier.
+At this stage we have covered all user actions in this codebase. The only thing left is `_accrueInterest()` and the IRM, which are notably more difficult than the content we discussed earlier.
 
 ## Action 7: Interest accrual
 
-The design of interest accrual is similar to Compound: almost all state-changing functions invoke `_accrueInterest()` (besides `supplyCollateral()`):
+The design of interest accrual is similar to Compound: almost all state-changing market functions invoke `_accrueInterest()` (the exceptions being `supplyCollateral()` and `flashLoan()`).
 
-First, the code determines how many seconds have passed since the last time interest was accrued. It then calls the IRM contract associated with the market to get the current per-second borrow rate (scaled by WAD) (this part will be explained in Part 2 of this series).
+First, the code determines how many seconds have passed since the last time interest was accrued. If zero seconds have elapsed, it returns immediately. Otherwise it calls the IRM contract associated with the market to get the current per-second borrow rate (scaled by WAD) (this part will be explained in Part 2 of this series). **At the very end of the function** (not shown in this snippet), the code updates `market[id].lastUpdate = uint128(block.timestamp)` so the next call knows when interest was last accrued.
 
 ```solidity
     // morpho-blue/src/Morpho.sol
@@ -682,15 +684,15 @@ Instead of simple interest (`rate * time`), the code uses continuous compounding
     }
 ```
 
-As the comment says this is an approximation for a Taylor expansion of $e^{rt} - 1$. In the code, $r$ is the per-second borrow rate (WAD-scaled) returned by the IRM and $t$ is the elapsed time in seconds.
+As the comment says, this is an approximation of the Taylor expansion of $e^{rt} - 1$. In the code, the parameter `x` is $r$ (the per-second borrow rate, WAD-scaled, returned by the IRM) and `n` is $t$ (the elapsed time in seconds). So `firstTerm = x * n` computes $rt$ in WAD.
 
-Recall from elementary math that discrete compounding can be written as $A = P\left(1 + \frac{R}{n}\right)^{nt}$ where $P$ is principal, $R$ is an annual interest rate, $n$ is the number of compounding periods per year and $t$ is time in years. Turning this discrete compounding into continuous compounding, we take the limit:
+Recall from elementary math that discrete compounding can be written as $A = P\left(1 + \frac{R}{m}\right)^{mt}$ where $P$ is principal, $R$ is an annual interest rate, $m$ is the number of compounding periods per year, and $t$ is time in years. (We use $m$ for periods here to avoid confusion with the code's `n`.) Taking the limit as $m \to \infty$:
 
 $$
-\lim_{n \to \infty} \left(1 + \frac{r}{n}\right)^{nt} = e^{rt}
+\lim_{m \to \infty} \left(1 + \frac{R}{m}\right)^{mt} = e^{Rt}
 $$
 
-This formula is derived from the definition $e = \lim_{k \to \infty} \left(1 + \frac{1}{k}\right)^k$ with a change of variable $k = \frac{n}{r}$, then exponentiate both sides with $rt$. With this limit, the total amount becomes $A = P \cdot e^{rt}$.
+This follows from the definition $e = \lim_{k \to \infty} \left(1 + \frac{1}{k}\right)^k$: substitute $k = \frac{m}{R}$ so the expression becomes $\left(\left(1 + \frac{1}{k}\right)^k\right)^{Rt} \to e^{Rt}$. With this limit, the total amount becomes $A = P \cdot e^{Rt}$.
 
 Calculating $e^{rt}$ directly on-chain is tough. The way Morpho does it is through an approximation of $e^{rt} - 1$ (minus one since we are computing interest only excluding the principal) using Taylor expansion, but only up to the precision of first 3 terms:
 
@@ -704,7 +706,7 @@ $$
 \text{Interest} = P \times (e^{rt} - 1) \approx P \times \left( rt + \frac{(rt)^2}{2} + \frac{(rt)^3}{6} \right)
 $$
 
-This approximation is accurate enough and saves gas. After computing interest, the code increments `market[id].totalBorrowAssets` and `market[id].totalSupplyAssets` to reflect the change due to interest accrual.
+This approximation is accurate enough for typical interest rates and accrual periods, and saves gas compared to a more complete series. After computing the interest, the code increments `market[id].totalBorrowAssets` and `market[id].totalSupplyAssets` to reflect the change.
 
 ### Share system
 
@@ -713,15 +715,15 @@ This approximation is accurate enough and saves gas. After computing interest, t
             market[id].totalSupplyAssets += interest.toUint128();
 ```
 
-Although not entirely explicit, you should already notice that the interest is distributed through an ERC4626-style share system. Throughout the codebase, "assets" represent the actual token amount and "shares" represent a claim on a portion of the total assets in the pool.
+Although not entirely explicit in the code, you should already notice that interest is distributed through the ERC4626-style share system we described at the start. Throughout the codebase, "assets" represent the actual token amount and "shares" represent a claim on a portion of the total assets in the pool.
 
-When you supply assets, you receive shares (represented by an increment in `position[id][onBehalf].supplyShares`). When interest accrues, the Total Assets in the pool increase (because borrowers owe more), but the Total Shares remain constant (excluding new deposits/withdrawals). This means the value of each share increases over time. The formula is (as we already saw in bad debt section):
+When you supply assets, you receive shares (represented by an increment in `position[id][onBehalf].supplyShares`). When interest accrues, the total assets in the pool increase (because borrowers owe more), but the total shares remain constant (excluding new deposits/withdrawals). This means the value of each share increases over time. The formula is (as we already saw in the bad debt section):
 
 $$
 SharePrice = \frac{TotalAssets}{TotalShares}
 $$
 
-In `_accrueInterest()`, `market[id].totalSupplyAssets` is the numerator in above formula, it goes up while total shares stays the same, so share price goes up.
+In `_accrueInterest()`, `market[id].totalSupplyAssets` is the numerator in the formula above. It goes up while total shares stays the same, so the share price goes up.
 
 It is worth mentioning that `market[id].totalBorrowAssets` is also incremented because accrued interest becomes new debt. When interest accrues:
 
@@ -743,4 +745,4 @@ It is worth mentioning that `market[id].totalBorrowAssets` is also incremented b
             }
 ```
 
-If the fee feature is turned on, the user-level accounting for `feeRecipient` would be incremented by `feeShares`. This design avoids having another entry in struct `Position` for tracking fees; it reuses the share system so the fee is handled more elegantly.
+If the fee feature is turned on, the code mints new supply shares to `feeRecipient`, diluting existing suppliers proportionally. The key subtlety is the `totalSupplyAssets - feeAmount` in the denominator: at this point in the code, `totalSupplyAssets` has already been incremented by the *full* interest amount (which includes the fee portion). To price the fee shares correctly, we must use the supply total *before* the fee was added — otherwise the fee recipient would receive fewer shares than they deserve. This design avoids having a separate entry in struct `Position` for tracking fees; it reuses the share system elegantly.

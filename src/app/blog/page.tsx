@@ -11,18 +11,21 @@ export default async function BlogPage() {
   const categories = ['All', ...getAllCategories()]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#090e19] text-gray-900 dark:text-white">
       <Navigation />
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative py-20 bg-gray-50 dark:bg-[#090e19] overflow-hidden">
+          <div className="absolute inset-0 grid-bg" />
+          <div className="absolute top-10 left-1/4 w-96 h-96 bg-primary-200/30 dark:bg-primary-500/10 rounded-full blur-3xl" />
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                Security <span className="text-primary-200">Insights</span>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-400 mb-3">Blog</p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
+                Security Insights
               </h1>
-              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
+              <p className="text-lg text-gray-500 dark:text-slate-400 max-w-2xl mx-auto">
                 Deep dive into DeFi security research, vulnerability analysis, and best practices from the Taichi Audit team.
               </p>
             </div>

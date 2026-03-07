@@ -45,7 +45,7 @@ export default function ShareButton({ title, slug }: ShareButtonProps) {
         href={tweetUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+        className="flex items-center px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
       >
         <Twitter className="w-4 h-4 mr-2" />
         Tweet

@@ -83,23 +83,13 @@ The input data for the instruction is:
 }
 ```
 
-Let's take a look at how the `InitializeMint2` instruction is processed in the `Token Program`.
+Let's take a look at how the `InitializeMint2` instruction is processed in the Token Program. The difference between `InitializeMint` and `InitializeMint2` is that `InitializeMint` reads rent from a passed-in sysvar account, while `InitializeMint2` fetches rent via the `Rent::get()` syscall (no extra account needed). Both variants call `_process_initialize_mint` internally.
 
-```rust
-        // 20 - InitializeMint2
-        20 => {
-            #[cfg(feature = "logging")]
-            pinocchio::msg!("Instruction: InitializeMint2");
-
-            process_initialize_mint2(accounts, instruction_data)
-        }
-```
-
-The `process_initialize_mint2` will finally:
-- Validate if the mint is already initialized.
-- Validate if the mint is rent-exempt.
-- Initialize the mint with the given parameters.
-- Pack the mint data back to the account.
+When the program receives an `InitializeMint2` instruction, it calls `_process_initialize_mint` with `rent_sysvar_account: false`. This function:
+- Checks whether the mint is already initialized.
+- Verifies that the mint account is rent-exempt.
+- Writes the mint authority, decimals, freeze authority, and `is_initialized = true` into the account.
+- Packs the mint data back into the account.
 
 ```rust
 /// Program state handler.
@@ -145,7 +135,7 @@ impl Processor {
 
 After we have the mint, we should create a token account to hold the tokens.
 
-For the related `TokenAccount` struct, it is below:
+The related Token Account struct is defined as follows:
 
 ```rust
 /// Account data.
@@ -175,7 +165,7 @@ pub struct Account {
 }
 ```
 
-It should be noted that the whole `Account` struct is 165 bytes, which is the standard size of a Solana Token Account.
+The `Account` struct totals 165 bytes, which is the standard size of a Solana Token Account.
 
 **How 165 is calculated**
 
@@ -195,12 +185,12 @@ The struct uses `#[repr(C)]`, so layout is predictable. SPL uses `COption<T>` fo
 
 If we want to create a token account for the `TRUMP` token, we need to create a new account and assign it to the **SPL Token Program** as the owner, then use the `InitializeAccount3` instruction to initialize the account.
 
-`process_initialize_account3` will do:
-- Validate if the account is already initialized.
-- Validate if the account is rent-exempt.
-- Special handling for native mint.
-- Initialize the account with the given parameters.
-- Pack the account data back to the account.
+`process_initialize_account3` performs the following steps:
+- Check whether the account is already initialized.
+- Verify that the account is rent-exempt.
+- Handle native mint (wrapped SOL) specially by tracking the rent-exempt reserve.
+- Initialize the account fields (mint, owner, state, etc.).
+- Pack the account data back into the account.
 
 ```rust
     fn _process_initialize_account(
@@ -274,7 +264,7 @@ The program for Token2022 is: `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`.
 
 ### Token Mint
 
-Let's take 2022 token `Tesla xStock` for example: https://solscan.io/tx/5yKhATi8myn5XLPcKNkzvaTWSLhFR3CD1sEDsLvYib7BQTWzjjKqeQo2VP5uiDGaLt6kUkQAxi11r835uHCu42Z8
+For example, consider the Token2022 mint `Tesla xStock`: https://solscan.io/tx/5yKhATi8myn5XLPcKNkzvaTWSLhFR3CD1sEDsLvYib7BQTWzjjKqeQo2VP5uiDGaLt6kUkQAxi11r835uHCu42Z8
 
 - The `Tesla xStock` account (`XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB`) is created and assigned to the **Token2022 Program** as the owner (this is important).
 
@@ -417,7 +407,7 @@ Finally, the `InitializeMint` instruction is called to initialize the base mint 
     }
 ```
 
-`_process_initialize_mint` is largely the same as in SPL; the main difference is validation and initialization of extensions and account type.
+`_process_initialize_mint` follows the same high-level logic as SPL (validate rent, set mint fields, mark initialized), but differs in two key ways: it uses Pod types (`PodCOption`, `PodBool`) instead of SPL's `COption` and `bool` for zero-copy byte-level access, and it validates and initializes extensions and the account type discriminator.
 
 ```rust
     fn _process_initialize_mint(
@@ -471,11 +461,11 @@ Finally, the `InitializeMint` instruction is called to initialize the base mint 
 Similar to Token Mint, a Token2022 Token Account is also divided into two parts: `base_data` and `tlv_data`.
 
 The `InitializeAccount3` instruction initializes the account:
-- Validate if the account is already initialized.
-- Validate if the account is rent-exempt.
-- Validate if the mint is valid.
-- Check the mint's extensions and initialize the required account extensions.
-- Initialize base data of the account.
+- Check whether the account is already initialized.
+- Verify that the account is rent-exempt.
+- Validate the mint (unpack it and check for a permanent delegate warning).
+- Inspect the mint's extensions and initialize any required account extensions (e.g., `NonTransferableAccount`, `TransferFeeAmount`).
+- Initialize the base fields (mint, owner, state, amounts) and set the account type.
 
 ```rust
 
@@ -546,7 +536,7 @@ The `InitializeAccount3` instruction initializes the account:
 
 ## Associated Token Account (ATA)
 
-Creating a token account directly via `InitializeAccount3` requires manually creating and assigning a new account, and deriving the token account address from mint and owner is non-trivial. The **Associated Token Account (ATA)** program simplifies this.
+Creating a token account directly via `InitializeAccount3` requires multiple manual steps: allocating the account on-chain, computing the correct size (especially for Token2022 extensions), assigning it to the token program, and initializing it. The **Associated Token Account (ATA)** program bundles all of this into a single instruction and gives each (wallet, mint, token program) tuple a deterministic PDA address.
 
 Example transactions:
 - **SPL**: [solscan.io/tx/4kyR...](https://solscan.io/tx/4kyRXRAMy6HHRnFqPDSo69UmUR9i6q8Hpbro9AHe9zciWn5UbRmyaGysDMuqELPVJpMg5UgkX3vpqyDxbzLvcMdZ)
@@ -578,7 +568,7 @@ In the `process_create_associated_token_account`, the following steps will be ta
 
 ### Get Account Data Size
 
-The ATA explicitly uses the `ImmutableOwner` extension, so the `extension_types` is `&[ExtensionType::ImmutableOwner]`.
+The ATA explicitly requests the `ImmutableOwner` extension. This ensures the token account's owner cannot be changed after creation, preserving the deterministic wallet-to-mint-to-account mapping that ATAs rely on. The `extension_types` is `&[ExtensionType::ImmutableOwner]`.
 
 ```rust
     let account_len = get_account_len(
@@ -651,7 +641,7 @@ echo pQAAAAAAAAA= | base64 --decode | xxd
 00000000: a500 0000 0000 0000    // 0xa5 (decimal 165) = account data size in bytes
 ```
 
-- **Token2022**: Returns 165 bytes plus the `ImmutableOwner` extension size (14 bytes), i.e. 179 bytes total.
+- **Token2022**: Returns 165 bytes plus 14 bytes of extension overhead (account type discriminator, TLV header for `ImmutableOwner`, and padding), totaling 179 bytes.
 
 ```rust
                 PodTokenInstruction::GetAccountDataSize => {
@@ -796,7 +786,7 @@ This invokes `process_initialize_account3`, whose implementation was described i
 
 ### Why use Associated Token Accounts?
 
-ATA uses a **PDA** derived from the wallet, mint, and token program, so the relationship between token account, mint, and owner is deterministic and reproducible. The Associated Token Program also encapsulates account creation, rent, and token initialization, so callers can create ATAs with a single instruction instead of reimplementing the flow.
+ATA uses a **PDA** derived from the wallet, mint, and token program, so the relationship between token account, mint, and owner is deterministic. Any client can compute the ATA address for a given wallet and mint without on-chain lookups. The Associated Token Program also encapsulates account creation, sizing, rent, and token initialization into a single instruction, so callers do not need to reimplement the multi-step flow.
 
 ---
 
@@ -814,7 +804,7 @@ When auditing or integrating tokens, always check the **program ID** to distingu
 
 ---
 
-## Additional Notes (for reviewers)
+## Additional Notes
 
-- The SPL `InitializeAccount3` and `InitializeMint2` instructions are shown using their on-chain processor names for clarity, but the on-chain program dispatches by instruction variant (e.g., “Instruction: InitializeMint2”).
-- The ATA program works with both token programs; it simply routes to the token program you pass in and uses `GetAccountDataSize` to compute the correct size.
+- The SPL Token code shown in this article is from the original `spl-token` implementation (using `Mint::unpack`/`Mint::pack`). The program has since been rewritten using the pinocchio framework, but the logic and account layouts are identical.
+- The ATA program works with both token programs; it routes to whichever token program you pass in and uses `GetAccountDataSize` to compute the correct account size.

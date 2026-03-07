@@ -85,7 +85,7 @@ Morpho provides a factory (MorphoChainlinkOracleV2Factory.sol) that allows users
     }
 ```
 
-Into the oracle implementation, `price()` is the only function (besides constructor) in MorphoChainlinkOracleV2.sol:
+In the oracle implementation, `price()` is the only function (besides the constructor) in MorphoChainlinkOracleV2.sol:
 
 ```solidity
     function price() external view returns (uint256) {
@@ -96,13 +96,15 @@ Into the oracle implementation, `price()` is the only function (besides construc
     }
 ```
 
-Despite the succinctness, this oracle design embeds enormous amount of info that is worth discussing, so don’t underestimate the complexity here.
+`mulDiv` is OpenZeppelin's `(x * y) / z` with full 512-bit intermediate precision — so `SCALE_FACTOR.mulDiv(baseLeg, quoteLeg)` computes `SCALE_FACTOR * baseLeg / quoteLeg` without overflow on the intermediate product.
+
+Despite the succinctness, this oracle design embeds an enormous amount of information worth discussing, so don't underestimate the complexity.
 
 Upon seeing this code, many question marks arise:
 
 - Why does pricing involve vault?
 - What is “base” and what is “quote”?
-- Why there are 2 base feeds and 2 quote feeds? Why not 1? Why not 3 or more?
+- Why are there 2 base feeds and 2 quote feeds? Why not 1? Why not 3 or more?
 - What is `SCALE_FACTOR` and how does that work?
 
 Let’s call these questions the “big 4” and answer them in order. This is the main quest of this article.
@@ -241,13 +243,15 @@ Back to the oracle’s context, if we denote:
 - the collateral token denomination by $B_1$ (an asset/unit),
 - the loan token denomination by $Q_1$ (an asset/unit),
 
-then throughout this article we’ll use the following formula as the oracle’s pricing convention:
+then conceptually (ignoring decimal normalization, which Section 4 will handle via `SCALE_FACTOR`) the oracle targets:
 
 $$
-\mathtt{price()} = 10^{36} \cdot \frac{pB_1 \cdot pB_2}{pQ_1 \cdot pQ_2}
+\mathtt{price()} = 10^{36} \cdot \frac{pB_1 \cdot 10^{-d_{B1}} \cdot pB_2}{pQ_1 \cdot 10^{-d_{Q1}} \cdot pQ_2}
 $$
 
-where $pB_1$, $pB_2$, $pQ_1$, and $pQ_2$ (written as `pB1`, `pB2`, `pQ1`, `pQ2` in the Solidity comment) are defined as follows:
+where $d_{B1}$ and $d_{Q1}$ are the decimals of the collateral and loan tokens respectively. (When both tokens share the same decimals the exponent terms cancel and the formula reduces to $10^{36}\cdot pB_1 \cdot pB_2/(pQ_1 \cdot pQ_2)$.)
+
+$pB_1$, $pB_2$, $pQ_1$, and $pQ_2$ (written as `pB1`, `pB2`, `pQ1`, `pQ2` in the Solidity comment) are defined as follows:
 
 ```solidity
     // Let B1, B2, Q1, Q2, C be 5 assets, each respectively having dB1, dB2, dQ1, dQ2, dC decimals.
@@ -273,7 +277,7 @@ $$
 = \frac{\text{LINK}}{\text{DAI}}
 $$
 
-In this case one of the `QUOTE_FEED` is left as `address(0)` intentionally.
+In this case the second `QUOTE_FEED` is left as `address(0)` intentionally (its `getPrice()` returns 1, a multiplicative no-op).
 
 ### Quick wiring recipes
 
@@ -316,7 +320,7 @@ $$
 \frac{1}{\text{USDC/USD}} = \text{USD/USDC}
 $$
 
-## 3. Why there are 2 base feeds and 2 quote feeds? Why not 1? Why not 3 or more?
+## 3. Why are there 2 base feeds and 2 quote feeds? Why not 1? Why not 3 or more?
 
 Two feeds is the practical sweet spot.
 
@@ -390,7 +394,7 @@ Ignoring vaults for one line, the runtime structure is:
 
 $$
 \mathtt{price()}
-= \frac{(pB1\cdot 10^{fp_{B1}})\cdot(pB2\cdot 10^{fp_{B2}})\cdot \mathtt{SCALE\_FACTOR}}{(pQ1\cdot 10^{fp{Q1}})\cdot(pQ2\cdot 10^{fp_{Q2}})}
+= \frac{(pB1\cdot 10^{fp_{B1}})\cdot(pB2\cdot 10^{fp_{B2}})\cdot \mathtt{SCALE\_FACTOR}}{(pQ1\cdot 10^{fp_{Q1}})\cdot(pQ2\cdot 10^{fp_{Q2}})}
 $$
 
 So `SCALE_FACTOR` is chosen such that this equals the target $10^{36}\cdot \frac{pB1\cdot 10^{-d_{B1}}\cdot pB2}{pQ1\cdot 10^{-d_{Q1}}\cdot pQ2}$.
@@ -399,7 +403,7 @@ Solving for it (again, exactly matching the Solidity comment) gives:
 
 $$
 \mathtt{SCALE\_FACTOR}
-= 10^{36}\cdot 10^{-d{B1}}\cdot 10^{d_{Q1}}\cdot 10^{-fp_{B1}}\cdot 10^{-fp_{B2}}\cdot 10^{fp_{Q1}}\cdot 10^{fp_{Q2}}
+= 10^{36}\cdot 10^{-d_{B1}}\cdot 10^{d_{Q1}}\cdot 10^{-fp_{B1}}\cdot 10^{-fp_{B2}}\cdot 10^{fp_{Q1}}\cdot 10^{fp_{Q2}}
 $$
 
 Finally, incorporate the vault conversion samples.
@@ -414,7 +418,7 @@ Putting everything together yields the compact exponent form used in the article
 
 $$
 \mathtt{SCALE\_FACTOR}
-= 10^{\;36 + d{Q1} + fp_{Q1} + fp_{Q2} - d_{B1} - fp_{B1} - fp_{B2}} \cdot \frac{s_Q}{s_B} 
+= 10^{\;36 + d_{Q1} + fp_{Q1} + fp_{Q2} - d_{B1} - fp_{B1} - fp_{B2}} \cdot \frac{s_Q}{s_B} 
 $$
 
 And the code implements exactly that:
@@ -492,9 +496,9 @@ Suppose the market is roughly:
 
 In feed terms (i.e., scaled by feed decimals), that’s roughly:
 
-- `wstETH/ETH.getPrice() \\approx 1.03 * 10^18`
-- `ETH/USD.getPrice() \\approx 3000 * 10^8`
-- `USDC/USD.getPrice() \\approx 1 * 10^8`
+- wstETH/ETH: `getPrice()` $\approx 1.03 \times 10^{18}$
+- ETH/USD: `getPrice()` $\approx 3000 \times 10^{8}$
+- USDC/USD: `getPrice()` $\approx 1 \times 10^{8}$
 
 Then the oracle’s runtime computation is:
 

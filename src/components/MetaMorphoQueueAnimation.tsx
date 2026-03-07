@@ -140,7 +140,7 @@ const steps: Step[] = [
 
 function Badge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+    <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-gray-700 dark:text-slate-200">
       {label}
     </span>
   )
@@ -149,15 +149,15 @@ function Badge({ label }: { label: string }) {
 function ArrayRow({ title, items, activeIndex }: { title: string; items: string[]; activeIndex?: number }) {
   return (
     <div className="space-y-2">
-      <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</div>
+      <div className="text-sm font-semibold text-gray-700 dark:text-slate-200">{title}</div>
       <div className="flex flex-wrap gap-2">
         {items.map((item, idx) => (
           <div
             key={`${title}-${idx}`}
             className={`min-w-[44px] rounded-lg border px-3 py-2 text-center text-sm font-semibold ${
               activeIndex === idx
-                ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-200'
-                : 'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                ? 'border-primary-500 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200'
+                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200'
             }`}
           >
             {item}
@@ -177,18 +177,18 @@ export default function MetaMorphoQueueAnimation() {
   const reset = () => setStepIndex(0)
 
   return (
-    <div className="my-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="my-8 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
       <div className="mb-6 flex flex-col gap-2">
-        <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
           MetaMorpho updateWithdrawQueue walkthrough
         </div>
-        <h4 className="text-lg font-semibold text-slate-900 dark:text-white">{step.title}</h4>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{step.description}</p>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{step.title}</h4>
+        <p className="text-sm text-gray-600 dark:text-slate-300">{step.description}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 lg:col-span-2">
-          <div className="mb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 p-4 text-sm text-gray-700 dark:text-slate-200 lg:col-span-2">
+          <div className="mb-3 text-xs font-semibold uppercase text-gray-500 dark:text-slate-400">
             Code (MetaMorpho.sol)
           </div>
           <div className="space-y-2">
@@ -200,8 +200,8 @@ export default function MetaMorphoQueueAnimation() {
                   key={`${line}-${lineNumber}`}
                   className={`rounded-md px-3 py-1 ${
                     isActive
-                      ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-200'
-                      : 'text-slate-600 dark:text-slate-300'
+                      ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200'
+                      : 'text-gray-600 dark:text-slate-300'
                   }`}
                 >
                   <span className="whitespace-pre text-sm font-mono">{line}</span>
@@ -212,15 +212,15 @@ export default function MetaMorphoQueueAnimation() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-            <div className="mb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Queue state</div>
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+            <div className="mb-3 text-xs font-semibold uppercase text-gray-500 dark:text-slate-400">Queue state</div>
             <div className="space-y-4">
               <ArrayRow title="withdrawQueue" items={['A', 'B', 'C', 'D']} />
               {step.newWithdrawQueue.length > 0 && (
                 <ArrayRow title="newWithdrawQueue" items={step.newWithdrawQueue} />
               )}
               {step.indexes.length > 0 && (
-                <div className="text-sm text-slate-600 dark:text-slate-300">
+                <div className="text-sm text-gray-600 dark:text-slate-300">
                   indexes: {step.indexes.join(', ')}
                 </div>
               )}
@@ -234,8 +234,8 @@ export default function MetaMorphoQueueAnimation() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-            <div className="mb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Market config</div>
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+            <div className="mb-3 text-xs font-semibold uppercase text-gray-500 dark:text-slate-400">Market config</div>
             <div className="space-y-3">
               {markets.map((market) => {
                 const isCandidate = market.id === step.removalCandidate
@@ -244,8 +244,8 @@ export default function MetaMorphoQueueAnimation() {
                     key={market.id}
                     className={`rounded-lg border px-3 py-2 text-sm ${
                       isCandidate
-                        ? 'border-primary-500 bg-primary-50 text-primary-800 dark:bg-primary-900/30 dark:text-primary-200'
-                        : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'
+                        ? 'border-primary-500 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200'
+                        : 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 text-gray-700 dark:text-slate-200'
                     }`}
                   >
                     <div className="flex flex-wrap items-center gap-2">
@@ -261,10 +261,10 @@ export default function MetaMorphoQueueAnimation() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-            <div className="mb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Checks</div>
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+            <div className="mb-3 text-xs font-semibold uppercase text-gray-500 dark:text-slate-400">Checks</div>
             {step.checks ? (
-              <div className="space-y-2 text-sm text-slate-700 dark:text-slate-200">
+              <div className="space-y-2 text-sm text-gray-700 dark:text-slate-200">
                 {step.checks.map((check) => (
                   <div key={check.label} className="flex items-center justify-between">
                     <span>{check.label}</span>
@@ -275,11 +275,11 @@ export default function MetaMorphoQueueAnimation() {
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-slate-600 dark:text-slate-300">No checks in this step.</div>
+              <div className="text-sm text-gray-600 dark:text-slate-300">No checks in this step.</div>
             )}
 
             {step.outcome && (
-              <div className="mt-3 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <div className="mt-3 rounded-md bg-gray-100 dark:bg-slate-800 px-3 py-2 text-sm text-gray-700 dark:text-slate-200">
                 Outcome: {step.outcome}
               </div>
             )}
@@ -288,28 +288,28 @@ export default function MetaMorphoQueueAnimation() {
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-slate-500 dark:text-slate-400">
+        <div className="text-sm text-gray-500 dark:text-slate-400">
           Step {stepIndex + 1} of {steps.length}
         </div>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={goPrev}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:border-primary-400 hover:text-primary-600 dark:border-slate-700 dark:text-slate-200"
+            className="rounded-lg border border-gray-200 dark:border-slate-700 px-3 py-1.5 text-sm text-gray-700 dark:text-slate-200 hover:border-primary-400 hover:text-primary-400"
           >
             Previous
           </button>
           <button
             type="button"
             onClick={goNext}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:border-primary-400 hover:text-primary-600 dark:border-slate-700 dark:text-slate-200"
+            className="rounded-lg border border-gray-200 dark:border-slate-700 px-3 py-1.5 text-sm text-gray-700 dark:text-slate-200 hover:border-primary-400 hover:text-primary-400"
           >
             Next
           </button>
           <button
             type="button"
             onClick={reset}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:border-primary-400 hover:text-primary-600 dark:border-slate-700 dark:text-slate-200"
+            className="rounded-lg border border-gray-200 dark:border-slate-700 px-3 py-1.5 text-sm text-gray-700 dark:text-slate-200 hover:border-primary-400 hover:text-primary-400"
           >
             Reset
           </button>

@@ -52,34 +52,34 @@ export default function SolanaSecuritySeriesPage() {
           {/* Focus areas */}
           <div className="space-y-6 mb-12">
             <div>
-              <p className="text-sm uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Series focus</p>
+              <p className="text-sm uppercase tracking-[0.16em] text-gray-400 dark:text-slate-500">Series focus</p>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Security-research ready</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {focusAreas.map((area) => (
-                <div key={area.title} className="rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+                <div key={area.title} className="rounded-2xl bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{area.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{area.description}</p>
+                  <p className="text-gray-500 dark:text-slate-400">{area.description}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Research cadence */}
-          <div className="rounded-2xl bg-white dark:bg-slate-800 border border-dashed border-gray-300 dark:border-slate-700 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="rounded-2xl bg-white dark:bg-slate-900/60 border border-dashed border-gray-200 dark:border-slate-700 p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-slate-400">
                 <BookOpen className="w-4 h-4" />
                 Research cadence
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">New Solana security drops are queued</h2>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">
+              <p className="text-gray-500 dark:text-slate-400 mt-2">
                 Expect future chapters on consensus-edge cases, token program extensions, and protocol-specific attack surfaces.
               </p>
             </div>
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-full border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-100 font-semibold hover:border-primary-400 dark:hover:border-primary-500 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-slate-100 font-semibold hover:border-primary-500 transition-colors"
             >
               Browse all posts
               <ArrowRight className="w-4 h-4" />

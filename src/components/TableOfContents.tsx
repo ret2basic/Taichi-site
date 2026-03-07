@@ -66,7 +66,7 @@ export default function TableOfContents({ markdown }: { markdown: string }) {
       {/* Mobile toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="xl:hidden flex items-center gap-2 mb-4 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-800 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+        className="xl:hidden flex items-center gap-2 mb-4 px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
         aria-expanded={isOpen}
       >
         <List className="w-4 h-4" />
@@ -78,9 +78,9 @@ export default function TableOfContents({ markdown }: { markdown: string }) {
         aria-label="Table of contents"
         className={`${
           isOpen ? 'block' : 'hidden'
-        } xl:block xl:sticky xl:top-24 xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 p-4 mb-6 xl:mb-0`}
+        } xl:block xl:sticky xl:top-24 xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto rounded-xl bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 p-4 mb-6 xl:mb-0`}
       >
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">
           On this page
         </h2>
         <ul className="space-y-1 text-sm">
@@ -92,7 +92,7 @@ export default function TableOfContents({ markdown }: { markdown: string }) {
                 className={`block py-1 leading-snug transition-colors duration-150 ${
                   activeId === h.id
                     ? 'text-primary-600 dark:text-primary-400 font-medium'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
                 }`}
               >
                 {h.text}

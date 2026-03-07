@@ -45,7 +45,7 @@ If you're a sophisticated lender, you might want to supply across multiple marke
 MetaMorpho fills this gap by:
 
 1. Wrapping Morpho supply positions inside an ERC4626 vault.
-2. Exposing a single ERC20 share token → this is the only thing that you manage
+2. Exposing a single ERC20 share token — this is the only thing that you manage.
 3. Defining allocator-controlled queues that specify where deposits should go and from where withdrawals should come.
 4. Adding a vault-level performance fee on interest earned.
 5. Introducing governance roles (curator/allocator/guardian) with a timelock for risk parameter increases.
@@ -119,8 +119,8 @@ function submitCap(MarketParams memory marketParams, uint256 newSupplyCap)
 
 The function does the following things before calling `_setCap()`:
 
-1. **Check if vault underlying asset matches market loan token**: the market's `loanToken` must equal the vault's `asset()` (the ERC4626 underlying). MetaMorpho is a single-asset vault; it cannot allocate USDC deposits into a WETH loan-token market.
-2. **Check if the market actually exists on Morpho**: it checks `MORPHO.lastUpdate(id) != 0` (equivalent to “market was created”).
+1. **Check if the vault's underlying asset matches the market's loan token**: the market's `loanToken` must equal the vault's `asset()` (the ERC4626 underlying). MetaMorpho is a single-asset vault; it cannot allocate USDC deposits into a WETH loan-token market.
+2. **Check if the market actually exists on Morpho**: it checks `MORPHO.lastUpdate(id) != 0` (equivalent to "the market was created").
 3. **Risk asymmetry is encoded in timelocks**:
     - Decreasing cap is immediate (risk reduction should be fast) → in this branch, `_setCap()` is invoked and `if (!marketConfig.enabled)` branch is skipped. Only the following state updates will be performed:
         - `marketConfig.removableAt = 0`
@@ -163,7 +163,7 @@ This is subtle and important:
 
 **What `expectedSupplyAssets` does (and why `_setCap` uses it):**
 
-`MORPHO.expectedSupplyAssets(marketParams, user)` is a view helper that returns the expected lender assets for `user` after applying the same interest-accrual math Morpho would apply, without touching state (only act as a simulation):
+`MORPHO.expectedSupplyAssets(marketParams, user)` is a view helper that returns the expected lender assets for `user` after applying the same interest-accrual math Morpho would apply, without touching state (acting only as a simulation):
 
 ```solidity
     /// @notice Returns the expected supply assets balance of `user` on a market after having accrued interest.
@@ -229,7 +229,7 @@ And the interface documents their intended semantics:
 
 This separation solves two different problems:
 
-1. **Deposit routing** wants “best effort”: try markets in order until caps reached; if one market reverts, try next.
+1. **Deposit routing** wants "best effort": try markets in order until caps are reached; if one market reverts, try the next.
 2. **Withdrawal routing** wants “total accounting”: `totalAssets()` must count all positions, and withdrawals must attempt to free liquidity from a known superset of markets.
 
 ### `setSupplyQueue()`: only include markets with a non-zero cap
@@ -336,7 +336,7 @@ At this point, `seen = [true, false, true, true]`.
 - `i = 2` → `seen[2]` is true, keep C
 - `i = 3` → `seen[3]` is true, keep D
 
-When solving leetcode chals, `seen` often means "visited before." Here `seen` means something different: "this old entry at this index will still exist in the new `withdrawQueue`." In other words, `seen` means "we won't remove this entry from the `withdrawQueue`." That's why it's indexed by the old queue positions, and why the second loop treats `!seen[i]` as a removal candidate.
+When solving LeetCode challenges, `seen` often means "visited before." Here `seen` means something different: "this old entry at this index will still exist in the new `withdrawQueue`." In other words, `seen` means "we won't remove this entry from the `withdrawQueue`." That's why it's indexed by the old queue positions, and why the second loop treats `!seen[i]` as a removal candidate.
 
 #### Forced removal, `removableAt`, and why PPS can drop
 
@@ -398,7 +398,7 @@ struct MarketParams {
 }
 ```
 
-Recall that Morpho.sol requires caller to specify the entire `MarketParams` struct and it computes market ID onchain, so `MarketAllocation` just specifies which market you are interacting with and how many assets you want to allocate to this market.
+Recall that Morpho.sol requires the caller to specify the entire `MarketParams` struct and it computes market ID onchain, so `MarketAllocation` just specifies which market you are interacting with and how many assets you want to allocate to this market.
 
 For each allocation in the array, the code first accrues interest and then computes `withdrawn` to figure out if allocator wants to withdraw from the market or supply to the market:
 
@@ -437,7 +437,7 @@ This returns `max(0, x - y)` without ever underflowing.
     }
 ```
 
-If `withdrawn > 0` (allocator wants to withdraw from this market), the code handles a special case where `allocation.assets == 0` (withdraw all assets from a market) but there is a frontrunning donation. In that case the code calls `MORPHO.withdraw()` with `supplyShares` to withdraw all shares the vault holds for that market, so the frontrunning donation is withdrawn too. Recall that `MORPHO.withdraw()` can be called by specifying number of assets or number of shares, here we use number of shares since we don't know how much donation exists in a frontrunning context.
+If `withdrawn > 0` (allocator wants to withdraw from this market), the code needs to handle a subtle edge case. When `allocation.assets == 0` (the allocator wants to fully exit a market), a straightforward asset-based withdrawal like `MORPHO.withdraw(marketParams, supplyAssets, 0, ...)` would fail if someone front-ran the transaction with a donation that increased the vault's balance beyond what was computed. To handle this, the code switches to a **share-based withdrawal**: it passes `shares = supplyShares` and `withdrawn = 0` to `MORPHO.withdraw()`, which burns all the vault's supply shares and returns whatever underlying assets they represent — including any unknown donations. Recall that `MORPHO.withdraw()` can be called by specifying either a number of assets or a number of shares; here we use shares because the exact asset amount is unknowable when donations may exist.
 
 ```solidity
             if (withdrawn > 0) {
@@ -457,7 +457,7 @@ If `withdrawn > 0` (allocator wants to withdraw from this market), the code hand
             }
 ```
 
-If `withdrawn == 0` (allocator wants to supply to this market), the code checks whether the post-supply assets would exceed `supplyCap`.
+If `withdrawn == 0` (allocator wants to supply to this market), the code checks whether the post-supply assets would exceed `supplyCap`:
 
 ```solidity
             else {
@@ -480,13 +480,15 @@ If `withdrawn == 0` (allocator wants to supply to this market), the code checks 
             }
 ```
 
+Note the `allocation.assets == type(uint256).max` branch: this is a "supply the rest" shorthand. When the last entry in the allocations array uses `type(uint256).max`, it automatically deposits whatever remains from the total withdrawn amount minus what has already been supplied. This makes it easy to construct a net-zero reallocation without manually computing the final amount.
+
 At the end of this function (exiting the for loop), there is a [one-line check](https://github.com/morpho-org/metamorpho/blob/37714d67104523f32f8e7e31cd2c7a0506f800aa/src/MetaMorpho.sol#L414):
 
 ```solidity
 if (totalWithdrawn != totalSupplied) revert ErrorsLib.InconsistentReallocation(); 
 ```
 
-Here we throw out an important question: What is this check doing? Why does it exist?
+This is the **net-zero invariant**: the total assets withdrawn from some markets must exactly equal the total assets supplied to others. Without it, an allocator could extract assets from the vault (by withdrawing more than it supplies) or lock excess assets inside Morpho (by supplying more than it withdraws). The invariant ensures `reallocate()` only redistributes — it cannot create or destroy vault value.
 
 ## 4. User deposit & withdrawal: how it works, and what the supplied asset is used for
 
@@ -606,14 +608,14 @@ Sequence:
 Here `MORPHO.supplyShares()` is implemented in morpho-blue/src/libraries/periphery/MorphoLib.sol. It fetches how many shares the vault is supplying currently from Morpho's storage:
 
 ```solidity
-    // MorphoLib.so
+    // MorphoLib.sol
     function supplyShares(IMorpho morpho, Id id, address user) internal view returns (uint256) {
         bytes32[] memory slot = _array(MorphoStorageLib.positionSupplySharesSlot(id, user));
         return uint256(morpho.extSloads(slot)[0]);
     }
 ```
 
-The share number is converted to asset number, rounding up. `supplyAssets = supplyShares.toAssetsUp(...)` overestimates current usage so that `remaining = cap - supplyAssets` is underestimated, making `toSupply` conservative. This prevents a cap overrun caused by rounding dust when converting shares → assets.
+The share count is converted to an asset amount, rounding up. `supplyAssets = supplyShares.toAssetsUp(...)` overestimates current usage so that `remaining = cap - supplyAssets` is underestimated, making `toSupply` conservative. This prevents a cap overrun caused by rounding dust when converting shares → assets.
 
 ```solidity
             // `supplyAssets` needs to be rounded up for `toSupply` to be rounded down.
@@ -669,7 +671,7 @@ ERC4626 withdrawal calls `_withdrawMorpho(assets)` to free liquidity first:
     }
 ```
 
-The logic here mirrors the deposit flow. One thing to note is that, `_updateLastTotalAssets(newTotalAssets.zeroFloorSub(assets))` is set before `_withdraw()` because the asset transfer can trigger ERC777 tokensReceived re‑entrancy after the transfer. See [ERC4626.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/239795bea728c8dca4deb6c66856dd58a6991112/contracts/token/ERC20/extensions/ERC4626.sol#L290-L295) for more info. If `lastTotalAssets` weren't pre‑reduced, a re‑entrant call during `_withdraw()` would see a stale, higher `lastTotalAssets`, compute a smaller `totalInterest`, and under‑accrue fees (benefiting the re‑entrant caller). Pre‑updating keeps fee accrual and share pricing consistent even if the asset's transfer hook re‑enters.
+The logic here mirrors the deposit flow. One thing to note is that `_updateLastTotalAssets(newTotalAssets.zeroFloorSub(assets))` is called before `_withdraw()` because the asset transfer can trigger ERC777 `tokensReceived` re‑entrancy after the transfer. See [ERC4626.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/239795bea728c8dca4deb6c66856dd58a6991112/contracts/token/ERC20/extensions/ERC4626.sol#L290-L295) for more info. If `lastTotalAssets` weren't pre‑reduced, a re‑entrant call during `_withdraw()` would see a stale, higher `lastTotalAssets`, compute a smaller `totalInterest`, and under‑accrue fees (benefiting the re‑entrant caller). Pre‑updating keeps fee accrual and share pricing consistent even if the asset's transfer hook re‑enters.
 
 ### `_withdrawMorpho()`: withdraw only what is actually liquid
 

@@ -146,8 +146,10 @@ anchor program (Rust source)
           -> code generation (TokenStream)
       -> expanded Rust code
   -> rustc continues compilation
-  -> Solana BPF compilation
+  -> Solana SBF/BPF compilation
 ```
+
+> **Quick glossary:** [`syn`](https://docs.rs/syn) is a Rust crate for parsing Rust source code into an abstract syntax tree (AST). A `TokenStream` (`proc_macro2::TokenStream`) is the representation of Rust code that procedural macros produce — essentially the "output" of the macro that gets spliced back into the compiler's pipeline. SBF (Solana Bytecode Format, formerly BPF) is the bytecode format Solana validators execute.
 
 The `parser` in Anchor is responsible for analyzing Anchor-specific Rust constructs at compile time.
 
@@ -167,7 +169,7 @@ Specifically, it:
 - Translates declarative constraints into imperative runtime checks
 - Outputs Rust TokenStreams that are injected back into the compilation pipeline
 
-The generated code is then compiled normally by rustc and eventually deployed as a Solana BPF program.
+The generated code is then compiled normally by rustc and eventually deployed as a Solana SBF program.
 
 ## `parser` phase
 
@@ -201,7 +203,7 @@ pub fn parse_token(stream: ParseStream) -> ParseResult<ConstraintToken> {
 
 The only difference at this stage is `if_needed: false` (for `init`) vs `if_needed: true` (for `init_if_needed`).
 
-When the constraint group is being built, the `build` will do the following check for the `ConstraintInit`.
+When the constraint group is being built, the `build()` method performs the following checks for `ConstraintInit`.
 
 ```rust
 pub fn parse(f: &syn::Field, f_ty: Option<&Ty>) -> ParseResult<ConstraintGroup> {
@@ -241,7 +243,7 @@ First, it checks the `if_needed` flag and ensures the `init-if-needed` cargo fea
             }
 ```
 
-Later, `mut` is checked. If it’s provided together with `init`/`init_if_needed`, the macro emits a compile-time error (`"mut cannot be provided with init"`).
+Later, `mut` is checked. If the user explicitly specified `mut` alongside `init`/`init_if_needed`, the macro emits a compile-time error (`"mut cannot be provided with init"`), because `init` already implies mutability — Anchor auto-adds `ConstraintMut` in the `None` branch.
 
 ```rust
 
@@ -258,7 +260,7 @@ Later, `mut` is checked. If it’s provided together with `init`/`init_if_needed
             };
 ```
 
-Later, the `rent_exempt` is being checked. If it's not explicitly skipped, it will be set to `ConstraintRentExempt::Enforce`.
+Later, `rent_exempt` is checked. If it's not explicitly skipped, it defaults to `ConstraintRentExempt::Enforce`.
 
 ```rust
             // Rent exempt if not explicitly skipped.
@@ -347,7 +349,7 @@ Lastly, there are checks for `token account` and `mint` related constraints.
             }
 ```
 
-Finally, the `ConstraintInitGroup` will be generated. We need to pay attention to the `kind` field here. It will be used to determine the type of the account to be initialized. We have 4 possible values:
+Finally, the `ConstraintInitGroup` is generated. Pay attention to the `kind` field — it determines the type of account to initialize:
 - `InitKind::Program`: program account
 - `InitKind::Mint`: mint account
 - `InitKind::Token`: token account
@@ -453,7 +455,7 @@ fn generate_constraint_init_group(
 ) -> proc_macro2::TokenStream 
 ```
 
-The `if_needed` flag is being extracted from the constraint group.
+The `if_needed` flag is extracted from the constraint group.
 
 ```rust
     let if_needed = if c.if_needed {
@@ -463,7 +465,7 @@ The `if_needed` flag is being extracted from the constraint group.
     };
 ```
 
-Then the seeds are being checked and the `find_pda` and `seeds_with_bump` are being generated.
+Then the seeds are checked and `find_pda` and `seeds_with_bump` are generated.
 
 ```rust
     // PDA bump seeds.
@@ -561,7 +563,7 @@ Then the seeds are being checked and the `find_pda` and `seeds_with_bump` are be
     };
 ```
 
-Later, the `match &c.kind` will be used to generate the code for the different types of accounts like `Program`, `Mint`, `Token` and `AssociatedToken`.
+Later, `match &c.kind` dispatches code generation for each account type: `Program`, `Mint`, `Token`, and `AssociatedToken`.
 
 ## What “needs initialization” means to Anchor
 
@@ -576,7 +578,7 @@ Here, “owner” refers to `AccountInfo.owner` (the program id that owns the ac
 
 ### `InitKind::Program` (regular program-owned account)
 
-The `owner` is being checked, if not provided, the default owner will be the currently executing program.
+The `owner` is checked; if not provided, the default owner is the currently executing program.
 ```rust
        // Define the owner of the account being created. If not specified,
             // default to the currently executing program.
@@ -602,7 +604,7 @@ The `owner` is being checked, if not provided, the default owner will be the cur
             };
 ```
 
-Later, the `generate_create_account` will be used.
+Later, `generate_create_account` is called to build the account-creation CPI.
 ```rust
             // CPI to the system program to create the account.
             let create_account = generate_create_account(
@@ -620,6 +622,8 @@ Internally, `generate_create_account` handles a subtle but important edge case: 
 - If the account already has lamports, Anchor does **not** use `create_account`; instead it tops up rent if needed, then uses `system_program::allocate` and `system_program::assign` (with signer seeds for PDAs). This makes the flow robust against “pre-fund” griefing.
 
 In other words, if `if_needed` is `false` (plain `init`), **or** if `if_needed` is `true` but the target account is still owned by the System Program, Anchor takes the creation path via `generate_create_account`. Otherwise, it assumes the account already exists and deserializes it via the checked path.
+
+> **Note:** `from_account_info_unchecked` skips owner/discriminator checks because the account was *just* created (there is nothing to validate yet). `from_account_info` performs full validation, which is appropriate for an account that already existed.
 
 ```rust
                     // Create the account. Always do this in the event
@@ -662,7 +666,7 @@ If it’s the `init_if_needed` case and Anchor *skipped* creation, it will valid
 ```
 ### `InitKind::Mint`
 
-The logic is pretty similar to the `Program` case. After a lot of checks in the mint params, the `generate_create_account` will be used again.
+The logic is similar to the `Program` case. After several checks on the mint parameters, `generate_create_account` is called again.
 
 ```rust
             let create_account = generate_create_account(
@@ -674,7 +678,7 @@ The logic is pretty similar to the `Program` case. After a lot of checks in the 
             );
 ```
 
-In the construction of the stream, if the account is to be created via the CPI call, the `create_account` will be called and `extensions` will be initialized accordingly. If it's `init_if_needed` case, the account is considered to be already initialized, so it will be checked against the basic configuration like `mint_authority`, `freeze_authority` and `decimals`.
+In the generated code, if the account needs to be created, `create_account` runs and any extensions are initialized. In the `init_if_needed` case where the account already exists, Anchor instead validates that `mint_authority`, `freeze_authority`, and `decimals` match the declared values.
 ```rust
                     if !#if_needed || owner_program == &anchor_lang::solana_program::system_program::ID {
                         // Define payer variable.
@@ -720,7 +724,7 @@ In the construction of the stream, if the account is to be created via the CPI c
 
 ### `InitKind::Token`
 
-The logic is pretty similar to the `Program` case. After a lot of checks in the token params, the `generate_create_account` will be used again.
+The logic is similar to the `Program` case. After several checks on the token parameters, `generate_create_account` is called again.
 
 ```rust
             let create_account = generate_create_account(
@@ -732,7 +736,7 @@ The logic is pretty similar to the `Program` case. After a lot of checks in the 
             );
 ```
 
-In the construction of the stream, if the account is to be created via the CPI call, the `create_account` will be called and the token account will be initialized accordingly. If it's `init_if_needed` case, the account is considered to be already initialized, so it will be checked against the basic configuration like `mint`, `owner` and `token_program`.
+In the generated code, if the account needs to be created, `create_account` runs and the token account is initialized. In the `init_if_needed` case where the account already exists, Anchor instead validates that `mint`, `owner`, and `token_program` match the declared values.
 ```rust
                     if !#if_needed || owner_program == &anchor_lang::solana_program::system_program::ID {
                         #payer_optional_check
@@ -806,7 +810,7 @@ The logic here is slightly different. If Anchor takes the creation path, it call
 
 ## Associated token account (ATA) griefing with `init`
 
-In the runtime logic, the `::anchor_spl::associated_token::create` logic will be called to create the associated token account when the `init` is being used.
+At runtime, Anchor calls `::anchor_spl::associated_token::create` to create the associated token account when `init` is used.
 
 ```rust
                     if !#if_needed || owner_program == &anchor_lang::solana_program::system_program::ID {
@@ -830,7 +834,7 @@ In the runtime logic, the `::anchor_spl::associated_token::create` logic will be
 
 So, if `if_needed` is `false` (plain `init`), or if `if_needed` is `true` but the account is still system-owned, Anchor will attempt to create the ATA via a CPI into the associated token account program.
 
-This is normally the case for a lot of ATA accounts owned by the program:
+This is the normal case for ATA accounts declared by the program:
 
 ```rust
     #[account(

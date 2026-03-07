@@ -14,7 +14,7 @@ export const WRITEUPS_URL = 'https://ret2basic.gitbook.io/ctfwriteup'
 export const GITHUB_URL = 'https://github.com/TaiChiAuditGroup'
 export const TWITTER_URL = 'https://x.com/taichiaudit'
 export const TELEGRAM_URL = 'https://t.me/+egUmC7vd9TI4MGM9'
-export const EMAIL = 'taichiweb3sec@gmail.com'
+export const EMAIL = 'contact@taichiaudit.com'
 export const LLM4SEC_URL = 'https://llm4sec.net/'
 export const DEFIHACKLABS_URL = 'https://defihacklabs.io/'
 

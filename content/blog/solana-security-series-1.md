@@ -61,11 +61,11 @@ fn process_instruction(
 }
 ```
 
-This code assumes that new_account **has never been created before**.
+This code assumes that `new_account` **has never been created before**.
 
-## How is it DoSed
+## The DoS Attack
 
-At first glance, calling create_account appears safe. However, to understand the risk, we need to look at how the instruction behaves internally.
+At first glance, calling `create_account` appears safe. However, to understand the risk, we need to look at how the instruction behaves internally.
 
 ### Why pre-funding is possible
 
@@ -81,7 +81,6 @@ According to the documentation in
 [system_instruction.rs](https://github.com/solana-labs/solana/blob/7700cb3128c1f19820de67b81aa45d18f73d2ac0/sdk/program/src/system_instruction.rs#L11-L13):
 
 ```rust
-
 //! Account creation typically involves three steps: [`allocate`] space,
 //! [`transfer`] lamports for rent, [`assign`] to its owning program. The
 //! [`create_account`] function does all three at once. All new accounts must
@@ -181,12 +180,12 @@ There are two commonly used mitigation strategies:
 1. **Drain pre-funded lamports**
     - If you can sign for the address (e.g., it’s your PDA, so you can `invoke_signed`), you can transfer the lamports out first so the balance is zero, then proceed.
     - This is not always available (e.g., if the destination is not a PDA you control).
-2. **Avoid create_account entirely**
+2. **Avoid `create_account` entirely**
     - Manually split the process into:
         - `transfer`
         - `allocate`
         - `assign`
-    - This avoids the `AccountAlreadyInUse` check.
+    - This works because `allocate` only rejects accounts with non-empty data or a non-system-program owner — it does **not** check for non-zero lamports. So a pre-funded, system-owned, zero-data account passes `allocate` just fine.
 
 ### Practical mitigation pattern (manual)
 
@@ -268,7 +267,7 @@ pub struct DataAccount {
 }
 ```
 
-In [generate_constraint_init_group](https://github.com/solana-foundation/anchor/blob/347c0599b8310d84af4086cfe5c975733a9e17cd/lang/syn/src/codegen/accounts/constraints.rs#L1067-L1108), the owner is checked and the `generate_create_account` is being called.
+In [generate_constraint_init_group](https://github.com/solana-foundation/anchor/blob/347c0599b8310d84af4086cfe5c975733a9e17cd/lang/syn/src/codegen/accounts/constraints.rs#L1067-L1108), the owner is checked and `generate_create_account` is called.
 
 ```rust
 

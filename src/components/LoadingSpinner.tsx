@@ -27,11 +27,11 @@ export default function LoadingSpinner({
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
       <div className="relative">
-        <div className={`${sizeClasses[size]} border-4 border-gray-200 dark:border-gray-700 border-t-primary-600 rounded-full animate-spin`} />
-        <Shield className={`absolute inset-0 ${sizeClasses[size]} text-primary-600 opacity-50`} />
+        <div className={`${sizeClasses[size]} border-4 border-gray-200 dark:border-slate-700 border-t-primary-500 rounded-full animate-spin`} />
+        <Shield className={`absolute inset-0 ${sizeClasses[size]} text-primary-400 opacity-50`} />
       </div>
       {text && (
-        <p className={`mt-2 text-gray-600 dark:text-gray-300 ${textSizeClasses[size]}`}>
+        <p className={`mt-2 text-gray-500 dark:text-slate-400 ${textSizeClasses[size]}`}>
           {text}
         </p>
       )}
@@ -42,10 +42,10 @@ export default function LoadingSpinner({
 // Full page loading component
 export function FullPageLoading({ text = 'Loading...' }: { text?: string }) {
   return (
-    <div className="fixed inset-0 bg-white dark:bg-slate-900 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-50 dark:bg-[#090e19] flex items-center justify-center z-50">
       <div className="text-center">
         <div className="flex items-center justify-center mb-4">
-          <Shield className="h-12 w-12 text-primary-600 mr-3" />
+          <Shield className="h-12 w-12 text-primary-400 mr-3" />
           <span className="text-2xl font-bold gradient-text">Taichi Audit</span>
         </div>
         <LoadingSpinner size="lg" text={text} />

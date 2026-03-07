@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ExternalLink } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import DarkModeToggle from './DarkModeToggle'
 import { AUDIT_REQUEST_URL, PORTFOLIO_URL, WRITEUPS_URL } from '@/lib/constants'
 
@@ -36,18 +36,12 @@ export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [pathname])
+  useEffect(() => { setIsMenuOpen(false) }, [pathname])
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setIsScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   const menuItems = [
@@ -60,65 +54,52 @@ export default function Navigation() {
   ]
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-white/80 backdrop-blur-lg shadow-lg dark:bg-slate-900/80' 
-        : 'bg-transparent'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-slate-800/60'
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <Image
-                src="/taichi_logo.jpg"
-                alt="Taichi Audit Group"
-                width={32}
-                height={32}
-                className="mr-2 rounded-md"
-                priority
-              />
-              <span className="text-xl font-bold gradient-text">Taichi Audit</span>
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <Image src="/taichi_logo.jpg" alt="Taichi Audit" width={28} height={28} className="rounded-md" priority />
+            <span className="text-base font-bold text-gray-900 dark:text-white">Taichi Audit</span>
+          </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              {menuItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium transition-colors duration-200"
-                >
-                  {item.name}
-                </NavLink>
-              ))}
-              <a
-                href={AUDIT_REQUEST_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-primary-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-primary-700 transition-colors duration-200 flex items-center"
+          {/* Desktop */}
+          <div className="hidden md:flex items-center gap-1">
+            {menuItems.map((item) => (
+              <NavLink
+                key={item.name}
+                href={item.href}
+                className="text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white px-3 py-2 text-sm font-medium transition-colors"
               >
-                Request Audit
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </a>
-              <DarkModeToggle />
-            </div>
+                {item.name}
+              </NavLink>
+            ))}
+            <a
+              href={AUDIT_REQUEST_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary-500 text-white text-sm font-semibold hover:bg-primary-400 transition-colors"
+            >
+              Request Audit
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+            <DarkModeToggle />
           </div>
 
-          {/* Mobile menu button and dark mode toggle */}
-          <div className="md:hidden flex items-center space-x-2">
+          {/* Mobile controls */}
+          <div className="md:hidden flex items-center gap-2">
             <DarkModeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+              className="p-2 rounded-lg text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white focus:outline-none"
             >
-              {isMenuOpen ? (
-                <X className="block h-6 w-6" />
-              ) : (
-                <Menu className="block h-6 w-6" />
-              )}
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -126,13 +107,13 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-lg shadow-lg dark:bg-slate-900/95">
+        <div className="md:hidden border-t border-gray-200 bg-white/95 dark:border-slate-800/60 dark:bg-slate-900/95 backdrop-blur-lg">
+          <div className="px-4 py-3 space-y-1">
             {menuItems.map((item) => (
               <NavLink
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 block px-3 py-2 text-base font-medium"
+                className="block px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-slate-300 dark:hover:text-white rounded-lg dark:hover:bg-slate-800/60 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.name}
@@ -142,11 +123,10 @@ export default function Navigation() {
               href={AUDIT_REQUEST_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-primary-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-primary-700 transition-colors duration-200 flex items-center"
+              className="block px-3 py-2 text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Request Audit
-              <ExternalLink className="ml-2 h-4 w-4" />
+              Request Audit →
             </a>
           </div>
         </div>

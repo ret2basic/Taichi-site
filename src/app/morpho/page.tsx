@@ -48,22 +48,22 @@ export default function MorphoPage() {
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <p className="text-sm uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">Next up</p>
+              <p className="text-sm uppercase tracking-[0.16em] text-gray-400 dark:text-slate-500">Next up</p>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">More Internals series on deck</h2>
             </div>
-            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-gray-200">
-              <Sparkles className="w-4 h-4 text-secondary-500" />
+            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700 text-sm text-gray-600 dark:text-slate-300">
+              <Sparkles className="w-4 h-4 text-primary-500" />
               Fresh drops will reuse this hub
             </span>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {upcomingSeries.map((series) => (
-              <div key={series.title} className="rounded-2xl bg-white dark:bg-slate-800 border border-dashed border-gray-300 dark:border-slate-700 p-6 shadow-sm">
+              <div key={series.title} className="rounded-2xl bg-white dark:bg-slate-900/60 border border-dashed border-gray-200 dark:border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{series.title}</h3>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-secondary-100 text-secondary-800 dark:bg-secondary-900/40 dark:text-secondary-200">{series.status}</span>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300">{series.status}</span>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300">{series.description}</p>
+                <p className="text-gray-500 dark:text-slate-400">{series.description}</p>
               </div>
             ))}
           </div>

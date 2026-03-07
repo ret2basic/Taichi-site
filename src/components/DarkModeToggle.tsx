@@ -15,9 +15,7 @@ export default function DarkModeToggle() {
   if (!mounted) {
     return (
       <button
-        className="relative inline-flex items-center justify-center p-2 rounded-full text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-slate-800"
-        aria-label="Loading theme toggle"
-        disabled
+        className="relative inline-flex items-center justify-center p-2 rounded-full text-gray-500 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-slate-800"
       >
         <div className="w-5 h-5">
           <Sun className="w-5 h-5 opacity-50" />
@@ -29,7 +27,7 @@ export default function DarkModeToggle() {
   return (
     <button
       onClick={toggleDarkMode}
-      className="relative inline-flex items-center justify-center p-2 rounded-full text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-slate-800"
+      className="relative inline-flex items-center justify-center p-2 rounded-full text-gray-500 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-slate-800"
       aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
     >
       <div className="relative w-5 h-5">

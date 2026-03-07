@@ -93,7 +93,7 @@ export default function ZoomableImage({ src, alt, title, className = '' }: Zooma
     return (
       <div className={`my-8 ${className}`}>
         <div 
-          className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg mx-auto"
+          className="animate-pulse bg-gray-200 dark:bg-slate-800 rounded-lg mx-auto"
           style={{ 
             width: '100%', 
             height: '300px',
@@ -143,15 +143,15 @@ export default function ZoomableImage({ src, alt, title, className = '' }: Zooma
               
               {/* Zoom overlay hint - only show on hover */}
               <div className="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
-                <div className="bg-white bg-opacity-90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <ZoomIn className="w-6 h-6 text-gray-700" />
+                <div className="bg-black bg-opacity-60 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <ZoomIn className="w-6 h-6 text-white" />
                 </div>
               </div>
             </div>
           ) : (
             // Loading skeleton
             <div 
-              className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg mx-auto"
+              className="animate-pulse bg-gray-200 dark:bg-slate-800 rounded-lg mx-auto"
               style={{ 
                 width: '100%', 
                 height: '300px',
@@ -163,7 +163,7 @@ export default function ZoomableImage({ src, alt, title, className = '' }: Zooma
 
         {/* Caption */}
         {alt && (
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-3 italic max-w-3xl mx-auto">
+          <p className="text-center text-sm text-gray-500 dark:text-slate-400 mt-3 italic max-w-3xl mx-auto">
             {alt}
           </p>
         )}

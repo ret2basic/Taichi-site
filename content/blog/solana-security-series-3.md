@@ -55,7 +55,7 @@ Consider a common Anchor pattern: transferring tokens via CPI, then checking a t
     let vault_after = vault.amount;
 ```
 
-Even though the token program updated the token account during the CPI, `vault_before` and `vault_after` can still be the same.
+Even though the token program updated the token account during the CPI, `vault_before` and `vault_after` will still be the same.
 
 This surprises people because they (reasonably) expect "read again" to mean "read the updated account".
 
@@ -66,7 +66,7 @@ To observe the CPI side effects through Anchor's typed view, you need to reload:
     let vault_after = vault.amount;
 ```
 
-## What is Native Solana doing?
+## What is native Solana doing?
 
 Below is a native-style example where the value you read *does* change after CPI.
 
@@ -147,7 +147,7 @@ impl<'info, T: AccountSerialize + AccountDeserialize + Clone> AsRef<AccountInfo<
 }
 ```
 
-And we can see the [`get_lamports`](https://github.com/solana-foundation/anchor/blob/d7ace7a47d9720386d5ddc1690f358e2d1d33ff5/lang/src/lib.rs#L266-L312) is actually using [`as_ref`](https://github.com/solana-foundation/anchor/blob/d7ace7a47d9720386d5ddc1690f358e2d1d33ff5/lang/src/accounts/account.rs#L397-L403) to get the `AccountInfo`, and then borrow the `lamports` from the `AccountInfo`.
+[`get_lamports`](https://github.com/solana-foundation/anchor/blob/d7ace7a47d9720386d5ddc1690f358e2d1d33ff5/lang/src/lib.rs#L266-L312) uses [`as_ref`](https://github.com/solana-foundation/anchor/blob/d7ace7a47d9720386d5ddc1690f358e2d1d33ff5/lang/src/accounts/account.rs#L397-L403) to obtain the underlying `AccountInfo`, and then borrows `lamports` from it.
 
 ```rust
 /// Lamports related utility methods for accounts.
@@ -160,7 +160,7 @@ pub trait Lamports<'info>: AsRef<AccountInfo<'info>> {
 }
 ```
 
-All the `add_lamports` and `sub_lamports` are actually borrowing the `mut` version of the `lamports` from the `AccountInfo`.
+The `add_lamports` and `sub_lamports` methods similarly borrow the mutable `lamports` reference from `AccountInfo`.
 
 ```rust
     /// Add lamports to the account.
@@ -225,10 +225,10 @@ At the start of the instruction, Anchor constructs your accounts by deserializin
                     )?;
 ```
 
-Later, `Account::try_from` deserializes `T` from `info.data` (in the referenced commit it uses `try_deserialize_unchecked` here):
+Later, `Account::try_from` deserializes `T` from `info.data`:
 
 ```rust
-/// Deserializes the given `info` into an `Account`.
+/// Deserializes the given `info` into a `Account`.
 #[inline(never)]
 pub fn try_from(info: &'a AccountInfo<'a>) -> Result<Account<'a, T>> {
         if info.owner == &system_program::ID && info.lamports() == 0 {
@@ -239,9 +239,11 @@ pub fn try_from(info: &'a AccountInfo<'a>) -> Result<Account<'a, T>> {
                 .with_pubkeys((*info.owner, T::owner())));
         }
         let mut data: &[u8] = &info.try_borrow_data()?;
-        Ok(Account::new(info, T::try_deserialize_unchecked(&mut data)?))
+        Ok(Account::new(info, T::try_deserialize(&mut data)?))
 }
 ```
+
+> `try_deserialize` checks the 8-byte account discriminator before deserializing. Anchor also provides `try_from_unchecked`, which calls `try_deserialize_unchecked` and skips that check — but `try_from` (the default path) always validates the discriminator.
 
 This is the key: `T` is copied into your program's stack/heap as a Rust value. It's not a live reference to the runtime bytes.
 
@@ -281,7 +283,7 @@ Note:
 - Detachment only means CPI / runtime changes do not propagate automatically into the view
 ```
 
-One more nuance that matters for security: if `T` is **owned by your program** and the account is not closed, Anchor will serialize your cached `T` back into the account at the end of the instruction. If you keep a stale cached `T` after CPI and then mutate it, you can unintentionally overwrite CPI changes.
+One more nuance important for security: if the account is **owned by your program** and has not been closed, Anchor will serialize your cached `T` back into the account at the end of the instruction. If you keep a stale cached `T` after CPI and then mutate it, you can unintentionally overwrite CPI changes.
 
 A simple example:
 1. You make a copy of the data from runtime memory, both the original and your copy have value 1
@@ -357,7 +359,7 @@ impl<'info, T: AccountSerialize + AccountDeserialize + Owner + Clone> AccountsEx
     }
 ```
 
-## Can Native Solana Always Avoid Reloading?
+## Can native Solana always avoid reloading?
 
 No!
 
