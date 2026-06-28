@@ -81,10 +81,6 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
                 </Link>
               )}
             </div>
-            <div className="flex flex-wrap gap-3 text-sm">
-              <span className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300">Pendle Internals • coming soon</span>
-              <span className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300">Balancer V2 Internals • coming soon</span>
-            </div>
           </div>
         </div>
       </div>

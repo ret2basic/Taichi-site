@@ -18,7 +18,7 @@ export default function HeroSection() {
           <div>
             <div className="inline-flex items-center gap-2 border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300 rounded-lg">
               <ShieldCheck className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-              Taichi Audit Group
+              Incubated from a DeFiHackLabs community
             </div>
 
             <h1 className="mt-7 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] text-gray-950 dark:text-white">
