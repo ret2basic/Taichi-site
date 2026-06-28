@@ -13,7 +13,7 @@ This guide walks through the complete deployment of a Next.js website (Taichi Au
 Before diving into implementation, let's understand what we're building. A production web application isn't just your code running somewhere—it's a carefully orchestrated system of interconnected components:
 
 ```
-Internet → Domain (taichiaudit.com) → VPS (149.62.44.202) → Nginx → Next.js App
+Internet → Domain (taichiaudit.com) → VPS (185.200.66.124) → Nginx → Next.js App
 ```
 
 ### Why This Architecture?
@@ -220,7 +220,7 @@ All other ports are blocked by default.
 Your domain registrar (SquareSpace) needs to point `taichiaudit.com` to your server's IP address:
 
 ```
-A Record: taichiaudit.com → 149.62.44.202
+A Record: taichiaudit.com → 185.200.66.124
 CNAME Record: www.taichiaudit.com → taichiaudit.com
 ```
 
@@ -235,7 +235,7 @@ DNS changes take time to propagate across the internet. Different DNS servers up
 Let's trace what happens when someone visits `https://taichiaudit.com`:
 
 1. **DNS Resolution**: Browser queries DNS servers for the IP address of `taichiaudit.com`
-2. **TCP Connection**: Browser establishes connection to `149.62.44.202:443`
+2. **TCP Connection**: Browser establishes connection to `185.200.66.124:443`
 3. **SSL Handshake**: Browser and server exchange certificates and establish encryption
 4. **Nginx Processing**: Nginx receives the HTTPS request, applies security headers, checks cache
 5. **Proxy Pass**: Nginx forwards the request to `localhost:3000`
