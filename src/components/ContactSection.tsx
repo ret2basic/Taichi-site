@@ -16,12 +16,12 @@ export default function ContactSection() {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-400 mb-3">Contact</p>
+          <p className="text-xs font-semibold uppercase text-primary-600 dark:text-primary-400 mb-3">Contact</p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
-            Get in Touch
+            Scope a review
           </h2>
           <p className="text-lg text-gray-500 dark:text-slate-400 max-w-2xl mx-auto">
-            Ready to secure your protocol? We respond within 24-48 hours.
+            Send repository scope, target chain, integrations, and timeline. We respond within 24-48 hours.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function ContactSection() {
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Request an Audit</h3>
               <p className="text-sm text-gray-500 dark:text-slate-400 leading-relaxed mb-8">
-                Open a request form and our team will scope the engagement, timeline, and quote.
+                Open the request form and we will scope review depth, timeline, and availability.
               </p>
             </div>
             <a
@@ -90,4 +90,4 @@ export default function ContactSection() {
       </div>
     </section>
   )
-} 
+}

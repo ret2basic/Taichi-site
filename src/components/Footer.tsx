@@ -13,7 +13,7 @@ export default function Footer() {
       links: [
         { name: 'About', href: '/about' },
         { name: 'Portfolio', href: PORTFOLIO_URL },
-        { name: 'Blog', href: '/blog' },
+        { name: 'Research', href: '/blog' },
         { name: 'Writeups', href: WRITEUPS_URL },
       ],
     },
@@ -53,7 +53,7 @@ export default function Footer() {
               <span className="text-base font-bold">Taichi Audit Group</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-slate-400 leading-relaxed mb-6 max-w-sm">
-              DeFi security audit group from DeFiHackLabs — {STATS.competitions} competitions, {STATS.firstPlaceWins} first-place wins, covering Solidity, Move &amp; Solana.
+              Security audit group from DeFiHackLabs — {STATS.competitions} competitions, {STATS.firstPlaceWins} first-place wins, and {STATS.hmFindings} H/M findings across Web3 and Web2-Web3 systems.
             </p>
             <div className="flex gap-2">
               {socials.map((s, i) => (
@@ -111,4 +111,4 @@ export default function Footer() {
       </div>
     </footer>
   )
-} 
+}

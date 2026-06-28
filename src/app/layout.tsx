@@ -20,8 +20,8 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   metadataBase: new URL('https://taichiaudit.com'),
   title: 'Taichi Audit Group - DeFi Security Experts',
-  description: 'Leading DeFi security audit group specializing in Solidity, Move, and Solana smart contract reviews. Incubated from DeFiHackLabs community.',
-  keywords: ['DeFi', 'audit', 'security', 'smart contracts', 'Solidity', 'Move', 'Solana', 'blockchain', 'web3'],
+  description: 'Security audit group specializing in smart contracts, ZK integrations, exchanges, wallets, and Web2-Web3 systems. Incubated from the DeFiHackLabs community.',
+  keywords: ['DeFi', 'audit', 'security', 'smart contracts', 'Solidity', 'Move', 'Solana', 'CosmWasm', 'Cairo', 'ZK', 'exchange security', 'wallet security', 'web3'],
   authors: [{ name: 'Taichi Audit Group' }],
   creator: 'Taichi Audit Group',
   publisher: 'Taichi Audit Group',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Taichi Audit Group - DeFi Security Experts',
-    description: 'Leading DeFi security audit group specializing in Solidity, Move, and Solana smart contract reviews.',
+    description: 'Security audit group specializing in smart contracts, ZK integrations, exchanges, wallets, and Web2-Web3 systems.',
     url: 'https://taichiaudit.com',
     siteName: 'Taichi Audit Group',
     images: [
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Taichi Audit Group - DeFi Security Experts',
-    description: 'Leading DeFi security audit group specializing in Solidity, Move, and Solana smart contract reviews.',
+    description: 'Security audit group specializing in smart contracts, ZK integrations, exchanges, wallets, and Web2-Web3 systems.',
     images: ['/taichi_logo.jpg'],
     site: '@TaichiAudit', // Add your Twitter handle here
     creator: '@TaichiAudit', // Add your Twitter handle here
@@ -124,4 +124,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-} 
+}

@@ -13,10 +13,10 @@ interface BlogClientComponentProps {
 
 export default function BlogClientComponent({ allPosts, categories }: BlogClientComponentProps) {
   const [selectedCategory, setSelectedCategory] = useState('All')
-  
+
   // Filter posts by selected category
-  const filteredPosts = selectedCategory === 'All' 
-    ? allPosts 
+  const filteredPosts = selectedCategory === 'All'
+    ? allPosts
     : allPosts.filter(post => post.category === selectedCategory)
   const morphoInternals = allPosts.filter(post => post.slug.startsWith('morpho-internals'))
   const morphoLead = morphoInternals.find(post => /part\s*1/i.test(post.title)) || morphoInternals[0]
@@ -46,18 +46,22 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
       <div className="mb-16">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr,0.95fr]">
           <Link href="/morpho" className="group block w-full">
-            <div className="relative w-full pt-[100%] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary-600 via-slate-900 to-primary-800">
-              <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.15),transparent_45%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.12),transparent_35%),radial-gradient(circle_at_50%_75%,rgba(255,255,255,0.1),transparent_40%)]" />
-              <div className="absolute inset-0 p-8 flex flex-col justify-between text-white">
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] font-semibold">
-                  <span className="text-primary-50/80">Internals Series</span>
-                </div>
+            <div className="relative w-full border border-gray-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900/70 rounded-lg">
+              <div className="flex min-h-[360px] flex-col justify-between">
                 <div>
-                  <p className="text-3xl md:text-4xl font-semibold leading-tight mb-3">Morpho source code walkthroughs</p>
-                  <p className="text-lg text-primary-50/80 max-w-xl">Purpose-built notes for DeFi engineers: annotated flows, risk handoffs, and math behind Morpho Blue.</p>
+                  <div className="mb-8 flex items-center justify-between text-xs font-semibold uppercase text-gray-400 dark:text-slate-500">
+                    <span>Internals Series</span>
+                    <span>{morphoInternals.length} parts</span>
+                  </div>
+                  <p className="text-3xl md:text-4xl font-bold leading-tight text-gray-950 dark:text-white mb-4">
+                    Morpho source code walkthroughs
+                  </p>
+                  <p className="text-lg text-gray-600 dark:text-slate-300 max-w-xl">
+                    Purpose-built notes for DeFi engineers: annotated flows, risk handoffs, and math behind Morpho Blue.
+                  </p>
                 </div>
-                <div className="flex items-center justify-between text-sm text-primary-50">
-                  <span>{morphoInternals.length} parts live • Morpho Blue</span>
+                <div className="flex items-center justify-between border-t border-gray-200 pt-5 text-sm text-gray-500 dark:border-slate-800 dark:text-slate-400">
+                  <span>Morpho Blue</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -89,18 +93,22 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
       <div className="mb-20">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr,0.95fr]">
           <Link href="/solana-security" className="group block w-full">
-            <div className="relative w-full pt-[100%] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-emerald-500 via-slate-900 to-cyan-600">
-              <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.16),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.12),transparent_40%),radial-gradient(circle_at_50%_80%,rgba(255,255,255,0.1),transparent_40%)]" />
-              <div className="absolute inset-0 p-8 flex flex-col justify-between text-white">
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] font-semibold">
-                  <span className="text-emerald-50/80">Security Series</span>
-                </div>
+            <div className="relative w-full border border-gray-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900/70 rounded-lg">
+              <div className="flex min-h-[360px] flex-col justify-between">
                 <div>
-                  <p className="text-3xl md:text-4xl font-semibold leading-tight mb-3">Solana security series</p>
-                  <p className="text-lg text-emerald-50/80 max-w-xl">Reviewer-grade walkthroughs of account creation, token program internals, and real exploit patterns.</p>
+                  <div className="mb-8 flex items-center justify-between text-xs font-semibold uppercase text-gray-400 dark:text-slate-500">
+                    <span>Security Series</span>
+                    <span>{solanaSeries.length} parts</span>
+                  </div>
+                  <p className="text-3xl md:text-4xl font-bold leading-tight text-gray-950 dark:text-white mb-4">
+                    Solana security series
+                  </p>
+                  <p className="text-lg text-gray-600 dark:text-slate-300 max-w-xl">
+                    Reviewer-grade walkthroughs of account creation, token program internals, and real exploit patterns.
+                  </p>
                 </div>
-                <div className="flex items-center justify-between text-sm text-emerald-50">
-                  <span>{solanaSeries.length} parts live • Token + System Programs</span>
+                <div className="flex items-center justify-between border-t border-gray-200 pt-5 text-sm text-gray-500 dark:border-slate-800 dark:text-slate-400">
+                  <span>Token + System Programs</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
@@ -137,7 +145,7 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
             ({filteredPosts.length})
           </span>
         </h2>
-        
+
         {filteredPosts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-400 dark:text-slate-500">No articles found in this category.</p>
@@ -169,15 +177,15 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
                         </span>
                       )}
                     </div>
-                    
+
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    
+
                     <p className="text-sm text-gray-500 dark:text-slate-400 mb-4 line-clamp-3 flex-grow">
                       {post.excerpt}
                     </p>
-                    
+
                     <div className="flex flex-wrap gap-2 mb-4">
                       {post.tags.slice(0, 3).map((tag, index) => (
                         <span key={index} className="bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 px-2 py-1 rounded text-xs">
@@ -190,7 +198,7 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-400 dark:text-slate-500 mt-auto">
                       <div className="flex items-center">
                         <Calendar className="w-3.5 h-3.5 mr-1" />
@@ -210,4 +218,4 @@ export default function BlogClientComponent({ allPosts, categories }: BlogClient
       </div>
     </>
   )
-} 
+}

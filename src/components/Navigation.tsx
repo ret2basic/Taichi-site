@@ -47,9 +47,8 @@ export default function Navigation() {
   const menuItems = [
     { name: 'Home', href: '/' },
     { name: 'Portfolio', href: PORTFOLIO_URL },
-    { name: 'Blog', href: '/blog' },
+    { name: 'Research', href: '/blog' },
     { name: 'About', href: '/about' },
-    { name: 'Writeups', href: WRITEUPS_URL },
     { name: 'Contact', href: '/#contact' },
   ]
 
@@ -133,4 +132,4 @@ export default function Navigation() {
       )}
     </nav>
   )
-} 
+}

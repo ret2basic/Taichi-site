@@ -1,93 +1,113 @@
 import React from 'react'
-import { ArrowRight, Shield } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react'
 import { STATS, AUDIT_REQUEST_URL, PORTFOLIO_URL, FEATURED_WINS } from '@/lib/constants'
 
 export default function HeroSection() {
+  const operatingSignals = [
+    'Guaranteed review by 2+ researchers',
+    'Exploit-pattern checks from real DeFi incidents',
+    'Web3 and Web2-Web3 system coverage',
+  ]
+
   return (
-    <section id="home" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gray-50 dark:bg-[#090e19]">
-      {/* Grid background */}
+    <section id="home" className="relative overflow-hidden bg-gray-50 dark:bg-[#090e19]">
       <div className="absolute inset-0 grid-bg" />
 
-      {/* Subtle top-left glow */}
-      <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-primary-50/50 dark:bg-primary-500/[0.07] blur-[120px]" />
-      {/* Subtle bottom-right glow */}
-      <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full bg-primary-50/30 dark:bg-primary-400/[0.05] blur-[100px]" />
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+        <div className="grid lg:grid-cols-[1.08fr,0.92fr] gap-12 lg:gap-16 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300 rounded-lg">
+              <ShieldCheck className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              Taichi Audit Group
+            </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-        {/* Badge */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800/60 backdrop-blur-sm text-sm text-gray-600 dark:text-slate-300">
-            <Shield className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-            Incubated from DeFiHackLabs Community
+            <h1 className="mt-7 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] text-gray-950 dark:text-white">
+              Competition-tested audits for DeFi teams shipping critical code.
+            </h1>
+
+            <p className="mt-6 text-lg md:text-xl text-gray-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+              We review smart contracts, ZK integrations, exchanges, wallets, and Web2-Web3 systems
+              with contest-proven researchers, past-exploit playbooks, and source-level analysis.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <a
+                href={AUDIT_REQUEST_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-500 transition-colors"
+              >
+                Request Audit
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a
+                href={PORTFOLIO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-gray-300 bg-white text-gray-800 font-semibold hover:border-gray-400 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-slate-500 transition-colors"
+              >
+                View Portfolio
+              </a>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {operatingSignals.map((signal) => (
+                <div key={signal} className="flex items-start gap-2 text-sm text-gray-600 dark:text-slate-400">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" />
+                  <span>{signal}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900/70 rounded-lg overflow-hidden">
+            <div className="border-b border-gray-200 dark:border-slate-800 px-5 py-4">
+              <p className="text-xs font-semibold uppercase text-gray-400 dark:text-slate-500">Public proof</p>
+              <h2 className="mt-1 text-lg font-bold text-gray-950 dark:text-white">Contest record and audit signal</h2>
+            </div>
+
+            <div className="grid grid-cols-2">
+              {[
+                { value: STATS.competitions, label: 'Audit contests' },
+                { value: STATS.firstPlaceWins, label: 'First-place wins' },
+                { value: STATS.contestTop3, label: 'Top 3 finishes' },
+                { value: STATS.hmFindings, label: 'H/M findings' },
+              ].map((stat) => (
+                <div key={stat.label} className="border-b border-r border-gray-200 dark:border-slate-800 p-5 even:border-r-0">
+                  <div className="text-3xl font-bold text-gray-950 dark:text-white">{stat.value}</div>
+                  <div className="mt-1 text-sm text-gray-500 dark:text-slate-400">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-5 py-4">
+              <p className="text-xs font-semibold uppercase text-gray-400 dark:text-slate-500 mb-3">Highlighted finishes</p>
+              <div className="grid gap-3">
+                {FEATURED_WINS.map((win) => (
+                  <div key={win.name} className="flex items-center justify-between gap-4 text-sm">
+                    <span className="font-medium text-gray-800 dark:text-slate-200">{win.name}</span>
+                    <span className="text-gray-400 dark:text-slate-500">{win.type}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Headline */}
-        <h1 className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.08] mb-6">
-          We Secure the Protocols<br />
-          <span className="gradient-text">You Depend On</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-center text-lg md:text-xl text-gray-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed mb-10">
-          {STATS.competitions} audit contests. {STATS.contestTop3Label} Top 3. {STATS.hmFindings} H/M findings.
-          <br className="hidden sm:block" />
-          Solidity &middot; Move &middot; Solana — battle-tested across every major platform.
-        </p>
-
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-          <a
-            href={AUDIT_REQUEST_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-primary-500 text-white font-semibold text-lg hover:bg-primary-400 transition-colors shadow-lg shadow-primary-500/20"
-          >
-            Request Audit
-            <ArrowRight className="w-5 h-5" />
-          </a>
-          <a
-            href={PORTFOLIO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-200 font-semibold text-lg hover:border-gray-400 dark:hover:border-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            View Portfolio
-          </a>
-        </div>
-
-        {/* Key stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100 dark:bg-slate-800/60 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-800 max-w-3xl mx-auto mb-20">
-          {[
-            { value: STATS.competitions, label: 'Audit Contests' },
-            { value: STATS.contestTop3, label: 'Contest Top 3' },
-            { value: STATS.hmFindings, label: 'H/M Findings' },
-            { value: STATS.auditorsPerProject, label: 'Auditors / Project' },
-          ].map((s) => (
-            <div key={s.label} className="flex flex-col items-center py-6 px-4 bg-white dark:bg-[#090e19]">
-              <span className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{s.value}</span>
-              <span className="text-xs md:text-sm text-gray-400 dark:text-slate-500 mt-1 text-center">{s.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Trusted-by logo strip */}
-        <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-600 mb-6">
-            Top 3 finishes in
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4">
-            {FEATURED_WINS.map((win) => (
-              <span
-                key={win.name}
-                className="text-sm font-medium text-gray-400 hover:text-gray-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
-              >
-                {win.name}
-              </span>
+        <div className="mt-16 border-t border-gray-200 dark:border-slate-800 pt-6">
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              'Contest performance is used as evidence, not decoration.',
+              'Past hack analysis feeds review checklists.',
+              'Long-form research shows how we reason about code.',
+            ].map((item) => (
+              <p key={item} className="text-sm text-gray-500 dark:text-slate-400">
+                {item}
+              </p>
             ))}
           </div>
         </div>
       </div>
     </section>
   )
-} 
+}

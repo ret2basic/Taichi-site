@@ -24,8 +24,8 @@ export const STATS = {
   contestTop3: '11',
   contestTop3Label: '11 times',
   firstPlaceWins: '6',
-  totalFindings: '170+',
-  hmFindings: '300+',
+  totalFindings: '600+',
+  hmFindings: '600+',
   highFindings: '60+',
   mediumFindings: '75+',
   auditorsPerProject: '≥2',
@@ -55,7 +55,7 @@ export const ACHIEVEMENTS = [
   {
     platform: 'Our specialization',
     description:
-      'We enjoy finding bugs in Solidity, Move, and Solana codebases. Anything DeFi is welcome.',
+      'We review Solidity, Move, Solana, CosmWasm, Cairo, ZK integrations, and Web2-Web3 systems such as exchanges and wallets.',
   },
   {
     platform: 'Our philosophy',
